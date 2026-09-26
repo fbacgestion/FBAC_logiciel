@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FBAC Gestion — Full Boxe Américaine Club</title>
+    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/mise-en-page.css">
+    <link rel="stylesheet" href="styles/composants.css">
+    <link rel="stylesheet" href="styles/formulaires.css">
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-main">
+                <div class="brand-box">FBAC</div>
+                <div class="brand-text">
+                    <strong>FBAC Gestion</strong>
+                    <span>FULL BOXE AMÉRICAINE CLUB</span>
+                </div>
+            </div>
+        </div>
+        <nav class="nav">
+            <div class="nav-title">Gestion</div>
+            <button class="active" data-page="dashboard">
+                <span class="nav-icon">⌂</span>
+                <span>Tableau de bord</span>
+            </button>
+            <button data-page="members">
+                <span class="nav-icon">♙</span>
+                <span>Adhérents</span>
+            </button>
+            <button data-page="payments">
+                <span class="nav-icon">€</span>
+                <span>Paiements</span>
+            </button>
+            <button data-page="referrals">
+                <span class="nav-icon">↗</span>
+                <span>Parrainages</span>
+            </button>
+            <div class="nav-title">Administration</div>
+            <button data-page="seasons">
+                <span class="nav-icon">▣</span>
+                <span>Saisons</span>
+            </button>
+            <button data-page="settings">
+                <span class="nav-icon">⚙</span>
+                <span>Paramètres</span>
+            </button>
+        </nav>
+        <div class="sidebar-bottom">
+            FBAC — Saint-Lô<br>
+            Gestion locale<br>
+            Données enregistrées sur ce PC
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar-title">
+                <strong id="pageTitle">Tableau de bord</strong>
+                <span id="pageSubtitle">Gestion du Full Boxe Américaine Club</span>
+            </div>
+            <div class="topbar-right">
+                <span class="lock-badge" id="seasonLockBadge">● Saison active</span>
+                <select class="season-select field-input" id="viewSeasonSelect"></select>
+            </div>
+        </header>
+
+        <div class="content">
+            <section class="page active" id="page-dashboard">
+                <div class="page-header">
+                    <div>
+                        <h1>Tableau de bord</h1>
+                        <p id="dashboardSeasonText"></p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-primary" data-action="new-member">+ Nouvel adhérent</button>
+                        <button class="btn" data-action="reenroll">↻ Reprendre un ancien</button>
+                    </div>
+                </div>
+
+                <div class="kpis">
+                    <div class="kpi">
+                        <div class="kpi-label">Adhérents</div>
+                        <div class="kpi-value" id="kpiMembers">0</div>
+                        <div class="kpi-extra">inscrits sur la saison</div>
+                    </div>
+                    <div class="kpi">
+                        <div class="kpi-label">Paiements</div>
+                        <div class="kpi-value" id="kpiPaid">0 €</div>
+                        <div class="kpi-extra" id="kpiPaymentExtra"></div>
+                    </div>
+                    <div class="kpi">
+                        <div class="kpi-label">À encaisser</div>
+                        <div class="kpi-value" id="kpiDue">0 €</div>
+                        <div class="kpi-extra">après aides et réductions</div>
+                    </div>
+                    <div class="kpi">
+                        <div class="kpi-label">Certificats</div>
+                        <div class="kpi-value" id="kpiCertificates">0</div>
+                        <div class="kpi-extra" id="kpiCertificateExtra"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <strong>Dernières inscriptions</strong>
+                            <button class="btn btn-small" data-page-link="members">Voir tout</button>
+                        </div>
+                        <div class="card-body" id="dashboardRecent"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <strong>Alertes</strong>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert-list" id="dashboardAlerts"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="page" id="page-members">
+                <div class="page-header">
+                    <div>
+                        <h1>Adhérents</h1>
+                        <p id="membersSeasonText"></p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn" data-action="reenroll">↻ Reprendre un ancien</button>
+                        <button class="btn btn-primary" data-action="new-member">+ Nouvel adhérent</button>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="table-toolbar">
+                        <div class="toolbar-left">
+                            <input class="search" id="memberSearch" placeholder="Rechercher un adhérent...">
+                            <select class="search" id="memberStatusFilter">
+                                <option value="all">Tous les paiements</option>
+                                <option value="paid">Payé</option>
+                                <option value="partial">Partiel</option>
+                                <option value="unpaid">Impayé</option>
+                            </select>
+                        </div>
+                        <div class="toolbar-right">
+                            <span class="lock-badge" id="membersLockText"></span>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Adhérent</th>
+                                    <th>Grade</th>
+                                    <th>Famille</th>
+                                    <th>Paiement</th>
+                                    <th>Aides</th>
+                                    <th>Certificat</th>
+                                    <th>Parrainage</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="membersTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="page" id="page-payments">
+                <div class="page-header">
+                    <div>
+                        <h1>Paiements</h1>
+                        <p>Suivi des cotisations et du reste à encaisser.</p>
+                    </div>
+                </div>
+
+                <div class="kpis">
+                    <div class="kpi">
+                        <div class="kpi-label">Total facturé</div>
+                        <div class="kpi-value" id="paymentTotalDue">0 €</div>
+                    </div>
+                    <div class="kpi">
+                        <div class="kpi-label">Total encaissé</div>
+                        <div class="kpi-value" id="paymentTotalPaid">0 €</div>
+                    </div>
+                    <div class="kpi">
+                        <div class="kpi-label">Reste</div>
+                        <div class="kpi-value" id="paymentRemaining">0 €</div>
+                    </div>
+                    <div class="kpi">
+                        <div class="kpi-label">Impayés</div>
+                        <div class="kpi-value" id="paymentUnpaid">0</div>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="table-toolbar">
+                        <div>
+                            <strong>Situation des cotisations</strong>
+                        </div>
+                        <button class="btn btn-small" data-action="export-csv">Exporter CSV</button>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Adhérent</th>
+                                    <th>Tarif</th>
+                                    <th>Aides</th>
+                                    <th>Réduction famille</th>
+                                    <th>Parrainage acquis</th>
+                                    <th>À payer</th>
+                                    <th>Payé</th>
+                                    <th>Reste</th>
+                                    <th>Mode</th>
+                                    <th>État</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="page" id="page-referrals">
+                <div class="page-header">
+                    <div>
+                        <h1>Parrainages</h1>
+                        <p>Chaque adhérent peut obtenir jusqu'à 3 parrainages qualifiants.</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div id="referralList"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="page" id="page-seasons">
+                <div class="page-header">
+                    <div>
+                        <h1>Saisons</h1>
+                        <p>Une saison va de septembre à juin. Les anciennes saisons sont verrouillées.</p>
+                    </div>
+                    <button class="btn btn-primary" data-action="new-season">+ Nouvelle saison</button>
+                </div>
+                <div class="season-list" id="seasonList"></div>
+            </section>
+
+            <section class="page" id="page-settings">
+                <div class="page-header">
+                    <div>
+                        <h1>Paramètres</h1>
+                        <p>Tarifs, aides, réduction famille et saison active.</p>
+                    </div>
+                    <button class="btn btn-primary" data-action="save-settings">Enregistrer les paramètres</button>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="setting-card">
+                        <h3>Saison active</h3>
+                        <div class="field">
+                            <label>Saison actuellement ouverte</label>
+                            <select id="settingCurrentSeason"></select>
+                        </div>
+                        <p>La saison active est la seule saison dont les fiches adhérents peuvent être modifiées. Les anciennes saisons restent consultables.</p>
+                    </div>
+
+                    <div class="setting-card">
+                        <h3>Tarifs FBAC</h3>
+                        <div class="form-grid">
+                            <div class="field">
+                                <label>Enfant — 1 cours / semaine</label>
+                                <input type="number" id="priceChild1" min="0" step="1">
+                            </div>
+                            <div class="field">
+                                <label>Adulte — 1 cours / semaine</label>
+                                <input type="number" id="priceAdult1" min="0" step="1">
+                            </div>
+                            <div class="field">
+                                <label>Adulte — 4 cours / semaine</label>
+                                <input type="number" id="priceAdult4" min="0" step="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-card">
+                        <h3>Aides</h3>
+                        <div class="form-grid">
+                            <div class="field">
+                                <label>Atout Normandie — montant par défaut</label>
+                                <input type="number" id="aidAtout" min="0" step="1">
+                            </div>
+                            <div class="field">
+                                <label>Pass'Sport / Kiosk — montant par défaut</label>
+                                <input type="number" id="aidPassSport" min="0" step="1">
+                            </div>
+                            <div class="field">
+                                <label>Spot50 — montant par défaut</label>
+                                <input type="number" id="aidSpot50" min="0" step="1">
+                            </div>
+                        </div>
+                        <p>Ces montants sont des valeurs paramétrables. Le montant réel peut être modifié directement sur chaque fiche adhérent.</p>
+                    </div>
+
+                    <div class="setting-card">
+                        <h3>Réduction famille</h3>
+                        <div class="field">
+                            <label>Montant par défaut</label>
+                            <input type="number" id="familyDiscount" min="0" step="1">
+                        </div>
+                        <p>La réduction famille peut ensuite être activée ou désactivée individuellement sur chaque adhérent.</p>
+                    </div>
+
+                    <div class="setting-card">
+                        <h3>Parrainage</h3>
+                        <div class="readonly-box">
+                            <div class="summary-line">
+                                <span>1 parrainage</span>
+                                <strong>-20 €</strong>
+                            </div>
+                            <div class="summary-line">
+                                <span>2 parrainages</span>
+                                <strong>-40 €</strong>
+                            </div>
+                            <div class="summary-line">
+                                <span>3 parrainages</span>
+                                <strong>-60 €</strong>
+                            </div>
+                        </div>
+                        <p>L'avantage est acquis pour la saison suivante et n'est jamais déduit de la saison pendant laquelle le parrainage est réalisé.</p>
+                    </div>
+
+                    <div class="setting-card">
+                        <h3>Données locales</h3>
+                        <button class="btn btn-danger" data-action="reset-demo">Réinitialiser les données</button>
+                        <p>Cette action doit être protégée par une confirmation avant suppression.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+
+<div class="modal-backdrop" id="memberModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div>
+                <h2 id="memberModalTitle">Nouvel adhérent</h2>
+                <span id="memberModalSubtitle"></span>
+            </div>
+            <button class="close" data-close-modal="memberModal">×</button>
+        </div>
+
+        <form id="memberForm">
+            <div class="modal-body">
+                <input type="hidden" id="memberEnrollmentId">
+                <input type="hidden" id="memberPersonId">
+
+                <div class="form-grid">
+                    <div class="section-title">Identité</div>
+
+                    <div class="field full">
+                        <label>Photo</label>
+                        <div class="photo-upload">
+                            <div class="photo-preview" id="photoPreview">PHOTO</div>
+                            <div>
+                                <input type="file" id="memberPhoto" accept=".jpg,.jpeg,.png,.webp">
+                                <div class="help">JPG, PNG ou WEBP. Image enregistrée localement.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Nom</label>
+                        <input type="text" id="memberLastName" required>
+                    </div>
+
+                    <div class="field">
+                        <label>Prénom</label>
+                        <input type="text" id="memberFirstName" required>
+                    </div>
+
+                    <div class="field">
+                        <label>Date de naissance</label>
+                        <input type="date" id="memberBirthDate">
+                    </div>
+
+                    <div class="field">
+                        <label>Catégorie</label>
+                        <select id="memberCategory">
+                            <option value="enfant">Enfant</option>
+                            <option value="adulte">Adulte</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>Fréquence</label>
+                        <select id="memberFrequency">
+                            <option value="1">1 cours / semaine</option>
+                            <option value="4">4 cours / semaine</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>Grade / ceinture</label>
+                        <select id="memberGrade"></select>
+                    </div>
+
+                    <div class="field">
+                        <label>Groupe famille</label>
+                        <select id="memberFamilyGroup"></select>
+                        <small>Sélectionnez le nom d'un adhérent de la famille ou "Aucun groupe".</small>
+                    </div>
+
+                    <div class="section-title">Parrainage</div>
+
+                    <div class="field">
+                        <label>Parrain</label>
+                        <select id="memberReferrer"></select>
+                        <small>Un seul parrain possible pour cet adhérent.</small>
+                    </div>
+
+                    <div class="field">
+                        <label>Avantage de parrainage appliqué cette saison</label>
+                        <input type="text" id="memberReferralDiscountDisplay" disabled>
+                        <small>Calculé depuis les parrainages de la saison précédente.</small>
+                    </div>
+
+                    <div class="section-title">Certificat médical</div>
+
+                    <div class="field full">
+                        <div class="certificate-box">
+                            <div class="certificate-status">
+                                <div>
+                                    <strong id="certificateStatusTitle">Aucun certificat enregistré</strong>
+                                    <div class="help" id="certificateStatusText">Ajoutez le PDF du certificat médical.</div>
+                                </div>
+                                <button type="button" class="btn btn-small hidden" id="viewCertificateButton">Visualiser le PDF</button>
+                            </div>
+
+                            <div style="height:12px"></div>
+
+                            <div class="form-grid">
+                                <div class="field">
+                                    <label>Date du certificat</label>
+                                    <input type="date" id="certificateDate">
+                                    <small>La date de fin est calculée automatiquement à +1 an.</small>
+                                </div>
+
+                                <div class="field">
+                                    <label>Valide jusqu'au</label>
+                                    <input type="date" id="certificateExpiry" disabled>
+                                </div>
+
+                                <div class="field full">
+                                    <label>Fichier PDF</label>
+                                    <input type="file" id="certificateFile" accept="application/pdf">
+                                    <small id="certificateFileName">Aucun fichier sélectionné.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-title">Aides</div>
+
+                    <div class="field full">
+                        <div class="aid-grid">
+                            <div class="aid-item">
+                                <div class="aid-top">
+                                    <label>
+                                        <input type="checkbox" id="aidAtoutEnabled">
+                                        Atout Normandie
+                                    </label>
+                                </div>
+                                <input type="number" id="aidAtoutAmount" min="0" step="1" placeholder="Montant">
+                            </div>
+
+                            <div class="aid-item">
+                                <div class="aid-top">
+                                    <label>
+                                        <input type="checkbox" id="aidPassSportEnabled">
+                                        Pass'Sport / Kiosk
+                                    </label>
+                                </div>
+                                <input type="number" id="aidPassSportAmount" min="0" step="1" placeholder="Montant">
+                            </div>
+
+                            <div class="aid-item">
+                                <div class="aid-top">
+                                    <label>
+                                        <input type="checkbox" id="aidSpot50Enabled">
+                                        Spot50
+                                    </label>
+                                </div>
+                                <input type="number" id="aidSpot50Amount" min="0" step="1" placeholder="Montant">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-title">Réduction famille</div>
+
+                    <div class="field">
+                        <label>Réduction famille</label>
+                        <div class="checkbox">
+                            <input type="checkbox" id="familyDiscountEnabled">
+                            <span>Appliquer la réduction famille</span>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Montant de la réduction</label>
+                        <input type="number" id="familyDiscountAmount" min="0" step="1">
+                    </div>
+
+                    <div class="section-title">Paiement</div>
+
+                    <div class="field">
+                        <label>Mode de paiement</label>
+                        <select id="memberPaymentMethod">
+                            <option value="">Non renseigné</option>
+                            <option value="virement">Virement</option>
+                            <option value="especes">Espèces</option>
+                            <option value="cheque">Chèque</option>
+                            <option value="cb">CB</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>Montant payé</label>
+                        <input type="number" id="memberPaidAmount" min="0" step="0.01">
+                    </div>
+
+                    <div class="field full">
+                        <div class="summary-box">
+                            <div class="summary-line">
+                                <span>Tarif de base</span>
+                                <strong id="summaryBasePrice">0 €</strong>
+                            </div>
+                            <div class="summary-line">
+                                <span>Aides</span>
+                                <strong class="amount-positive" id="summaryAids">-0 €</strong>
+                            </div>
+                            <div class="summary-line">
+                                <span>Réduction famille</span>
+                                <strong class="amount-positive" id="summaryFamily">-0 €</strong>
+                            </div>
+                            <div class="summary-line">
+                                <span>Parrainage de la saison précédente</span>
+                                <strong class="amount-positive" id="summaryReferral">-0 €</strong>
+                            </div>
+                            <div class="summary-line total">
+                                <span>Total à payer</span>
+                                <strong id="summaryDue">0 €</strong>
+                            </div>
+                            <div class="summary-line">
+                                <span>Déjà payé</span>
+                                <strong id="summaryPaid">0 €</strong>
+                            </div>
+                            <div class="summary-line">
+                                <span>Reste à payer</span>
+                                <strong class="amount-orange" id="summaryRemaining">0 €</strong>
+                            </div>
+                            <div class="summary-line hidden" id="summaryOverpaymentLine">
+                                <span>Surpaiement</span>
+                                <strong id="summaryOverpayment">0 €</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn" data-close-modal="memberModal">Annuler</button>
+                <button type="submit" class="btn btn-primary" id="memberSaveButton">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="certificateModal">
+    <div class="modal large">
+        <div class="modal-header">
+            <div>
+                <h2>Certificat médical</h2>
+                <span id="certificateViewerName"></span>
+            </div>
+            <button class="close" data-close-modal="certificateModal">×</button>
+        </div>
+        <div class="modal-body" id="certificateViewerBody"></div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="reenrollModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div>
+                <h2>Reprendre un ancien adhérent</h2>
+                <span>Créer une nouvelle inscription sans supprimer l'ancienne.</span>
+            </div>
+            <button class="close" data-close-modal="reenrollModal">×</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="field">
+                <label>Adhérent à reprendre</label>
+                <select id="reenrollPersonSelect"></select>
+            </div>
+
+            <div style="height:15px"></div>
+
+            <div class="readonly-box" id="reenrollInfo">
+                Sélectionnez un ancien adhérent.
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn" data-close-modal="reenrollModal">Annuler</button>
+            <button class="btn btn-primary" data-action="confirm-reenroll">Créer l'inscription</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="seasonModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div>
+                <h2>Nouvelle saison</h2>
+                <span>La nouvelle saison deviendra automatiquement la saison active.</span>
+            </div>
+            <button class="close" data-close-modal="seasonModal">×</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="field">
+                <label>Année de début</label>
+                <input type="number" id="newSeasonYear" min="2020" max="2100">
+                <small>Exemple : 2027 donnera la saison 2027-2028.</small>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn" data-close-modal="seasonModal">Annuler</button>
+            <button class="btn btn-primary" data-action="confirm-new-season">Créer la saison</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="scripts/calculs.js"></script>
+<script src="scripts/notifications.js"></script>
+<script src="scripts/navigation.js"></script>
+<script src="scripts/tableau-de-bord.js"></script>
+<script src="scripts/adherents.js"></script>
+<script src="scripts/paiements.js"></script>
+<script src="scripts/parrainages.js"></script>
+<script src="scripts/saisons.js"></script>
+<script src="scripts/parametres.js"></script>
+<script src="scripts/application.js"></script>
+</body>
+</html>

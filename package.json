@@ -1,0 +1,14 @@
+{
+  "name": "fbac_logiciel",
+  "version": "1.0.0",
+  "description": "Logiciel de gestion du Full Boxe Américaine Club",
+  "main": "backend/principal.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "FBAC",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "electron": "^38.2.0"
+  }
+}
