@@ -158,17 +158,17 @@ function afficherResumePaiements() {
 
     const elementAttendu =
         document.getElementById(
-            "paiements-attendu"
+            "paymentTotalDue"
         );
 
     const elementPaye =
         document.getElementById(
-            "paiements-encaisse"
+            "paymentTotalPaid"
         );
 
     const elementReste =
         document.getElementById(
-            "paiements-reste"
+            "paymentRemaining"
         );
 
     if (elementAttendu) {
