@@ -2799,22 +2799,22 @@ function initialiserEvenementsAdherents() {
             }
 
             if (
-                action ===
-                "nouvel-adherent"
+                action === "nouvel-adherent" ||
+                action === "new-member"
             ) {
                 ouvrirNouvelAdherent();
             }
 
             if (
-                action ===
-                "reinscription"
+                action === "reinscription" ||
+                action === "reenroll"
             ) {
                 ouvrirReinscription();
             }
 
             if (
-                action ===
-                "confirmer-reinscription"
+                action === "confirmer-reinscription" ||
+                action === "confirm-reenroll"
             ) {
                 confirmerReinscription();
             }
