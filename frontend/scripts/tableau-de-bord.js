@@ -37,16 +37,16 @@ function afficherTableauDeBord() {
     ).length;
 
     const elementAdherents =
-        document.getElementById("kpi-adherents");
+        document.getElementById("kpiMembers");
 
     const elementEncaisse =
-        document.getElementById("kpi-encaisse");
+        document.getElementById("kpiPaid");
 
     const elementReste =
-        document.getElementById("kpi-reste");
+        document.getElementById("kpiDue");
 
     const elementCertificats =
-        document.getElementById("kpi-certificats");
+        document.getElementById("kpiCertificates");
 
     if (elementAdherents) {
         elementAdherents.textContent = totalAdherents;
@@ -72,7 +72,7 @@ function afficherTableauDeBord() {
 
 function afficherAlertesTableauDeBord(inscriptions) {
     const conteneur =
-        document.getElementById("dashboard-alertes");
+        document.getElementById("dashboardAlerts");
 
     if (!conteneur) {
         return;
