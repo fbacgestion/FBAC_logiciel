@@ -1,5 +1,5 @@
 function afficherNotification(message, type = "info") {
-    const conteneur = document.getElementById("toast");
+    const conteneur = document.getElementById("toastContainer");
 
     if (!conteneur) {
         console.warn(message);
