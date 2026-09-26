@@ -3,15 +3,29 @@ function changerPage(page) {
         return;
     }
 
+    const correspondances = {
+        dashboard: "dashboard",
+        members: "adherents",
+        payments: "paiements",
+        referrals: "parrainages",
+        seasons: "saisons",
+        settings: "parametres"
+    };
+
+    const pageInterne =
+        correspondances[page] ||
+        page;
+
     if (typeof ui !== "undefined") {
-        ui.page = page;
+        ui.page = pageInterne;
     }
 
     document.querySelectorAll(".page").forEach(element => {
         element.classList.remove("active");
     });
 
-    const pageElement = document.getElementById(`page-${page}`);
+    const pageElement =
+        document.getElementById(`page-${page}`);
 
     if (pageElement) {
         pageElement.classList.add("active");
@@ -21,9 +35,10 @@ function changerPage(page) {
         element.classList.remove("active");
     });
 
-    const navItem = document.querySelector(
-        `.nav button[data-page="${page}"]`
-    );
+    const navItem =
+        document.querySelector(
+            `.nav button[data-page="${page}"]`
+        );
 
     if (navItem) {
         navItem.classList.add("active");
@@ -38,7 +53,8 @@ function changerPage(page) {
         settings: "Paramètres"
     };
 
-    const titre = document.getElementById("pageTitle");
+    const titre =
+        document.getElementById("pageTitle");
 
     if (titre && titres[page]) {
         titre.textContent = titres[page];
