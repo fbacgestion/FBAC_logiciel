@@ -502,3 +502,118 @@ if (
 } else {
     initialiserPaiements();
 }
+function exporterPaiementsCsv() {
+    const saisonId =
+        state.configuration.saisonActiveId;
+
+    const inscriptions =
+        state.inscriptions.filter(
+            inscription =>
+                inscription.saisonId === saisonId
+        );
+
+    const lignes = [
+        [
+            "Nom",
+            "Prénom",
+            "Saison",
+            "Grade",
+            "Catégorie",
+            "Fréquence",
+            "Tarif",
+            "Aides",
+            "Réduction famille",
+            "Parrainage",
+            "Total à payer",
+            "Payé",
+            "Reste",
+            "Mode paiement",
+            "Certificat",
+            "Validité"
+        ]
+    ];
+
+    inscriptions.forEach(inscription => {
+        const personne =
+            state.personnes.find(
+                element =>
+                    element.id === inscription.personneId
+            );
+
+        const saison =
+            state.saisons.find(
+                element =>
+                    element.id === inscription.saisonId
+            );
+
+        const donnees =
+            calculerDonneesPaiement(inscription);
+
+        const certificat =
+            inscription.certificat ||
+            inscription.certificate ||
+            {};
+
+        lignes.push([
+            personne?.lastName || "",
+            personne?.firstName || "",
+            saison?.nom || "",
+            inscription.grade || "",
+            inscription.category || "",
+            inscription.frequency || "",
+            donnees.tarif.toFixed(2),
+            donnees.totalAides.toFixed(2),
+            donnees.reductionFamille.toFixed(2),
+            donnees.parrainageAcquis.toFixed(2),
+            donnees.montantAPayer.toFixed(2),
+            donnees.montantPaye.toFixed(2),
+            donnees.reste.toFixed(2),
+            inscription.paymentMethod || "",
+            certificat.fileName || "",
+            certificat.expiry || ""
+        ]);
+    });
+
+    const csv =
+        lignes
+            .map(
+                ligne =>
+                    ligne
+                        .map(
+                            valeur =>
+                                `"${String(
+                                    valeur ?? ""
+                                ).replace(/"/g, '""')}"`
+                        )
+                        .join(";")
+            )
+            .join("\r\n");
+
+    const blob =
+        new Blob(
+            ["\ufeff" + csv],
+            {
+                type: "text/csv;charset=utf-8;"
+            }
+        );
+
+    const url =
+        URL.createObjectURL(blob);
+
+    const lien =
+        document.createElement("a");
+
+    lien.href = url;
+    lien.download =
+        `fbac-paiements-${saisonId || "export"}.csv`;
+
+    document.body.appendChild(lien);
+    lien.click();
+    lien.remove();
+
+    URL.revokeObjectURL(url);
+
+    notificationSucces(
+        "Export CSV terminé."
+    );
+}
