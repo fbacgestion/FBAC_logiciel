@@ -4,7 +4,7 @@ function afficherSaisons() {
     }
 
     const conteneur =
-        document.getElementById("liste-saisons");
+        document.getElementById("seasonList");
 
     if (!conteneur) {
         return;
