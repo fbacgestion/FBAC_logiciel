@@ -1233,6 +1233,86 @@ function initialiserEvenementsGlobaux() {
     );
 
     document.addEventListener(
+        "click",
+        event => {
+            const bouton =
+                event.target.closest(
+                    "[data-action]"
+                );
+
+            if (!bouton) {
+                return;
+            }
+
+            const action =
+                bouton.dataset.action;
+
+            if (action === "new-season") {
+                const champ =
+                    document.getElementById(
+                        "newSeasonYear"
+                    );
+
+                if (champ) {
+                    champ.value =
+                        new Date().getFullYear() + 1;
+                }
+
+                ouvrirModalParId(
+                    "seasonModal"
+                );
+            }
+
+            if (action === "confirm-new-season") {
+                const champ =
+                    document.getElementById(
+                        "newSeasonYear"
+                    );
+
+                const annee =
+                    Number(
+                        champ?.value
+                    );
+
+                if (!Number.isInteger(annee)) {
+                    notificationErreur(
+                        "Année de saison invalide."
+                    );
+                    return;
+                }
+
+                creerNouvelleSaison(
+                    `${annee}-${annee + 1}`
+                ).then(
+                    saison => {
+                        if (saison) {
+                            fermerModalParId(
+                                "seasonModal"
+                            );
+                        }
+                    }
+                );
+            }
+
+            if (action === "export-csv") {
+                exporterPaiementsCsv();
+            }
+        }
+    );
+
+    document.addEventListener(
+        "change",
+        event => {
+            if (
+                event.target.id ===
+                "reenrollPersonSelect"
+            ) {
+                mettreAJourInformationReinscription();
+            }
+        }
+    );
+
+    document.addEventListener(
         "keydown",
         event => {
             if (
