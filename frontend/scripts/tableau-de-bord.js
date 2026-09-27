@@ -96,7 +96,7 @@ function afficherAlertesTableauDeBord(inscriptions) {
     }
 
     const certificatsManquants = inscriptions.filter(
-        inscription => !inscription.certificat
+        inscription => !(inscription.certificat?.documentId || inscription.certificat?.fileName)
     );
 
     if (certificatsManquants.length > 0) {
