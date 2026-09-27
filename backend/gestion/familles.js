@@ -155,14 +155,16 @@ function supprimerFamille(id) {
     }
 
     const inscriptions = lireJson("inscriptions.json");
-    const utilisee = Array.isArray(inscriptions) &&
-        inscriptions.some(inscription => (
-            inscription?.familyGroupId === id &&
-            inscription?.saisonId === famille.saisonId
-        ));
-
-    if (utilisee) {
-        throw new Error("Cette famille contient encore des adhérents. Retirez d'abord les adhérents de cette famille avant de la supprimer.");
+    if (Array.isArray(inscriptions)) {
+        for (const inscription of inscriptions) {
+            if (
+                inscription?.familyGroupId === id &&
+                inscription?.saisonId === famille.saisonId
+            ) {
+                delete inscription.familyGroupId;
+            }
+        }
+        ecrireJson("inscriptions.json", inscriptions);
     }
 
     const [supprimee] = familles.splice(index, 1);
