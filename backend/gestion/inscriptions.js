@@ -79,7 +79,7 @@ function creerInscription(donnees) {
     }
 
     const inscription = {
-        id: genererId(),
+        id: donnees.id || genererId(),
 
         personId: donnees.personId,
         season: donnees.season,
@@ -162,6 +162,40 @@ function modifierInscription(
     const inscriptionActuelle =
         inscriptions[index];
 
+    const configuration =
+        lireJson("configuration.json") || {};
+
+    const saisonActive =
+        configuration.saisonActiveId ||
+        configuration.saisonActive ||
+        "";
+
+    const estSaisonActive =
+        inscriptionActuelle.season ===
+        saisonActive;
+
+    if (!estSaisonActive) {
+        const champsAutorises = [
+            "referrerId",
+            "referralDiscountApplied"
+        ];
+
+        const champsDemandes =
+            Object.keys(donnees);
+
+        const modificationAutorisee =
+            champsDemandes.every(
+                champ =>
+                    champsAutorises.includes(champ)
+            );
+
+        if (!modificationAutorisee) {
+            throw new Error(
+                "Cette inscription appartient à une saison historique. Seul le parrainage peut être modifié."
+            );
+        }
+    }
+
     const personneId =
         donnees.personId ??
         inscriptionActuelle.personId;
@@ -239,6 +273,23 @@ function supprimerInscription(id) {
     if (index === -1) {
         throw new Error(
             "Inscription introuvable."
+        );
+    }
+
+    const configuration =
+        lireJson("configuration.json") || {};
+
+    const saisonActive =
+        configuration.saisonActiveId ||
+        configuration.saisonActive ||
+        "";
+
+    if (
+        inscriptions[index].season !==
+        saisonActive
+    ) {
+        throw new Error(
+            "Une inscription historique ne peut pas être supprimée."
         );
     }
 
