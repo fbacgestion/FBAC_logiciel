@@ -60,6 +60,26 @@ function creerFamille(donnees) {
     return famille;
 }
 
+function supprimerFamille(id) {
+    const familles = obtenirFamilles();
+    const index = familles.findIndex(famille => famille.id === id);
+    if (index === -1) {
+        throw new Error("Famille introuvable.");
+    }
+
+    const inscriptions = lireJson("inscriptions.json");
+    const utilisee = Array.isArray(inscriptions) &&
+        inscriptions.some(inscription => inscription?.familyGroupId === id);
+
+    if (utilisee) {
+        throw new Error("Cette famille contient encore des adhérents. Retirez d'abord les adhérents de cette famille avant de la supprimer.");
+    }
+
+    const [famille] = familles.splice(index, 1);
+    enregistrerFamilles(familles);
+    return famille;
+}
+
 function modifierFamille(id, donnees) {
     const familles = obtenirFamilles();
     const index = familles.findIndex(famille => famille.id === id);
@@ -81,5 +101,6 @@ module.exports = {
     initialiserFamilles,
     obtenirFamilles,
     creerFamille,
-    modifierFamille
+    modifierFamille,
+    supprimerFamille
 };
