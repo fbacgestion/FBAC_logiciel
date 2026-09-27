@@ -92,20 +92,35 @@ function mettreAJourAffichageParrainage(
     const valeur =
         Number(montant) || 0;
 
-    definirValeur(
-        "referralAmount1",
-        `-${valeur.toFixed(2)} €`
-    );
+    const montant1 =
+        document.getElementById(
+            "referralAmount1"
+        );
 
-    definirValeur(
-        "referralAmount2",
-        `-${(valeur * 2).toFixed(2)} €`
-    );
+    const montant2 =
+        document.getElementById(
+            "referralAmount2"
+        );
 
-    definirValeur(
-        "referralAmount3",
-        `-${(valeur * 3).toFixed(2)} €`
-    );
+    const montant3 =
+        document.getElementById(
+            "referralAmount3"
+        );
+
+    if (montant1) {
+        montant1.textContent =
+            `-${valeur.toFixed(2)} €`;
+    }
+
+    if (montant2) {
+        montant2.textContent =
+            `-${(valeur * 2).toFixed(2)} €`;
+    }
+
+    if (montant3) {
+        montant3.textContent =
+            `-${(valeur * 3).toFixed(2)} €`;
+    }
 }
 
 async function enregistrerParametres() {
