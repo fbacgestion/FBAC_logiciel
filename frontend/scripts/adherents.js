@@ -116,7 +116,7 @@ function afficherAdherents() {
             "<td>" + famille + "</td>" +
             "<td>" + afficherBadgePaiement(inscription) + "</td>" +
             "<td>" + echapperHtml(aides) + "</td>" +
-            "<td>" + echapperHtml(certificat) + "</td>" +
+            "<td>" + certificat + "</td>" +
             "<td>" + (parrainage > 0 ? "-" + parrainage + " €" : "—") + "</td>" +
             "<td><div class=\"actions\">" + actions + "</div></td>" +
             "</tr>";
