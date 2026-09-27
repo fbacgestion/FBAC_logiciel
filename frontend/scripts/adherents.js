@@ -110,7 +110,7 @@ function afficherAdherents() {
                     : "";
 
         const parrainage = Number(inscription.referralDiscountApplied ?? inscription.parrainageAcquis ?? 0);
-        const famille = inscription.familyGroupId ? "Oui" : "—";
+        const famille = genererAffichageFamille(inscription);
 
         const actions = ui.selectedSeason === saisonCourante
             ? "<button class=\"btn btn-small\" data-action=\"modifier-adherent\" data-id=\"" + echapperHtml(inscription.id) + "\">Modifier</button> " +
@@ -2293,9 +2293,78 @@ function mettreAJourResumeAdherent() {
         );
 }
 
-function remplirSelectFamille(
-    familleId
-) {
+function obtenirFamille(familleId) {
+    if (!familleId) {
+        return null;
+    }
+
+    return state.familles?.find(
+        famille =>
+            famille.id === familleId
+    ) || null;
+}
+
+function obtenirMembresFamille(familleId, saisonId = state.configuration.saisonActiveId) {
+    if (!familleId) {
+        return [];
+    }
+
+    return state.inscriptions
+        .filter(
+            inscription =>
+                inscription.familyGroupId === familleId &&
+                (!saisonId || inscription.saisonId === saisonId)
+        )
+        .map(
+            inscription => {
+                const personne =
+                    state.personnes.find(
+                        element =>
+                            element.id === inscription.personneId
+                    );
+
+                return personne
+                    ? {
+                        inscription,
+                        personne
+                    }
+                    : null;
+            }
+        )
+        .filter(Boolean);
+}
+
+function obtenirNomFamille(familleId) {
+    return obtenirFamille(familleId)?.nom || "Famille";
+}
+
+function genererAffichageFamille(inscription) {
+    if (!inscription.familyGroupId) {
+        return "—";
+    }
+
+    const famille =
+        obtenirFamille(inscription.familyGroupId);
+
+    const membres =
+        obtenirMembresFamille(
+            inscription.familyGroupId,
+            inscription.saisonId
+        );
+
+    const libelle =
+        famille?.nom ||
+        "Famille";
+
+    return `
+        <button type="button" class="family-link" data-action="voir-famille" data-id="${echapperHtml(inscription.familyGroupId)}">
+            <span class="family-name">${echapperHtml(libelle)}</span>
+            <span class="family-count">${membres.length} membre${membres.length > 1 ? "s" : ""}</span>
+        </button>
+    `;
+}
+
+function remplirSelectFamille(familleId) {
     const select =
         document.getElementById(
             "memberFamilyGroup"
@@ -2305,16 +2374,17 @@ function remplirSelectFamille(
         return;
     }
 
-    const familles = [
-        ...new Set(
-            state.inscriptions
-                .map(
-                    inscription =>
-                        inscription.familyGroupId
+    const familles =
+        Array.isArray(state.familles)
+            ? [...state.familles]
+                .sort((a, b) =>
+                    String(a.nom).localeCompare(
+                        String(b.nom),
+                        "fr",
+                        { sensitivity: "base" }
+                    )
                 )
-                .filter(Boolean)
-        )
-    ];
+            : [];
 
     select.innerHTML =
         `
@@ -2324,22 +2394,142 @@ function remplirSelectFamille(
         ` +
         familles
             .map(
-                id =>
-                    `
-                    <option value="${echapperHtml(
-                        id
-                    )}">
-                        ${echapperHtml(
-                            id
-                        )}
-                    </option>
-                `
+                famille => {
+                    const membres =
+                        obtenirMembresFamille(
+                            famille.id,
+                            state.configuration.saisonActiveId
+                        );
+
+                    const noms =
+                        membres
+                            .slice(0, 3)
+                            .map(
+                                membre =>
+                                    `${membre.personne.firstName} ${membre.personne.lastName}`.trim()
+                            )
+                            .join(", ");
+
+                    const suffixe =
+                        membres.length > 3
+                            ? ` + ${membres.length - 3}`
+                            : "";
+
+                    return `
+                        <option value="${echapperHtml(famille.id)}">
+                            ${echapperHtml(famille.nom)} — ${echapperHtml(noms || "aucun membre")}${echapperHtml(suffixe)}
+                        </option>
+                    `;
+                }
             )
             .join("");
 
     select.value =
-        familleId ||
-        "";
+        familleId || "";
+}
+
+async function creerNouvelleFamilleDepuisFormulaire() {
+    const nomInput =
+        document.getElementById("newFamilyName");
+
+    const nom =
+        nomInput?.value?.trim() || "";
+
+    if (!nom) {
+        notificationErreur("Le nom de la famille est obligatoire.");
+        return;
+    }
+
+    try {
+        const famille =
+            await window.fbac.creerFamille({ nom });
+
+        state.familles =
+            Array.isArray(state.familles)
+                ? [...state.familles, famille]
+                : [famille];
+
+        remplirSelectFamille(famille.id);
+        mettreAJourResumeAdherent();
+        fermerModalParId("familyCreateModal");
+
+        if (nomInput) {
+            nomInput.value = "";
+        }
+
+        notificationSucces(`La famille « ${famille.nom} » a été créée.`);
+    } catch (error) {
+        console.error("Erreur lors de la création de la famille :", error);
+        notificationErreur(
+            error?.message ||
+            "Impossible de créer la famille."
+        );
+    }
+}
+
+function ouvrirCreationFamille() {
+    const input =
+        document.getElementById("newFamilyName");
+
+    if (input) {
+        input.value = "";
+        setTimeout(
+            () => input.focus(),
+            0
+        );
+    }
+
+    ouvrirModalParId("familyCreateModal");
+}
+
+function afficherFamille(familleId) {
+    const famille =
+        obtenirFamille(familleId);
+
+    if (!famille) {
+        notificationErreur("Famille introuvable.");
+        return;
+    }
+
+    const membres =
+        obtenirMembresFamille(
+            familleId,
+            state.configuration.saisonActiveId
+        );
+
+    const contenu =
+        document.getElementById("familyViewerBody");
+
+    const nom =
+        document.getElementById("familyViewerName");
+
+    if (nom) {
+        nom.textContent =
+            `${famille.nom} — ${membres.length} membre${membres.length > 1 ? "s" : ""}`;
+    }
+
+    if (contenu) {
+        contenu.innerHTML =
+            membres.length
+                ? membres.map(
+                    ({ inscription, personne }) => `
+                        <div class="family-member-row">
+                            <div>
+                                <strong>${echapperHtml(`${personne.firstName} ${personne.lastName}`.trim())}</strong>
+                                <span>${echapperHtml(inscription.category === "enfant" ? "Enfant" : "Adulte")} · ${echapperHtml(inscription.frequency || "1")} cours/semaine</span>
+                            </div>
+                            <button type="button" class="btn btn-small" data-action="modifier-adherent" data-id="${echapperHtml(inscription.id)}">Voir</button>
+                        </div>
+                    `
+                ).join("")
+                : `
+                    <div class="empty-state">
+                        Aucun membre dans cette famille pour la saison active.
+                    </div>
+                `;
+    }
+
+    ouvrirModalParId("familyViewerModal");
 }
 
 function remplirSelectParrain(
@@ -3695,6 +3885,10 @@ function initialiserEvenementsAdherents() {
 
             if (action === "voir-photo") {
                 afficherPhotoEnGrand(bouton.dataset.personId);
+            }
+
+            if (action === "voir-famille") {
+                afficherFamille(id);
             }
 
             if (action === "imprimer-certificat") {
