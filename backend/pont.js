@@ -131,6 +131,18 @@ contextBridge.exposeInMainWorld(
             );
         },
 
+        obtenirFamilles: () => {
+            return ipcRenderer.invoke("obtenir-familles");
+        },
+
+        creerFamille: donnees => {
+            return ipcRenderer.invoke("creer-famille", donnees);
+        },
+
+        modifierFamille: (id, donnees) => {
+            return ipcRenderer.invoke("modifier-famille", id, donnees);
+        },
+
         obtenirSaisons: () => {
             return ipcRenderer.invoke(
                 "obtenir-saisons"
