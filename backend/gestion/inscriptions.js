@@ -171,6 +171,10 @@ function modifierInscription(
         saisonActuelle?.nom ||
         "";
 
+    const estSaisonActive =
+        inscriptionActuelle.season ===
+        saisonActive;
+
     if (!estSaisonActive) {
         const champsAutorises = [
             "referrerId",
