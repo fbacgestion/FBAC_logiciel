@@ -111,7 +111,7 @@ function afficherAdherents() {
         return "<tr>" +
             "<td><strong>" + echapperHtml(`${personne.firstName} ${personne.lastName}`.trim()) + "</strong>" +
             (inscription.vip ? " <span class=\"badge success\">VIP</span>" : "") + "</td>" +
-            "<td>" + echapperHtml(inscription.grade || "Blanc") + "</td>" +
+            "<td>" + afficherBadgeGrade(inscription.grade || "Blanc") + "</td>" +
             "<td>" + famille + "</td>" +
             "<td>" + afficherBadgePaiement(inscription) + "</td>" +
             "<td>" + echapperHtml(aides) + "</td>" +
@@ -160,6 +160,35 @@ function changerSaisonAffichageAdherents(saisonId) {
         saisonId;
 
     afficherAdherents();
+}
+
+function afficherBadgeGrade(
+    grade
+) {
+    const nom =
+        grade || "Blanc";
+
+    const classes = {
+        "Blanc": "grade-white",
+        "Blanc-Jaune": "grade-white-yellow",
+        "Jaune": "grade-yellow",
+        "Jaune-Orange": "grade-yellow-orange",
+        "Orange": "grade-orange",
+        "Orange-Vert": "grade-orange-green",
+        "Vert": "grade-green",
+        "Vert-Bleu": "grade-green-blue",
+        "Bleu": "grade-blue",
+        "Bleu-Marron": "grade-blue-brown",
+        "Marron": "grade-brown",
+        "Noire": "grade-black"
+    };
+
+    return `
+        <span class="grade-badge ${classes[nom] || "grade-white"}">
+            <span class="grade-belt"></span>
+            <span class="grade-name">${echapperHtml(nom)}</span>
+        </span>
+    `;
 }
 
 function afficherBadgePaiement(
