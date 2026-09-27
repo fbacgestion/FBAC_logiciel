@@ -33,7 +33,7 @@ function creerPersonne(donnees) {
     const personnes = obtenirPersonnes();
 
     const personne = {
-        id: genererId(),
+        id: donnees.id || genererId(),
         firstName: donnees.firstName || "",
         lastName: donnees.lastName || "",
         photo: donnees.photo || null
