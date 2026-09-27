@@ -298,6 +298,15 @@
                     </div>
 
                     <div class="setting-card">
+                        <h3>Sauvegarde des données</h3>
+                        <div class="actions">
+                            <button class="btn" data-action="backup-data">Créer une sauvegarde</button>
+                            <button class="btn button-danger" data-action="restore-data">Restaurer la dernière sauvegarde</button>
+                        </div>
+                        <p id="backupStatus">Des sauvegardes automatiques sont créées régulièrement sur ce PC.</p>
+                    </div>
+
+                    <div class="setting-card">
                         <h3>Réduction famille</h3>
                         <div class="field">
                             <label>Montant par défaut</label>
@@ -552,6 +561,22 @@
                                 <span>Aides</span>
                                 <strong class="amount-positive" id="summaryAids">-0 €</strong>
                             </div>
+                            <div class="summary-line summary-detail">
+                                <span>Atout Normandie</span>
+                                <strong id="summaryAidAtout">-0 €</strong>
+                            </div>
+                            <div class="summary-line summary-detail">
+                                <span>Pass'Sport</span>
+                                <strong id="summaryAidPassSport">-0 €</strong>
+                            </div>
+                            <div class="summary-line summary-detail">
+                                <span>Kiosk</span>
+                                <strong id="summaryAidKiosk">-0 €</strong>
+                            </div>
+                            <div class="summary-line summary-detail">
+                                <span>Spot50</span>
+                                <strong id="summaryAidSpot50">-0 €</strong>
+                            </div>
                             <div class="summary-line">
                                 <span>Réduction famille</span>
                                 <strong class="amount-positive" id="summaryFamily">-0 €</strong>
@@ -646,8 +671,10 @@
                 <input type="hidden" id="paymentEnrollmentId">
                 <div class="readonly-box" id="paymentSummary"></div>
                 <div style="height:15px"></div>
+                <div class="readonly-box" id="paymentHistory"></div>
+                <div style="height:15px"></div>
                 <div class="field">
-                    <label>Montant payé</label>
+                    <label>Nouveau paiement</label>
                     <input type="number" id="paymentAmount" min="0" step="0.01" required>
                 </div>
                 <div class="field">
