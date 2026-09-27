@@ -96,9 +96,10 @@ function afficherAdherents() {
             inscription.aides?.spot50?.enabled ? "Spot50" : ""
         ].filter(Boolean).join(", ") || "—";
 
-        const certificat = inscription.certificat?.documentId || inscription.certificate?.documentId
-            ? "Présent"
-            : "Absent";
+        const certificatDocumentId = inscription.certificat?.documentId || inscription.certificate?.documentId;
+        const certificat = certificatDocumentId
+            ? "<button type=\"button\" class=\"btn btn-small\" data-action=\"voir-certificat\" data-id=\"" + echapperHtml(inscription.id) + "\">Visualiser</button>"
+            : "<span class=\"badge\">Absent</span>";
 
         const parrainage = Number(inscription.referralDiscountApplied ?? inscription.parrainageAcquis ?? 0);
         const famille = inscription.familyGroupId ? "Oui" : "—";
@@ -524,6 +525,13 @@ function ouvrirModificationAdherent(
     if (bouton) {
         bouton.textContent =
             "Enregistrer les modifications";
+    }
+
+    if (typeof ui !== "undefined" && ui) {
+        ui.currentCertificateId =
+            certificat.documentId
+                ? inscription.id
+                : null;
     }
 
     afficherEtatCertificat(
@@ -2409,17 +2417,87 @@ async function afficherCertificat(
                 blob
             );
 
-        window.open(
-            url,
-            "_blank"
+        const inscription =
+            state.inscriptions.find(
+                element =>
+                    element.id ===
+                    inscriptionId
+            );
+
+        const personne =
+            inscription
+                ? state.personnes.find(
+                    element =>
+                        element.id ===
+                        inscription.personneId
+                )
+                : null;
+
+        const nom =
+            personne
+                ? `${personne.firstName} ${personne.lastName}`.trim()
+                : "Adhérent";
+
+        const nomElement =
+            document.getElementById(
+                "certificateViewerName"
+            );
+
+        const corps =
+            document.getElementById(
+                "certificateViewerBody"
+            );
+
+        if (!corps) {
+            URL.revokeObjectURL(url);
+            return;
+        }
+
+        if (nomElement) {
+            nomElement.textContent =
+                nom;
+        }
+
+        corps.innerHTML = "";
+
+        const iframe =
+            document.createElement(
+                "iframe"
+            );
+
+        iframe.className =
+            "certificate-viewer";
+
+        iframe.title =
+            `Certificat médical de ${nom}`;
+
+        iframe.src =
+            url;
+
+        corps.appendChild(
+            iframe
         );
+
+        const modal =
+            document.getElementById(
+                "certificateModal"
+            );
+
+        if (modal) {
+            modal.dataset.inscriptionId =
+                inscriptionId;
+
+            ouvrirModalParId(
+                "certificateModal"
+            );
+        }
 
         setTimeout(
             () =>
                 URL.revokeObjectURL(
                     url
                 ),
-            60000
+            600000
         );
     } catch (error) {
         console.error(
@@ -2433,6 +2511,44 @@ async function afficherCertificat(
     }
 }
 
+async function imprimerCertificatActuel() {
+    const modal =
+        document.getElementById(
+            "certificateModal"
+        );
+
+    const inscriptionId =
+        modal?.dataset?.inscriptionId;
+
+    if (!inscriptionId) {
+        notificationErreur(
+            "Aucun certificat à imprimer."
+        );
+        return;
+    }
+
+    try {
+        const resultat =
+            await window.fbac.imprimerCertificat(
+                inscriptionId
+            );
+
+        if (resultat === false) {
+            notificationErreur(
+                "Impossible d'imprimer le certificat."
+            );
+        }
+    } catch (error) {
+        console.error(
+            "Erreur lors de l'impression du certificat :",
+            error
+        );
+
+        notificationErreur(
+            "Impossible d'imprimer le certificat."
+        );
+    }
+}
 async function afficherPhoto(
     personneId,
     imageElement
@@ -3325,6 +3441,33 @@ function initialiserEvenementsAdherents() {
             "true";
     }
 
+    const boutonCertificat =
+        document.getElementById(
+            "viewCertificateButton"
+        );
+
+    if (
+        boutonCertificat &&
+        !boutonCertificat.dataset.initialise
+    ) {
+        boutonCertificat.addEventListener(
+            "click",
+            () => {
+                if (
+                    typeof ui !== "undefined" &&
+                    ui?.currentCertificateId
+                ) {
+                    afficherCertificat(
+                        ui.currentCertificateId
+                    );
+                }
+            }
+        );
+
+        boutonCertificat.dataset.initialise =
+            "true";
+    }
+
     const certificat =
         document.getElementById(
             "certificateFile"
@@ -3449,6 +3592,10 @@ function initialiserEvenementsAdherents() {
 
             if (action === "voir-certificat") {
                 afficherCertificat(id);
+            }
+
+            if (action === "imprimer-certificat") {
+                imprimerCertificatActuel();
             }
         }
     );
