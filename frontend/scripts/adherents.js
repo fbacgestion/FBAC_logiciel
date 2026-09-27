@@ -322,6 +322,11 @@ function ouvrirModificationAdherent(
     );
 
     definirValeur(
+        "memberBirthDate",
+        personne.birthDate || ""
+    );
+
+    definirValeur(
         "memberCategory",
         inscription.category
     );
@@ -802,6 +807,11 @@ async function enregistrerAdherentDepuisFormulaire(
         return;
     }
 
+    const dateNaissance =
+        obtenirValeur(
+            "memberBirthDate"
+        ) || "";
+
     const categorie =
         obtenirValeur(
             "memberCategory"
@@ -924,6 +934,9 @@ async function enregistrerAdherentDepuisFormulaire(
 
             personne.lastName =
                 nom;
+
+            personne.birthDate =
+                dateNaissance;
 
             await window.fbac.modifierPersonne(
                 personne.id,
@@ -2188,6 +2201,9 @@ function normaliserPersonneLocale(
         lastName:
             personne.lastName ||
             "",
+        birthDate:
+            personne.birthDate ||
+            "",
         photo:
             personne.photo ||
             null
@@ -2203,6 +2219,9 @@ function convertirPersonnePourBackend(
             "",
         lastName:
             personne.lastName ||
+            "",
+        birthDate:
+            personne.birthDate ||
             "",
         photo:
             personne.photo ||
