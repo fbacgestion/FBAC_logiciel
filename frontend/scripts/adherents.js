@@ -1793,13 +1793,13 @@ function mettreAJourResumeAdherent() {
     const reste = Math.max(0, montant - montantPaye);
     const totalAides = calculerTotalAides(aides);
     const surpaiement = Math.max(0, montantPaye - montant);
-    definirValeur("summaryBasePrice", `${tarif.toFixed(2)} €`);
-    definirValeur("summaryAids", `-${totalAides.toFixed(2)} €`);
-    definirValeur("summaryFamily", `-${reductionFamille.toFixed(2)} €`);
-    definirValeur("summaryReferral", `-${parrainageAcquis.toFixed(2)} €`);
-    definirValeur("summaryDue", `${montant.toFixed(2)} €`);
-    definirValeur("summaryPaid", `${montantPaye.toFixed(2)} €`);
-    definirValeur("summaryRemaining", `${reste.toFixed(2)} €`);
+    document.getElementById("summaryBasePrice")?.replaceChildren(document.createTextNode(`${tarif.toFixed(2)} €`));
+    document.getElementById("summaryAids")?.replaceChildren(document.createTextNode(`-${totalAides.toFixed(2)} €`));
+    document.getElementById("summaryFamily")?.replaceChildren(document.createTextNode(`-${reductionFamille.toFixed(2)} €`));
+    document.getElementById("summaryReferral")?.replaceChildren(document.createTextNode(`-${parrainageAcquis.toFixed(2)} €`));
+    document.getElementById("summaryDue")?.replaceChildren(document.createTextNode(`${montant.toFixed(2)} €`));
+    document.getElementById("summaryPaid")?.replaceChildren(document.createTextNode(`${montantPaye.toFixed(2)} €`));
+    document.getElementById("summaryRemaining")?.replaceChildren(document.createTextNode(`${reste.toFixed(2)} €`));
     const ligneSurpaiement = document.getElementById("summaryOverpaymentLine");
     if (ligneSurpaiement) {
         ligneSurpaiement.classList.toggle("hidden", surpaiement <= 0);
