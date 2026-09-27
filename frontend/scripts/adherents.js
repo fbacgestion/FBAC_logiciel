@@ -1743,6 +1743,11 @@ function mettreAJourResumeAdherent() {
     if (categorie) {
         definirValeur("memberCategory", categorie);
     }
+
+    if (categorie === "enfant") {
+        definirValeur("memberFrequency", "1");
+    }
+
     const frequence = obtenirValeur("memberFrequency");
     const vip = obtenirCase("memberVip");
     const aides = {
