@@ -7,25 +7,43 @@ function calculerTarif(
             coursParSemaine
         );
 
+    const tarifs =
+        typeof state !== "undefined" &&
+        state?.configuration?.tarifs
+            ? state.configuration.tarifs
+            : {};
+
     if (
         typeAdherent === "enfant" &&
         cours === 1
     ) {
-        return 110;
+        return Number(
+            tarifs.child1 ??
+            tarifs.enfant1Cours ??
+            110
+        );
     }
 
     if (
         typeAdherent === "adulte" &&
         cours === 1
     ) {
-        return 155;
+        return Number(
+            tarifs.adult1 ??
+            tarifs.adulte1Cours ??
+            155
+        );
     }
 
     if (
         typeAdherent === "adulte" &&
         cours === 4
     ) {
-        return 255;
+        return Number(
+            tarifs.adult4 ??
+            tarifs.adulte4Cours ??
+            255
+        );
     }
 
     throw new Error(
@@ -220,13 +238,15 @@ function calculerDonneesPaiement(
 
     return {
         tarif:
-            Number(
-                inscription.tarif
-            ) ||
-            calculerTarif(
-                inscription.category,
-                inscription.frequency
-            ),
+            inscription.vip
+                ? 0
+                : Number(
+                    inscription.tarif
+                ) ||
+                calculerTarif(
+                    inscription.category,
+                    inscription.frequency
+                ),
 
         totalAides:
             calculerTotalAides(
