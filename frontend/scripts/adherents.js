@@ -137,6 +137,8 @@ function afficherAdherents() {
             "<td><div class=\"actions\">" + actions + "</div></td>" +
             "</tr>";
     }).join("");
+
+    chargerPhotosListeAdherents();
 }
 function genererAvatarAdherent(personne) {
     if (personne?.photo) {
