@@ -118,9 +118,15 @@ function afficherAdherents() {
             : "<button class=\"btn btn-small\" data-action=\"modifier-adherent\" data-id=\"" + echapperHtml(inscription.id) + "\">Voir</button>";
 
         return "<tr>" +
-            "<td><strong>" + echapperHtml(`${personne.firstName} ${personne.lastName}`.trim()) + "</strong>" +
+            "<td>" +
+            "<div class=\"member-cell\">" +
+            genererAvatarAdherent(personne) +
+            "<div class=\"member-name\">" +
+            "<strong>" + echapperHtml(`${personne.firstName} ${personne.lastName}`.trim()) + "</strong>" +
             (inscription.vip ? " <span class=\"badge vip\">VIP</span>" : "") +
             alerteCertificat +
+            "</div>" +
+            "</div>" +
             "</td>" +
             "<td>" + afficherBadgeGrade(inscription.grade || "Blanc") + "</td>" +
             "<td>" + famille + "</td>" +
@@ -132,6 +138,56 @@ function afficherAdherents() {
             "</tr>";
     }).join("");
 }
+function genererAvatarAdherent(personne) {
+    if (personne?.photo) {
+        return `
+            <button type="button" class="member-avatar-button" data-action="voir-photo" data-person-id="${echapperHtml(personne.id)}" title="Afficher la photo en grand">
+                <span class="avatar">
+                    <img data-photo-person-id="${echapperHtml(personne.id)}" alt="">
+                </span>
+            </button>
+        `;
+    }
+
+    return `
+        <span class="avatar">${echapperHtml(obtenirInitiales(personne))}</span>
+    `;
+}
+
+function chargerPhotosListeAdherents() {
+    document.querySelectorAll("[data-photo-person-id]").forEach(image => {
+        afficherPhoto(image.dataset.photoPersonId, image);
+    });
+}
+
+async function afficherPhotoEnGrand(personneId) {
+    const personne = state.personnes.find(element => element.id === personneId);
+
+    if (!personne?.photo) {
+        return;
+    }
+
+    const image = document.getElementById("photoViewerImage");
+    const nom = document.getElementById("photoViewerName");
+
+    if (!image) {
+        return;
+    }
+
+    if (nom) {
+        nom.textContent = `${personne.firstName} ${personne.lastName}`.trim();
+    }
+
+    image.removeAttribute("src");
+    image.alt = `Photo de ${personne.firstName} ${personne.lastName}`.trim();
+
+    ouvrirModalParId("photoModal");
+
+    await afficherPhoto(personneId, image);
+
+    chargerPhotosListeAdherents();
+}
+
 function remplirFiltreSaisonsAdherents() {
     const select =
         document.getElementById("memberSeasonFilter");
@@ -3633,6 +3689,10 @@ function initialiserEvenementsAdherents() {
 
             if (action === "voir-certificat") {
                 afficherCertificat(id);
+            }
+
+            if (action === "voir-photo") {
+                afficherPhotoEnGrand(bouton.dataset.personId);
             }
 
             if (action === "imprimer-certificat") {
