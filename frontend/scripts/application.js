@@ -294,7 +294,8 @@ function normaliserFamille(famille) {
     return {
         ...famille,
         id: famille?.id || "",
-        nom: famille?.nom || famille?.name || "Famille"
+        nom: famille?.nom || famille?.name || "Famille",
+        saisonId: famille?.saisonId || famille?.season || ""
     };
 }
 
