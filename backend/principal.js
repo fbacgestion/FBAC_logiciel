@@ -54,6 +54,14 @@ const {
     supprimerPhoto
 } = require("./gestion/photos");
 
+const {
+    initialiserSauvegardes,
+    creerSauvegarde,
+    obtenirSauvegardes,
+    restaurerDerniereSauvegarde,
+    demarrerSauvegardesAutomatiques
+} = require("./gestion/sauvegardes");
+
 function initialiserDonnees() {
     const dossierDonnees =
         path.join(
@@ -71,6 +79,12 @@ function initialiserDonnees() {
         path.join(
             __dirname,
             "donnees"
+        );
+
+    const dossierSauvegardes =
+        path.join(
+            app.getPath("userData"),
+            "sauvegardes"
         );
 
     definirDossierDonnees(
@@ -106,6 +120,19 @@ function initialiserDonnees() {
             recursive: true
         }
     );
+
+    initialiserSauvegardes(
+        dossierDonnees,
+        dossierSauvegardes
+    );
+
+    try {
+        creerSauvegarde("demarrage");
+    } catch (error) {
+        console.error("Erreur lors de la sauvegarde de démarrage :", error);
+    }
+
+    demarrerSauvegardesAutomatiques();
 }
 
 function enregistrerHandlersIpc() {
@@ -301,6 +328,30 @@ function enregistrerHandlersIpc() {
     );
 
     ipcMain.handle(
+        "creer-sauvegarde-donnees",
+        () => {
+            const chemin = creerSauvegarde("manuelle");
+            return {
+                nom: path.basename(chemin)
+            };
+        }
+    );
+
+    ipcMain.handle(
+        "obtenir-sauvegardes",
+        () => {
+            return obtenirSauvegardes().map(sauvegarde => sauvegarde.nom);
+        }
+    );
+
+    ipcMain.handle(
+        "restaurer-derniere-sauvegarde",
+        () => {
+            return restaurerDerniereSauvegarde();
+        }
+    );
+
+    ipcMain.handle(
         "obtenir-saison",
         (_, id) => {
             return obtenirSaison(
@@ -316,21 +367,7 @@ function enregistrerHandlersIpc() {
         }
     );
 
-    ipcMain.handle(
-        "creer-saison",
-        (_, anneeDebut) => {
-            return require("./gestion/saisons")
-                .creerSaison(anneeDebut);
-        }
-    );
 
-    ipcMain.handle(
-        "definir-saison-actuelle",
-        (_, idSaison) => {
-            return require("./gestion/saisons")
-                .definirSaisonActuelle(idSaison);
-        }
-    );
 
     ipcMain.handle(
         "enregistrer-certificat",
