@@ -468,6 +468,38 @@ function ouvrirModificationAdherent(
         certificat
     );
 
+    const apercuPhoto =
+        document.getElementById(
+            "photoPreview"
+        );
+
+    if (apercuPhoto) {
+        apercuPhoto.textContent =
+            "PHOTO";
+
+        if (personne.photo) {
+            const image =
+                document.createElement(
+                    "img"
+                );
+
+            image.alt =
+                "Photo de l'adhérent";
+
+            apercuPhoto.innerHTML =
+                "";
+
+            apercuPhoto.appendChild(
+                image
+            );
+
+            afficherPhoto(
+                personne.id,
+                image
+            );
+        }
+    }
+
     if (
         parrainageUniquement
     ) {
