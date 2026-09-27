@@ -31,7 +31,7 @@ function afficherPaiements() {
     if (!inscriptions.length) {
         conteneur.innerHTML = `
             <tr>
-                <td colspan="8">
+                <td colspan="11">
                     Aucun paiement enregistré pour cette saison.
                 </td>
             </tr>
@@ -95,6 +95,15 @@ function afficherPaiements() {
                                 ${afficherEtatPaiement(
                                     donnees.etat
                                 )}
+                            </td>
+                            <td>
+                                <button
+                                    class="btn btn-small"
+                                    data-action="modifier-paiement"
+                                    data-id="${echapperHtml(inscription.id)}"
+                                >
+                                    Modifier
+                                </button>
                             </td>
                         </tr>
                     `;
@@ -472,25 +481,34 @@ function convertirInscriptionPaiementBackend(
 }
 
 function initialiserPaiements() {
-    const formulaire =
-        document.getElementById(
-            "paymentForm"
-        );
+    const formulaire = document.getElementById("paymentForm");
 
-    if (
-        formulaire &&
-        !formulaire.dataset.initialise
-    ) {
-        formulaire.addEventListener(
-            "submit",
-            enregistrerPaiement
-        );
+    if (formulaire && !formulaire.dataset.initialise) {
+        formulaire.addEventListener("submit", enregistrerPaiement);
+        formulaire.dataset.initialise = "true";
+    }
 
-        formulaire.dataset.initialise =
-            "true";
+    if (!document.body.dataset.paiementActionsInitialises) {
+        document.addEventListener("click", event => {
+            const bouton = event.target.closest('[data-action="modifier-paiement"]');
+
+            if (!bouton) {
+                return;
+            }
+
+            ouvrirPaiement(bouton.dataset.id);
+        });
+
+        document.body.dataset.paiementActionsInitialises = "true";
+    }
+
+    const exportButton = document.querySelector('[data-action="export-csv"]');
+
+    if (exportButton && !exportButton.dataset.initialise) {
+        exportButton.addEventListener("click", exporterPaiementsCsv);
+        exportButton.dataset.initialise = "true";
     }
 }
-
 if (
     document.readyState ===
     "loading"
