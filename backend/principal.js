@@ -36,8 +36,7 @@ const {
     obtenirInscriptionPersonneSaison,
     creerInscription,
     modifierInscription,
-    supprimerInscription,
-    supprimerInscriptionsPersonne
+    supprimerInscription
 } = require("./gestion/inscriptions");
 
 const {
