@@ -1630,6 +1630,10 @@ async function confirmerReinscription() {
                 enabled: false,
                 amount: 50
             },
+            kiosk: {
+                enabled: false,
+                amount: 50
+            },
             spot50: {
                 enabled: false,
                 amount: 50
@@ -1642,6 +1646,8 @@ async function confirmerReinscription() {
             20,
         montantPaye:
             0,
+        paiements:
+            [],
         paidAmount:
             0,
         paymentMethod:
