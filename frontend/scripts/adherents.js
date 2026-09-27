@@ -2136,6 +2136,15 @@ function activerFormulaireAdherent(
                 }
 
                 if (
+                    element.id ===
+                    "memberCategory"
+                ) {
+                    element.disabled =
+                        true;
+                    return;
+                }
+
+                if (
                     element.type ===
                     "button"
                 ) {
