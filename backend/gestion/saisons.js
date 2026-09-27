@@ -102,7 +102,9 @@ function creerSaison(anneeDebut) {
         id: genererId(),
         nom,
         anneeDebut: annee,
-        anneeFin: annee + 1
+        anneeFin: annee + 1,
+        debut: String(annee) + "-09-01",
+        fin: String(annee + 1) + "-06-30"
     };
 
     saisons.push(saison);
