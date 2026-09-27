@@ -2529,7 +2529,44 @@ function afficherFamille(familleId) {
                 `;
     }
 
+    const supprimer = document.getElementById("deleteFamilyButton");
+    if (supprimer) {
+        supprimer.dataset.familyId = familleId;
+        supprimer.disabled = state.inscriptions.some(inscription => inscription.familyGroupId === familleId);
+        supprimer.title = supprimer.disabled
+            ? "Impossible de supprimer une famille contenant des adhérents."
+            : "Supprimer cette famille";
+    }
+
     ouvrirModalParId("familyViewerModal");
+}
+
+async function supprimerFamilleDepuisInterface(familleId) {
+    const famille = obtenirFamille(familleId);
+    if (!famille) {
+        notificationErreur("Famille introuvable.");
+        return;
+    }
+
+    if (state.inscriptions.some(inscription => inscription.familyGroupId === familleId)) {
+        notificationErreur("Cette famille contient encore des adhérents. Retirez d'abord les adhérents de cette famille avant de la supprimer.");
+        return;
+    }
+
+    if (!confirm("Supprimer définitivement la famille « " + famille.nom + " » ?")) {
+        return;
+    }
+
+    try {
+        await window.fbac.supprimerFamille(familleId);
+        state.familles = state.familles.filter(element => element.id !== familleId);
+        fermerModalParId("familyViewerModal");
+        renderCurrentPage();
+        notificationSucces("La famille « " + famille.nom + " » a été supprimée.");
+    } catch (error) {
+        console.error("Erreur lors de la suppression de la famille :", error);
+        notificationErreur(error?.message || "Impossible de supprimer la famille.");
+    }
 }
 
 function remplirSelectParrain(
@@ -3904,6 +3941,10 @@ function initialiserEvenementsAdherents() {
 
             if (action === "voir-famille") {
                 afficherFamille(id);
+            }
+
+            if (action === "supprimer-famille") {
+                supprimerFamilleDepuisInterface(bouton.dataset.familyId || id);
             }
 
             if (action === "imprimer-certificat") {
