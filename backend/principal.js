@@ -19,8 +19,6 @@ const {
     obtenirSaisons,
     obtenirSaisonActuelle,
     obtenirSaison,
-    creerSaison,
-    definirSaisonActuelle
 } = require("./gestion/saisons");
 
 const {
@@ -298,24 +296,6 @@ function enregistrerHandlersIpc() {
         "obtenir-saison-actuelle",
         () => {
             return obtenirSaisonActuelle();
-        }
-    );
-
-    ipcMain.handle(
-        "creer-saison",
-        (_, anneeDebut) => {
-            return creerSaison(
-                anneeDebut
-            );
-        }
-    );
-
-    ipcMain.handle(
-        "definir-saison-actuelle",
-        (_, idSaison) => {
-            return definirSaisonActuelle(
-                idSaison
-            );
         }
     );
 
