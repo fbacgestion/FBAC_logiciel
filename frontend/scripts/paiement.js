@@ -423,6 +423,10 @@ function convertirInscriptionPaiementBackend(
             ),
         grade:
             inscription.grade,
+        vip:
+            Boolean(
+                inscription.vip
+            ),
         familyGroupId:
             inscription.familyGroupId ||
             null,
