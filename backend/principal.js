@@ -175,24 +175,42 @@ function enregistrerHandlersIpc() {
     ipcMain.handle(
         "supprimer-personne",
         (_, id) => {
-            const nombreInscriptions =
-                supprimerInscriptionsPersonne(
+            const personne =
+                obtenirPersonne(
                     id
                 );
+
+            if (!personne) {
+                throw new Error(
+                    "Personne introuvable."
+                );
+            }
+
+            const inscriptions =
+                obtenirInscriptions().filter(
+                    inscription =>
+                        inscription.personId ===
+                        id
+                );
+
+            if (inscriptions.length > 0) {
+                throw new Error(
+                    "Cette personne possède encore des inscriptions. Supprimez uniquement les inscriptions nécessaires afin de conserver l'historique."
+                );
+            }
 
             const photoSupprimee =
                 supprimerPhoto(
                     id
                 );
 
-            const personne =
-                supprimerPersonne(
-                    id
-                );
+            supprimerPersonne(
+                id
+            );
 
             return {
                 personne,
-                nombreInscriptions,
+                nombreInscriptions: 0,
                 photoSupprimee
             };
         }
