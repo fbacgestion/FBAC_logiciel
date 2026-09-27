@@ -101,6 +101,14 @@ function afficherAdherents() {
             ? "<button type=\"button\" class=\"btn btn-small\" data-action=\"voir-certificat\" data-id=\"" + echapperHtml(inscription.id) + "\">Visualiser</button>"
             : "<span class=\"badge\">Absent</span>";
 
+        const etatCertificat = obtenirEtatCertificat(inscription);
+        const alerteCertificat =
+            etatCertificat === "expire"
+                ? "<span class=\"member-warning-badge\">⚠ Certificat expiré</span>"
+                : etatCertificat === "manquant"
+                    ? "<span class=\"member-warning-badge\">⚠ Certificat manquant</span>"
+                    : "";
+
         const parrainage = Number(inscription.referralDiscountApplied ?? inscription.parrainageAcquis ?? 0);
         const famille = inscription.familyGroupId ? "Oui" : "—";
 
@@ -111,7 +119,9 @@ function afficherAdherents() {
 
         return "<tr>" +
             "<td><strong>" + echapperHtml(`${personne.firstName} ${personne.lastName}`.trim()) + "</strong>" +
-            (inscription.vip ? " <span class=\"badge success\">VIP</span>" : "") + "</td>" +
+            (inscription.vip ? " <span class=\"badge success\">VIP</span>" : "") +
+            alerteCertificat +
+            "</td>" +
             "<td>" + afficherBadgeGrade(inscription.grade || "Blanc") + "</td>" +
             "<td>" + famille + "</td>" +
             "<td>" + afficherBadgePaiement(inscription) + "</td>" +
@@ -190,6 +200,37 @@ function afficherBadgeGrade(
             <span class="grade-name">${echapperHtml(nom)}</span>
         </span>
     `;
+}
+
+function obtenirEtatCertificat(inscription) {
+    const certificat =
+        inscription?.certificat ||
+        inscription?.certificate ||
+        {};
+
+    if (!certificat.date && !certificat.expiry && !certificat.documentId && !certificat.fileName) {
+        return "manquant";
+    }
+
+    const expiration =
+        certificat.expiry ||
+        calculerExpirationCertificat(certificat.date);
+
+    if (!expiration) {
+        return "manquant";
+    }
+
+    const dateExpiration =
+        new Date(expiration + "T23:59:59");
+
+    if (
+        Number.isNaN(dateExpiration.getTime()) ||
+        dateExpiration < new Date()
+    ) {
+        return "expire";
+    }
+
+    return "valide";
 }
 
 function afficherBadgePaiement(
