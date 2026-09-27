@@ -87,6 +87,7 @@ function afficherAdherents() {
         const aides = [
             inscription.aides?.atoutNormandie?.enabled ? "Atout" : "",
             inscription.aides?.passSport?.enabled ? "Pass'Sport" : "",
+            inscription.aides?.kiosk?.enabled ? "Kiosk" : "",
             inscription.aides?.spot50?.enabled ? "Spot50" : ""
         ].filter(Boolean).join(", ") || "—";
 
@@ -1104,6 +1105,19 @@ async function enregistrerAdherentDepuisFormulaire(
                         : 0,
                 montantPaye:
                     montantPaye,
+                paiements:
+                    montantPaye > 0
+                        ? [{
+                            id:
+                                genererIdentifiant("paiement"),
+                            date:
+                                new Date().toISOString().slice(0, 10),
+                            amount:
+                                montantPaye,
+                            method:
+                                paiement
+                        }]
+                        : [],
                 paidAmount:
                     montantPaye,
                 paymentMethod:
@@ -2407,6 +2421,11 @@ function convertirInscriptionPourBackend(
                     inscription.aides
                         ?.passSport
                 ),
+            kiosk:
+                convertirAideBackend(
+                    inscription.aides
+                        ?.kiosk
+                ),
             spot50:
                 convertirAideBackend(
                     inscription.aides
@@ -2423,6 +2442,10 @@ function convertirInscriptionPourBackend(
                 inscription.reductionFamille ??
                 0
             ),
+        paiements:
+            Array.isArray(inscription.paiements)
+                ? inscription.paiements
+                : [],
         paidAmount:
             Number(
                 inscription.paidAmount ??
