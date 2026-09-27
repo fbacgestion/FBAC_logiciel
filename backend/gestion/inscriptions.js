@@ -115,9 +115,20 @@ function creerInscription(donnees) {
                 donnees.familyDiscountAmount || 0
             ),
 
+        paiements:
+            normaliserPaiements(
+                donnees.paiements,
+                donnees.paidAmount,
+                donnees.paymentMethod
+            ),
+
         paidAmount:
-            Number(
-                donnees.paidAmount || 0
+            calculerTotalPaiements(
+                normaliserPaiements(
+                    donnees.paiements,
+                    donnees.paidAmount,
+                    donnees.paymentMethod
+                )
             ),
 
         paymentMethod:
@@ -206,6 +217,12 @@ function modifierInscription(
         donnees.season ??
         inscriptionActuelle.season;
 
+    if (saison !== inscriptionActuelle.season) {
+        throw new Error(
+            "La saison d'une inscription ne peut pas être modifiée."
+        );
+    }
+
     const doublon = inscriptions.find(
         inscription =>
             inscription.id !== id &&
@@ -254,9 +271,25 @@ function modifierInscription(
             nouvelleInscription.familyDiscountAmount || 0
         );
 
+    if (donnees.paiements) {
+        nouvelleInscription.paiements =
+            normaliserPaiements(
+                donnees.paiements,
+                nouvelleInscription.paidAmount,
+                nouvelleInscription.paymentMethod
+            );
+    } else {
+        nouvelleInscription.paiements =
+            normaliserPaiements(
+                nouvelleInscription.paiements,
+                nouvelleInscription.paidAmount,
+                nouvelleInscription.paymentMethod
+            );
+    }
+
     nouvelleInscription.paidAmount =
-        Number(
-            nouvelleInscription.paidAmount || 0
+        calculerTotalPaiements(
+            nouvelleInscription.paiements
         );
 
     inscriptions[index] =
@@ -351,6 +384,9 @@ function normaliserAides(aides) {
         passSport: normaliserAide(
             source.passSport
         ),
+        kiosk: normaliserAide(
+            source.kiosk
+        ),
         spot50: normaliserAide(
             source.spot50
         )
@@ -369,6 +405,46 @@ function normaliserAide(aide) {
         enabled: Boolean(aide.enabled),
         amount: Number(aide.amount || 0)
     };
+}
+
+function normaliserPaiements(
+    paiements,
+    montantLegacy = 0,
+    modeLegacy = ""
+) {
+    if (Array.isArray(paiements)) {
+        return paiements
+            .filter(paiement => paiement && typeof paiement === "object")
+            .map(paiement => ({
+                id: paiement.id || genererId(),
+                date: paiement.date || new Date().toISOString().slice(0, 10),
+                amount: Math.max(0, Number(paiement.amount) || 0),
+                method: paiement.method || paiement.paymentMethod || ""
+            }))
+            .filter(paiement => paiement.amount > 0);
+    }
+
+    const montant = Math.max(0, Number(montantLegacy) || 0);
+
+    if (!montant) {
+        return [];
+    }
+
+    return [{
+        id: genererId(),
+        date: new Date().toISOString().slice(0, 10),
+        amount: montant,
+        method: modeLegacy || ""
+    }];
+}
+
+function calculerTotalPaiements(paiements) {
+    return (Array.isArray(paiements) ? paiements : [])
+        .reduce(
+            (total, paiement) =>
+                total + (Number(paiement.amount) || 0),
+            0
+        );
 }
 
 function normaliserCertificat(
