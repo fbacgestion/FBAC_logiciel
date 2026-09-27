@@ -631,6 +631,44 @@
     </div>
 </div>
 
+<div class="modal-backdrop" id="paymentModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div>
+                <h2>Modifier le paiement</h2>
+                <span>Enregistrez le montant réellement encaissé.</span>
+            </div>
+            <button class="close" data-close-modal="paymentModal">×</button>
+        </div>
+        <form id="paymentForm">
+            <div class="modal-body">
+                <input type="hidden" id="paymentEnrollmentId">
+                <div class="readonly-box" id="paymentSummary"></div>
+                <div style="height:15px"></div>
+                <div class="field">
+                    <label>Montant payé</label>
+                    <input type="number" id="paymentAmount" min="0" step="0.01" required>
+                </div>
+                <div class="field">
+                    <label>Mode de paiement</label>
+                    <select id="paymentMethod">
+                        <option value="">Non renseigné</option>
+                        <option value="Espèces">Espèces</option>
+                        <option value="Chèque">Chèque</option>
+                        <option value="Virement">Virement</option>
+                        <option value="Carte">Carte</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" data-close-modal="paymentModal">Annuler</button>
+                <button type="submit" class="btn btn-primary">Enregistrer le paiement</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="modal-backdrop" id="seasonModal">
     <div class="modal">
         <div class="modal-header">
