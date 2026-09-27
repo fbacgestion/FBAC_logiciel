@@ -1074,14 +1074,19 @@ async function enregistrerAdherentDepuisFormulaire(
                 }
             };
 
+            const backend =
+                await window.fbac.creerInscription(
+                    convertirInscriptionPourBackend(
+                        inscription
+                    )
+                );
+
+            inscription.id =
+                backend?.id ||
+                inscription.id;
+
             state.inscriptions.push(
                 inscription
-            );
-
-            await window.fbac.creerInscription(
-                convertirInscriptionPourBackend(
-                    inscription
-                )
             );
         } else {
             inscription.personneId =
