@@ -41,3 +41,41 @@ function initialiserInterfaceSauvegardes() {
         bouton.dataset.initialise = "true";
     }
 }
+
+function initialiserRestaurationInterface() {
+    const bouton =
+        document.querySelector(
+            '[data-action="restore-data"]'
+        );
+
+    if (bouton && !bouton.dataset.initialise) {
+        bouton.addEventListener(
+            "click",
+            async () => {
+                const resultat =
+                    await lancerRestaurationDonnees();
+
+                notificationSucces(
+                    "Sauvegarde restaurée."
+                );
+
+                return resultat;
+            }
+        );
+
+        bouton.dataset.initialise = "true";
+    }
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener(
+        "DOMContentLoaded",
+        () => {
+            initialiserInterfaceSauvegardes();
+            initialiserRestaurationInterface();
+        }
+    );
+} else {
+    initialiserInterfaceSauvegardes();
+    initialiserRestaurationInterface();
+}
