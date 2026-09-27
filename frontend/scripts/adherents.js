@@ -1805,7 +1805,6 @@ async function confirmerReinscription() {
             ancienne.grade ||
             "Blanc",
         familyGroupId:
-            ancienne.familyGroupId ||
             null,
         referrerId:
             null,
@@ -2293,14 +2292,15 @@ function mettreAJourResumeAdherent() {
         );
 }
 
-function obtenirFamille(familleId) {
+function obtenirFamille(familleId, saisonId = state.configuration.saisonActiveId) {
     if (!familleId) {
         return null;
     }
 
     return state.familles?.find(
         famille =>
-            famille.id === familleId
+            famille.id === familleId &&
+            (!saisonId || famille.saisonId === saisonId)
     ) || null;
 }
 
@@ -2344,7 +2344,10 @@ function genererAffichageFamille(inscription) {
     }
 
     const famille =
-        obtenirFamille(inscription.familyGroupId);
+        obtenirFamille(
+            inscription.familyGroupId,
+            inscription.saisonId
+        );
 
     const membres =
         obtenirMembresFamille(
@@ -2374,9 +2377,12 @@ function remplirSelectFamille(familleId) {
         return;
     }
 
+    const saisonId = state.configuration.saisonActiveId;
+
     const familles =
         Array.isArray(state.familles)
             ? [...state.familles]
+                .filter(famille => famille.saisonId === saisonId)
                 .sort((a, b) =>
                     String(a.nom).localeCompare(
                         String(b.nom),
@@ -2441,8 +2447,18 @@ async function creerNouvelleFamilleDepuisFormulaire() {
     }
 
     try {
+        const saisonId = state.configuration.saisonActiveId;
+
+        if (!saisonId) {
+            notificationErreur("Aucune saison active n'est disponible.");
+            return;
+        }
+
         const famille =
-            await window.fbac.creerFamille({ nom });
+            await window.fbac.creerFamille({
+                nom,
+                saisonId
+            });
 
         state.familles =
             Array.isArray(state.familles)
@@ -2483,8 +2499,9 @@ function ouvrirCreationFamille() {
 }
 
 function afficherFamille(familleId) {
+    const saisonId = ui.selectedSeason || state.configuration.saisonActiveId;
     const famille =
-        obtenirFamille(familleId);
+        obtenirFamille(familleId, saisonId);
 
     if (!famille) {
         notificationErreur("Famille introuvable.");
@@ -2494,7 +2511,7 @@ function afficherFamille(familleId) {
     const membres =
         obtenirMembresFamille(
             familleId,
-            state.configuration.saisonActiveId
+            saisonId
         );
 
     const contenu =
@@ -2524,7 +2541,7 @@ function afficherFamille(familleId) {
                 ).join("")
                 : `
                     <div class="empty-state">
-                        Aucun membre dans cette famille pour la saison active.
+                        Aucun membre dans cette famille pour la saison sélectionnée.
                     </div>
                 `;
     }
@@ -2532,23 +2549,38 @@ function afficherFamille(familleId) {
     const supprimer = document.getElementById("deleteFamilyButton");
     if (supprimer) {
         supprimer.dataset.familyId = familleId;
-        supprimer.disabled = state.inscriptions.some(inscription => inscription.familyGroupId === familleId);
-        supprimer.title = supprimer.disabled
-            ? "Impossible de supprimer une famille contenant des adhérents."
-            : "Supprimer cette famille";
+        supprimer.disabled =
+            famille.saisonId !== state.configuration.saisonActiveId ||
+            state.inscriptions.some(inscription =>
+                inscription.familyGroupId === familleId &&
+                inscription.saisonId === famille.saisonId
+            );
+        supprimer.title = famille.saisonId !== state.configuration.saisonActiveId
+            ? "Les familles historiques ne peuvent pas être supprimées."
+            : supprimer.disabled
+                ? "Impossible de supprimer une famille contenant des adhérents."
+                : "Supprimer cette famille";
     }
 
     ouvrirModalParId("familyViewerModal");
 }
 
 async function supprimerFamilleDepuisInterface(familleId) {
-    const famille = obtenirFamille(familleId);
+    const famille = obtenirFamille(familleId, state.configuration.saisonActiveId);
     if (!famille) {
         notificationErreur("Famille introuvable.");
         return;
     }
 
-    if (state.inscriptions.some(inscription => inscription.familyGroupId === familleId)) {
+    if (famille.saisonId !== state.configuration.saisonActiveId) {
+        notificationErreur("Une famille historique ne peut pas être supprimée.");
+        return;
+    }
+
+    if (state.inscriptions.some(inscription =>
+        inscription.familyGroupId === familleId &&
+        inscription.saisonId === famille.saisonId
+    )) {
         notificationErreur("Cette famille contient encore des adhérents. Retirez d'abord les adhérents de cette famille avant de la supprimer.");
         return;
     }
