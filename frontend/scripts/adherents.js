@@ -634,6 +634,43 @@ const GRADES = [
     "Noire"
 ];
 
+function afficherApercuGrade(grade) {
+    const apercu =
+        document.getElementById(
+            "memberGradePreview"
+        );
+
+    if (!apercu) {
+        return;
+    }
+
+    const nom =
+        grade || "Blanc";
+
+    const classes = {
+        "Blanc": "grade-white",
+        "Blanc-Jaune": "grade-white-yellow",
+        "Jaune": "grade-yellow",
+        "Jaune-Orange": "grade-yellow-orange",
+        "Orange": "grade-orange",
+        "Orange-Vert": "grade-orange-green",
+        "Vert": "grade-green",
+        "Vert-Bleu": "grade-green-blue",
+        "Bleu": "grade-blue",
+        "Bleu-Marron": "grade-blue-brown",
+        "Marron": "grade-brown",
+        "Noire": "grade-black"
+    };
+
+    apercu.innerHTML = `
+        <span class="grade-badge large ${classes[nom] || "grade-white"}">
+            <span class="grade-belt"></span>
+            <span class="grade-name">${echapperHtml(nom)}</span>
+        </span>
+        <span class="grade-preview-text">Niveau actuel</span>
+    `;
+}
+
 function remplirSelectGrade(valeur = "Blanc") {
     const select = document.getElementById("memberGrade");
     if (!select) {
@@ -649,6 +686,8 @@ function remplirSelectGrade(valeur = "Blanc") {
     select.value = GRADES.includes(valeurActuelle)
         ? valeurActuelle
         : "Blanc";
+
+    afficherApercuGrade(select.value);
 }
 
 function reinitialiserFormulaireAdherent() {
@@ -3307,6 +3346,7 @@ function initialiserEvenementsAdherents() {
     [
         "memberBirthDate",
         "memberFrequency",
+        "memberGrade",
         "memberVip",
         "aidAtoutEnabled",
         "aidAtoutAmount",
