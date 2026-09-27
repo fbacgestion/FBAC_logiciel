@@ -86,71 +86,17 @@ function afficherSaisons() {
                         </div>
                     </div>
                     <div class="season-card-actions">
-                        <button
-                            class="button button-small"
-                            data-action="selectionner-saison"
-                            data-id="${echapperHtml(saison.id)}"
-                        >
+                        <span class="season-card-status">
                             ${
                                 active
-                                    ? "Saison active"
-                                    : "Sélectionner"
+                                    ? "Saison active automatiquement"
+                                    : "Saison historique"
                             }
-                        </button>
+                        </span>
                     </div>
                 </div>
             `;
         }).join("");
-}
-
-async function selectionnerSaison(saisonId) {
-    if (!state || !saisonId) {
-        return;
-    }
-
-    const saison =
-        state.saisons.find(
-            saison => saison.id === saisonId
-        );
-
-    if (!saison) {
-        return;
-    }
-
-    try {
-        if (
-            typeof window.fbac === "undefined" ||
-            typeof window.fbac.definirSaisonActuelle !== "function"
-        ) {
-            throw new Error(
-                "Le pont Electron de gestion des saisons est indisponible."
-            );
-        }
-
-        await window.fbac.definirSaisonActuelle(
-            saison.id
-        );
-
-        state.configuration.saisonActiveId =
-            saison.id;
-
-        mettreAJourSelecteurSaison();
-
-        renderCurrentPage();
-
-        notificationSucces(
-            `Saison ${saison.nom} sélectionnée.`
-        );
-    } catch (error) {
-        console.error(
-            "Erreur lors de la sélection de la saison :",
-            error
-        );
-
-        notificationErreur(
-            "Impossible de sélectionner cette saison."
-        );
-    }
 }
 
 async function creerNouvelleSaison(nom) {
@@ -217,14 +163,6 @@ async function creerNouvelleSaison(nom) {
             saisonNormalisee
         );
 
-        await window.fbac.definirSaisonActuelle(
-            saisonNormalisee.id
-        );
-
-        state.configuration.saisonActiveId =
-            saisonNormalisee.id;
-
-        mettreAJourSelecteurSaison();
         afficherSaisons();
 
         notificationSucces(
@@ -247,28 +185,3 @@ async function creerNouvelleSaison(nom) {
     }
 }
 
-document.addEventListener("change", event => {
-    if (
-        event.target.id ===
-        "selecteur-saison"
-    ) {
-        selectionnerSaison(
-            event.target.value
-        );
-    }
-});
-
-document.addEventListener("click", event => {
-    const bouton =
-        event.target.closest(
-            '[data-action="selectionner-saison"]'
-        );
-
-    if (!bouton) {
-        return;
-    }
-
-    selectionnerSaison(
-        bouton.dataset.id
-    );
-});
