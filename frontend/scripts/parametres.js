@@ -75,7 +75,8 @@ async function enregistrerParametres() {
         return;
     }
 
-
+    const configuration = {
+        ...(state.configuration || {}),
         tarifs: {
             child1:
                 Number(
@@ -96,7 +97,6 @@ async function enregistrerParametres() {
                     ) || 0
                 )
         },
-
         aides: {
             atout:
                 Number(
@@ -117,7 +117,6 @@ async function enregistrerParametres() {
                     ) || 0
                 )
         },
-
         reductionFamille:
             Number(
                 obtenirValeur(
@@ -126,15 +125,13 @@ async function enregistrerParametres() {
             )
     };
 
-    configuration.prices =
-        {
-            ...configuration.tarifs
-        };
+    configuration.prices = {
+        ...configuration.tarifs
+    };
 
-    configuration.aidDefaults =
-        {
-            ...configuration.aides
-        };
+    configuration.aidDefaults = {
+        ...configuration.aides
+    };
 
     configuration.familyDiscount =
         configuration.reductionFamille;
