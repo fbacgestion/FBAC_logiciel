@@ -143,6 +143,10 @@ contextBridge.exposeInMainWorld(
             return ipcRenderer.invoke("modifier-famille", id, donnees);
         },
 
+        supprimerFamille: id => {
+            return ipcRenderer.invoke("supprimer-famille", id);
+        },
+
         obtenirSaisons: () => {
             return ipcRenderer.invoke(
                 "obtenir-saisons"
