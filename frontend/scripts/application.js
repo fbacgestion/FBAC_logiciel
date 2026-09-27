@@ -320,6 +320,11 @@ function normaliserPersonne(
             personne.nom ||
             "",
 
+        birthDate:
+            personne.birthDate ||
+            personne.dateNaissance ||
+            "",
+
         photo:
             personne.photo ||
             null
@@ -931,6 +936,10 @@ function convertirPersonneBackend(
         lastName:
             personne.lastName ||
             personne.nom ||
+            "",
+
+        birthDate:
+            personne.birthDate ||
             "",
 
         photo:
