@@ -2584,16 +2584,11 @@ function afficherFamille(familleId) {
     if (supprimer) {
         supprimer.dataset.familyId = familleId;
         supprimer.disabled =
-            famille.saisonId !== state.configuration.saisonActiveId ||
-            state.inscriptions.some(inscription =>
-                inscription.familyGroupId === familleId &&
-                inscription.saisonId === famille.saisonId
-            );
-        supprimer.title = famille.saisonId !== state.configuration.saisonActiveId
-            ? "Les familles historiques ne peuvent pas être supprimées."
-            : supprimer.disabled
-                ? "Impossible de supprimer une famille contenant des adhérents."
-                : "Supprimer cette famille";
+            famille.saisonId !== state.configuration.saisonActiveId;
+        supprimer.title =
+            famille.saisonId !== state.configuration.saisonActiveId
+                ? "Les familles historiques ne peuvent pas être supprimées."
+                : "Supprimer cette famille et retirer son rattachement aux adhérents";
     }
 
     ouvrirModalParId("familyViewerModal");
