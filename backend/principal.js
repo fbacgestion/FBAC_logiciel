@@ -302,13 +302,8 @@ function enregistrerHandlersIpc() {
     ipcMain.handle(
         "creer-saison",
         (_, anneeDebut) => {
-            const saison = require("./gestion/saisons")
+            return require("./gestion/saisons")
                 .creerSaison(anneeDebut);
-
-            require("./gestion/saisons")
-                .definirSaisonActuelle(saison.id);
-
-            return saison;
         }
     );
 
