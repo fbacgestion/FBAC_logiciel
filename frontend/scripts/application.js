@@ -286,18 +286,40 @@ function normaliserSaison(
         };
     }
 
+    const nom =
+        saison.nom ||
+        saison.id ||
+        "";
+
+    const correspondance =
+        String(
+            nom
+        ).match(
+            /^(\d{4})-(\d{4})$/
+        );
+
     return {
         ...saison,
 
         id:
             saison.id ||
-            saison.nom ||
-            "",
+            nom,
 
-        nom:
-            saison.nom ||
-            saison.id ||
-            ""
+        nom,
+
+        anneeDebut:
+            Number(
+                saison.anneeDebut ??
+                correspondance?.[1] ??
+                0
+            ),
+
+        anneeFin:
+            Number(
+                saison.anneeFin ??
+                correspondance?.[2] ??
+                0
+            )
     };
 }
 
