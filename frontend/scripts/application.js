@@ -1042,6 +1042,10 @@ function convertirInscriptionBackend(
                 0
             ),
 
+        paiements:
+            Array.isArray(inscription.paiements)
+                ? inscription.paiements
+                : [],
         paidAmount:
             Number(
                 inscription.paidAmount ??
