@@ -5,9 +5,9 @@
     "main": "backend/principal.js",
     "scripts": {
         "start": "electron .",
-        "dist": "electron-builder",
-        "dist:dir": "electron-builder --dir",
-        "dist:win": "electron-builder --win nsis"
+        "build": "electron-builder",
+        "build:dir": "electron-builder --dir",
+        "build:win": "electron-builder --win nsis"
     },
     "author": "FBAC",
     "license": "UNLICENSED",
