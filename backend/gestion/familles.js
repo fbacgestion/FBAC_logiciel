@@ -8,7 +8,8 @@ function genererIdFamille() {
 function normaliserFamille(famille) {
     return {
         id: famille?.id || genererIdFamille(),
-        nom: String(famille?.nom || "").trim()
+        nom: String(famille?.nom || "").trim(),
+        saisonId: famille?.saisonId || null
     };
 }
 
@@ -23,36 +24,103 @@ function enregistrerFamilles(familles) {
 
 function initialiserFamilles() {
     let familles = obtenirFamilles();
-    const inscriptions = lireJson("inscriptions.json");
-    const groupesExistants = new Set(familles.map(famille => famille.id));
+    let inscriptions = lireJson("inscriptions.json");
+    const groupesExistants = new Map(familles.map(famille => [famille.id, famille]));
+    const famillesFinales = [];
+    const correspondances = new Map();
 
-    if (Array.isArray(inscriptions)) {
-        for (const inscription of inscriptions) {
-            const groupe = inscription?.familyGroupId;
-            if (!groupe || groupesExistants.has(groupe)) {
-                continue;
-            }
-            familles.push({
-                id: groupe,
-                nom: String(groupe)
-            });
-            groupesExistants.add(groupe);
+    for (const famille of familles) {
+        if (famille.saisonId) {
+            famillesFinales.push(famille);
+            correspondances.set(`${famille.id}::${famille.saisonId}`, famille.id);
         }
     }
 
-    enregistrerFamilles(familles);
+    if (Array.isArray(inscriptions)) {
+        const groupesLegacy = new Set(
+            inscriptions
+                .map(inscription => inscription?.familyGroupId)
+                .filter(Boolean)
+        );
+
+        for (const groupeId of groupesLegacy) {
+            const familleExistante = groupesExistants.get(groupeId);
+            const saisons = [
+                ...new Set(
+                    inscriptions
+                        .filter(inscription => inscription?.familyGroupId === groupeId)
+                        .map(inscription => inscription?.saisonId)
+                        .filter(Boolean)
+                )
+            ];
+
+            if (!saisons.length) {
+                continue;
+            }
+
+            for (let index = 0; index < saisons.length; index += 1) {
+                const saisonId = saisons[index];
+                const cle = `${groupeId}::${saisonId}`;
+                let familleId = correspondances.get(cle);
+
+                if (!familleId) {
+                    if (index === 0 && familleExistante && !familleExistante.saisonId) {
+                        familleExistante.saisonId = saisonId;
+                        familleId = familleExistante.id;
+                    } else {
+                        familleId = genererIdFamille();
+                        famillesFinales.push({
+                            id: familleId,
+                            nom: familleExistante?.nom || String(groupeId),
+                            saisonId
+                        });
+                    }
+
+                    correspondances.set(cle, familleId);
+                }
+
+                for (const inscription of inscriptions) {
+                    if (
+                        inscription?.familyGroupId === groupeId &&
+                        inscription?.saisonId === saisonId
+                    ) {
+                        inscription.familyGroupId = familleId;
+                    }
+                }
+            }
+        }
+    }
+
+    for (const famille of familles) {
+        if (famille.saisonId && !famillesFinales.some(element => element.id === famille.id)) {
+            famillesFinales.push(famille);
+        }
+    }
+
+    enregistrerFamilles(famillesFinales);
+
+    if (Array.isArray(inscriptions)) {
+        ecrireJson("inscriptions.json", inscriptions);
+    }
 }
 
 function creerFamille(donnees) {
     const nom = String(donnees?.nom || "").trim();
+    const saisonId = String(donnees?.saisonId || "").trim();
+
     if (!nom) {
         throw new Error("Le nom de la famille est obligatoire.");
+    }
+
+    if (!saisonId) {
+        throw new Error("La saison de la famille est obligatoire.");
     }
 
     const familles = obtenirFamilles();
     const famille = {
         id: genererIdFamille(),
-        nom
+        nom,
+        saisonId
     };
 
     familles.push(famille);
@@ -63,31 +131,38 @@ function creerFamille(donnees) {
 function supprimerFamille(id) {
     const familles = obtenirFamilles();
     const index = familles.findIndex(famille => famille.id === id);
+
     if (index === -1) {
         throw new Error("Famille introuvable.");
     }
 
+    const famille = familles[index];
     const inscriptions = lireJson("inscriptions.json");
     const utilisee = Array.isArray(inscriptions) &&
-        inscriptions.some(inscription => inscription?.familyGroupId === id);
+        inscriptions.some(inscription => (
+            inscription?.familyGroupId === id &&
+            inscription?.saisonId === famille.saisonId
+        ));
 
     if (utilisee) {
         throw new Error("Cette famille contient encore des adhérents. Retirez d'abord les adhérents de cette famille avant de la supprimer.");
     }
 
-    const [famille] = familles.splice(index, 1);
+    const [supprimee] = familles.splice(index, 1);
     enregistrerFamilles(familles);
-    return famille;
+    return supprimee;
 }
 
 function modifierFamille(id, donnees) {
     const familles = obtenirFamilles();
     const index = familles.findIndex(famille => famille.id === id);
+
     if (index === -1) {
         throw new Error("Famille introuvable.");
     }
 
     const nom = String(donnees?.nom || "").trim();
+
     if (!nom) {
         throw new Error("Le nom de la famille est obligatoire.");
     }
