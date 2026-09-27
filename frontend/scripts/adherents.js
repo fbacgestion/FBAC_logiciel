@@ -119,7 +119,7 @@ function afficherAdherents() {
 
         return "<tr>" +
             "<td><strong>" + echapperHtml(`${personne.firstName} ${personne.lastName}`.trim()) + "</strong>" +
-            (inscription.vip ? " <span class=\"badge success\">VIP</span>" : "") +
+            (inscription.vip ? " <span class=\"badge vip\">VIP</span>" : "") +
             alerteCertificat +
             "</td>" +
             "<td>" + afficherBadgeGrade(inscription.grade || "Blanc") + "</td>" +
