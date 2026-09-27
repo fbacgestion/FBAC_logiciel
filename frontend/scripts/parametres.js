@@ -254,6 +254,24 @@ function changerSaisonDepuisParametres(
         return;
     }
 
+    const derniereSaison =
+        [...state.saisons].sort(
+            (a, b) =>
+                Number(b.anneeDebut) -
+                Number(a.anneeDebut)
+        )[0];
+
+    if (
+        derniereSaison &&
+        derniereSaison.id !== saison.id
+    ) {
+        notificationAvertissement(
+            "Une saison historique ne peut pas devenir la saison active."
+        );
+        remplirSelecteurSaisonsParametres();
+        return;
+    }
+
     state.configuration.saisonActiveId =
         saison.id;
 
