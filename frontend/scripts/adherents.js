@@ -224,6 +224,7 @@ function ouvrirNouvelAdherent() {
     }
 
     reinitialiserFormulaireAdherent();
+    remplirSelectGrade("Blanc");
 
     const titre =
         document.getElementById(
@@ -347,10 +348,7 @@ function ouvrirModificationAdherent(
         inscription.frequency
     );
 
-    definirValeur(
-        "memberGrade",
-        inscription.grade
-    );
+    remplirSelectGrade(inscription.grade || "Blanc");
 
     remplirSelectFamille(
         inscription.familyGroupId
@@ -514,6 +512,38 @@ function ouvrirModificationAdherent(
     ouvrirModalAdherent();
 
     mettreAJourResumeAdherent();
+}
+
+const GRADES = [
+    "Blanc",
+    "Blanc-Jaune",
+    "Jaune",
+    "Jaune-Orange",
+    "Orange",
+    "Orange-Vert",
+    "Vert",
+    "Vert-Bleu",
+    "Bleu",
+    "Bleu-Marron",
+    "Marron",
+    "Noire"
+];
+
+function remplirSelectGrade(valeur = "Blanc") {
+    const select = document.getElementById("memberGrade");
+    if (!select) {
+        return;
+    }
+
+    const valeurActuelle = valeur || select.value || "Blanc";
+
+    select.innerHTML = GRADES
+        .map(grade => `<option value="${echapperHtml(grade)}">${echapperHtml(grade)}</option>`)
+        .join("");
+
+    select.value = GRADES.includes(valeurActuelle)
+        ? valeurActuelle
+        : "Blanc";
 }
 
 function reinitialiserFormulaireAdherent() {
@@ -2669,6 +2699,8 @@ function gererChangementCertificat(
 }
 
 function initialiserEvenementsAdherents() {
+    remplirSelectGrade("Blanc");
+
     const formulaire =
         document.getElementById(
             "memberForm"
