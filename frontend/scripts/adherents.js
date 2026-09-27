@@ -1200,6 +1200,13 @@ async function enregistrerPhotoDepuisFormulaire(
         resultat.fileName ||
         personne.photo ||
         null;
+
+    await window.fbac.modifierPersonne(
+        personne.id,
+        convertirPersonnePourBackend(
+            personne
+        )
+    );
 }
 
 async function enregistrerCertificatDepuisFormulaire(
