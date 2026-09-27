@@ -67,7 +67,12 @@ function afficherAdherents() {
     const texteSaison = document.getElementById("membersSeasonText");
 
     if (texteSaison) {
-        texteSaison.textContent = saison ? `Inscriptions de la saison ${saison.nom}` : "";
+        texteSaison.textContent =
+            saison
+                ? ui.selectedSeason === saisonCourante
+                    ? `Inscriptions de la saison ${saison.nom}`
+                    : `⚠ Consultation de la saison historique ${saison.nom} — lecture seule`
+                : "";
     }
 
     const verrou = document.getElementById("membersLockText");
