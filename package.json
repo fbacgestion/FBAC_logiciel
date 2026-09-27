@@ -1,14 +1,54 @@
 {
-  "name": "fbac_logiciel",
-  "version": "1.0.0",
-  "description": "Logiciel de gestion du Full Boxe Américaine Club",
-  "main": "backend/principal.js",
-  "scripts": {
-    "start": "electron ."
-  },
-  "author": "FBAC",
-  "license": "UNLICENSED",
-  "devDependencies": {
-    "electron": "^38.2.0"
-  }
+    "name": "fbac_logiciel",
+    "version": "1.0.0",
+    "description": "Logiciel de gestion du Full Boxe Américaine Club",
+    "main": "backend/principal.js",
+    "scripts": {
+        "start": "electron .",
+        "dist": "electron-builder",
+        "dist:dir": "electron-builder --dir",
+        "dist:win": "electron-builder --win nsis"
+    },
+    "author": "FBAC",
+    "license": "UNLICENSED",
+    "devDependencies": {
+        "electron": "^38.2.0",
+        "electron-builder": "^26.0.12"
+    },
+    "build": {
+        "appId": "fr.fullboxeamericaineclub.gestion",
+        "productName": "FBAC Gestion",
+        "artifactName": "FBAC-Gestion-${version}-${arch}.${ext}",
+        "directories": {
+            "output": "dist",
+            "buildResources": "build"
+        },
+        "files": [
+            "frontend/**/*",
+            "backend/**/*",
+            "package.json"
+        ],
+        "extraMetadata": {
+            "main": "backend/principal.js"
+        },
+        "win": {
+            "target": [
+                {
+                    "target": "nsis",
+                    "arch": [
+                        "x64"
+                    ]
+                }
+            ],
+            "executableName": "FBAC-Gestion"
+        },
+        "nsis": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true,
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true,
+            "shortcutName": "FBAC Gestion",
+            "uninstallDisplayName": "FBAC Gestion"
+        }
+    }
 }
