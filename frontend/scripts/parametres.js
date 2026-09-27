@@ -65,6 +65,47 @@ function afficherParametres() {
         configuration.familyDiscount ??
         20
     );
+
+    const parrainage =
+        configuration.parrainage || {};
+
+    const montantParrainage =
+        Number(
+            parrainage.montantParFilleul ??
+            parrainage.montant ??
+            20
+        );
+
+    definirValeur(
+        "referralAmount",
+        montantParrainage
+    );
+
+    mettreAJourAffichageParrainage(
+        montantParrainage
+    );
+}
+
+function mettreAJourAffichageParrainage(
+    montant
+) {
+    const valeur =
+        Number(montant) || 0;
+
+    definirValeur(
+        "referralAmount1",
+        `-${valeur.toFixed(2)} €`
+    );
+
+    definirValeur(
+        "referralAmount2",
+        `-${(valeur * 2).toFixed(2)} €`
+    );
+
+    definirValeur(
+        "referralAmount3",
+        `-${(valeur * 3).toFixed(2)} €`
+    );
 }
 
 async function enregistrerParametres() {
@@ -125,7 +166,16 @@ async function enregistrerParametres() {
                 obtenirValeur(
                     "familyDiscount"
                 ) || 0
-            )
+            ),
+        parrainage: {
+            montantParFilleul:
+                Number(
+                    obtenirValeur(
+                        "referralAmount"
+                    ) || 0
+                ),
+            plafond: 3
+        }
     };
 
     configuration.prices = {
@@ -138,6 +188,17 @@ async function enregistrerParametres() {
 
     configuration.familyDiscount =
         configuration.reductionFamille;
+
+    configuration.parrainage = {
+        ...(configuration.parrainage || {}),
+        montantParFilleul:
+            configuration.parrainage.montantParFilleul,
+        plafond: 3
+    };
+
+    mettreAJourAffichageParrainage(
+        configuration.parrainage.montantParFilleul
+    );
 
     try {
         await window.fbac.enregistrerConfiguration(
@@ -166,6 +227,27 @@ async function enregistrerParametres() {
 }
 
 function initialiserParametres() {
+    const champParrainage =
+        document.getElementById(
+            "referralAmount"
+        );
+
+    if (
+        champParrainage &&
+        !champParrainage.dataset.initialise
+    ) {
+        champParrainage.addEventListener(
+            "input",
+            () =>
+                mettreAJourAffichageParrainage(
+                    champParrainage.value
+                )
+        );
+
+        champParrainage.dataset.initialise =
+            "true";
+    }
+
     const bouton =
         document.querySelector(
             '[data-action="enregistrer-parametres"]'
