@@ -126,6 +126,30 @@ function definirSaisonActuelle(idSaison) {
         );
     }
 
+    const saisons =
+        obtenirSaisons();
+
+    const derniereSaison =
+        saisons
+            .slice()
+            .sort(
+                (a, b) =>
+                    Number(b.anneeDebut) -
+                    Number(a.anneeDebut)
+            )[0];
+
+    if (
+        derniereSaison &&
+        obtenirIdentifiantSaison(
+            derniereSaison
+        ) !==
+        obtenirIdentifiantSaison(saison)
+    ) {
+        throw new Error(
+            "Une saison historique ne peut pas devenir la saison active."
+        );
+    }
+
     const configuration =
         lireJson(FICHIER_CONFIGURATION) || {};
 
