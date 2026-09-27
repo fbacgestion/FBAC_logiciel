@@ -217,6 +217,15 @@ contextBridge.exposeInMainWorld(
             );
         },
 
+        imprimerCertificat: (
+            inscriptionId
+        ) => {
+            return ipcRenderer.invoke(
+                "imprimer-certificat",
+                inscriptionId
+            );
+        },
+
         supprimerCertificat: (
             inscriptionId
         ) => {
