@@ -2452,7 +2452,9 @@ function remplirSelectFamille(familleId) {
 
 async function creerNouvelleFamilleDepuisFormulaire() {
     const nomInput =
-        document.getElementById("newFamilyName");
+        document.getElementById(
+            "newFamilyName"
+        );
 
     const nom =
         nomInput?.value?.trim() || "";
@@ -2463,7 +2465,8 @@ async function creerNouvelleFamilleDepuisFormulaire() {
     }
 
     try {
-        const saisonId = state.configuration.saisonActiveId;
+        const saisonId =
+            state.configuration.saisonActiveId;
 
         if (!saisonId) {
             notificationErreur("Aucune saison active n'est disponible.");
@@ -2481,24 +2484,30 @@ async function creerNouvelleFamilleDepuisFormulaire() {
                 ? [...state.familles, famille]
                 : [famille];
 
-        remplirSelectFamille(famille.id);
-        mettreAJourResumeAdherent();
         fermerModalParId("familyCreateModal");
 
         if (nomInput) {
             nomInput.value = "";
         }
 
-        notificationSucces(`La famille « ${famille.nom} » a été créée.`);
+        remplirSelectFamille(famille.id);
+        mettreAJourResumeAdherent();
+
+        notificationSucces(
+            `La famille « ${famille.nom} » a été créée.`
+        );
     } catch (error) {
-        console.error("Erreur lors de la création de la famille :", error);
+        console.error(
+            "Erreur lors de la création de la famille :",
+            error
+        );
+
         notificationErreur(
             error?.message ||
             "Impossible de créer la famille."
         );
     }
 }
-
 function ouvrirCreationFamille() {
     const saisonActiveId = state.configuration.saisonActiveId;
     const inscriptionId = document.getElementById("memberEnrollmentId")?.value;
