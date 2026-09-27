@@ -85,6 +85,12 @@ function obtenirMontantAide(
 function calculerMontantAPayer(
     inscription
 ) {
+    if (
+        inscription.vip
+    ) {
+        return 0;
+    }
+
     const tarif =
         Number(
             inscription.tarif
