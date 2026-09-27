@@ -63,6 +63,9 @@ function initialiserRestaurationInterface() {
                 const resultat =
                     await lancerRestaurationDonnees();
 
+                await chargerDonnees();
+                renderCurrentPage();
+
                 notificationSucces(
                     "Sauvegarde restaurée."
                 );
