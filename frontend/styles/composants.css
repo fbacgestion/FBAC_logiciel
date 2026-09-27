@@ -265,6 +265,15 @@ tr:hover td{
     background:#24272d;
 }
 
+.badge.vip{
+    color:#f7d774;
+    background:linear-gradient(135deg,rgba(212,175,55,.22),rgba(255,215,119,.08));
+    border:1px solid rgba(212,175,55,.5);
+    box-shadow:0 0 8px rgba(212,175,55,.12),inset 0 1px rgba(255,255,255,.12);
+    font-weight:700;
+    letter-spacing:.3px;
+}
+
 .actions-cell{
     display:flex;
     gap:5px;
