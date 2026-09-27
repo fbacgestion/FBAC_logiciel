@@ -369,6 +369,11 @@ function normaliserInscription(
             inscription.grade ||
             "Blanc",
 
+        vip:
+            Boolean(
+                inscription.vip
+            ),
+
         familyGroupId:
             inscription.familyGroupId ||
             null,
@@ -961,6 +966,11 @@ function convertirInscriptionBackend(
         grade:
             inscription.grade ||
             "Blanc",
+
+        vip:
+            Boolean(
+                inscription.vip
+            ),
 
         familyGroupId:
             inscription.familyGroupId ||
