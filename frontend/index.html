@@ -304,21 +304,25 @@
 
                     <div class="setting-card">
                         <h3>Parrainage</h3>
+                        <div class="field">
+                            <label>Montant par parrainage</label>
+                            <input type="number" id="referralAmount" min="0" step="1">
+                        </div>
                         <div class="readonly-box">
                             <div class="summary-line">
                                 <span>1 parrainage</span>
-                                <strong>-20 €</strong>
+                                <strong id="referralAmount1">-20 €</strong>
                             </div>
                             <div class="summary-line">
                                 <span>2 parrainages</span>
-                                <strong>-40 €</strong>
+                                <strong id="referralAmount2">-40 €</strong>
                             </div>
                             <div class="summary-line">
                                 <span>3 parrainages</span>
-                                <strong>-60 €</strong>
+                                <strong id="referralAmount3">-60 €</strong>
                             </div>
                         </div>
-                        <p>L'avantage est acquis pour la saison suivante et n'est jamais déduit de la saison pendant laquelle le parrainage est réalisé.</p>
+                        <p>Lors de la création d'une inscription, vous pouvez sélectionner de 0 à 3 parrainages acquis. Le montant choisi est déduit de la cotisation.</p>
                     </div>
 
                 </div>
@@ -415,9 +419,14 @@
                     </div>
 
                     <div class="field">
-                        <label>Avantage de parrainage appliqué cette saison</label>
-                        <input type="text" id="memberReferralDiscountDisplay" disabled>
-                        <small>Calculé depuis les parrainages de la saison précédente.</small>
+                        <label>Parrainages acquis cette saison</label>
+                        <select id="memberReferralCount">
+                            <option value="0">0 parrainage — aucun avantage</option>
+                            <option value="1">1 parrainage</option>
+                            <option value="2">2 parrainages</option>
+                            <option value="3">3 parrainages</option>
+                        </select>
+                        <small>Chaque parrainage déduit le montant défini dans les paramètres. Maximum : 3.</small>
                     </div>
 
                     <div class="section-title">Certificat médical</div>
