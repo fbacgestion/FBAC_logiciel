@@ -36,6 +36,7 @@ function creerPersonne(donnees) {
         id: donnees.id || genererId(),
         firstName: donnees.firstName || "",
         lastName: donnees.lastName || "",
+        birthDate: donnees.birthDate || "",
         photo: donnees.photo || null
     };
 
