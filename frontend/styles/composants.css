@@ -457,3 +457,68 @@ tr:hover td{
         grid-template-columns:1fr;
     }
 }
+
+.season-admin-card{
+    margin-bottom:16px;
+}
+
+.season-admin-description{
+    color:var(--muted);
+    font-size:10px;
+    line-height:1.5;
+    margin:6px 0 0;
+}
+
+.season-current-name{
+    font-size:24px;
+    font-weight:700;
+    margin-bottom:16px;
+}
+
+.season-history-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    padding:14px 0;
+    border-bottom:1px solid var(--border);
+}
+
+.season-history-row:last-child{
+    border-bottom:0;
+}
+
+.season-history-row > div:first-child strong{
+    display:block;
+    font-size:13px;
+}
+
+.season-history-row > div:first-child span{
+    display:block;
+    color:var(--muted);
+    font-size:10px;
+    margin-top:4px;
+}
+
+.season-history-values{
+    display:flex;
+    gap:22px;
+    color:var(--muted);
+    font-size:10px;
+}
+
+.season-history-values strong{
+    color:var(--text);
+    margin-left:4px;
+}
+
+@media(max-width:800px){
+    .season-history-row{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .season-history-values{
+        flex-wrap:wrap;
+    }
+}
