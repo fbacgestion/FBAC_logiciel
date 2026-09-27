@@ -13,7 +13,30 @@ function afficherTableauDeBord() {
         )
         : [];
 
-    const totalAdherents = inscriptions.length;
+    const totalAdherents =
+        inscriptions.length;
+
+    const enfants =
+        inscriptions.filter(
+            inscription =>
+                inscription.category === "enfant"
+        ).length;
+
+    const adultes =
+        inscriptions.filter(
+            inscription =>
+                inscription.category === "adulte"
+        ).length;
+
+    const totalAides =
+        inscriptions.reduce(
+            (total, inscription) =>
+                total +
+                calculerDonneesPaiement(
+                    inscription
+                ).totalAides,
+            0
+        );
 
     const totalEncaisse = inscriptions.reduce(
         (total, inscription) =>
@@ -32,9 +55,43 @@ function afficherTableauDeBord() {
         totalAttendu - totalEncaisse
     );
 
-    const certificatsManquants = inscriptions.filter(
-        inscription => !(inscription.certificat?.documentId || inscription.certificat?.fileName)
-    ).length;
+    const aujourdHui =
+        new Date();
+
+    const certificatsManquants =
+        inscriptions.filter(
+            inscription =>
+                !(
+                    inscription.certificat?.documentId ||
+                    inscription.certificat?.fileName
+                )
+        ).length;
+
+    const certificatsExpires =
+        inscriptions.filter(
+            inscription => {
+                const expiration =
+                    inscription.certificat?.expiry ||
+                    inscription.certificate?.expiry ||
+                    "";
+
+                if (!expiration) {
+                    return false;
+                }
+
+                const dateExpiration =
+                    new Date(
+                        `${expiration}T23:59:59`
+                    );
+
+                return (
+                    !Number.isNaN(
+                        dateExpiration.getTime()
+                    ) &&
+                    dateExpiration < aujourdHui
+                );
+            }
+        ).length;
 
     const elementAdherents =
         document.getElementById("kpiMembers");
@@ -49,12 +106,35 @@ function afficherTableauDeBord() {
         document.getElementById("kpiCertificates");
 
     if (elementAdherents) {
-        elementAdherents.textContent = totalAdherents;
+        elementAdherents.textContent =
+            totalAdherents;
+    }
+
+    const extraAdherents =
+        document.getElementById(
+            "kpiMembers"
+        )?.parentElement?.querySelector(
+            ".kpi-extra"
+        );
+
+    if (extraAdherents) {
+        extraAdherents.textContent =
+            `${enfants} enfants • ${adultes} adultes`;
     }
 
     if (elementEncaisse) {
         elementEncaisse.textContent =
             `${totalEncaisse.toFixed(2)} €`;
+    }
+
+    const extraPaiements =
+        document.getElementById(
+            "kpiPaymentExtra"
+        );
+
+    if (extraPaiements) {
+        extraPaiements.textContent =
+            `Aides utilisées : -${totalAides.toFixed(2)} €`;
     }
 
     if (elementReste) {
@@ -65,6 +145,18 @@ function afficherTableauDeBord() {
     if (elementCertificats) {
         elementCertificats.textContent =
             certificatsManquants;
+    }
+
+    const extraCertificats =
+        document.getElementById(
+            "kpiCertificateExtra"
+        );
+
+    if (extraCertificats) {
+        extraCertificats.textContent =
+            certificatsExpires > 0
+                ? `${certificatsExpires} expiré(s)`
+                : "Aucun certificat expiré";
     }
 
     afficherAlertesTableauDeBord(inscriptions);
@@ -106,6 +198,41 @@ function afficherAlertesTableauDeBord(inscriptions) {
             texte:
                 `${certificatsManquants.length} certificat(s) ` +
                 `ne sont pas encore enregistré(s).`
+        });
+    }
+
+    const certificatsExpires =
+        inscriptions.filter(
+            inscription => {
+                const expiration =
+                    inscription.certificat?.expiry ||
+                    inscription.certificate?.expiry ||
+                    "";
+
+                if (!expiration) {
+                    return false;
+                }
+
+                const dateExpiration =
+                    new Date(
+                        `${expiration}T23:59:59`
+                    );
+
+                return (
+                    !Number.isNaN(
+                        dateExpiration.getTime()
+                    ) &&
+                    dateExpiration < new Date()
+                );
+            }
+        ).length;
+
+    if (certificatsExpires > 0) {
+        alertes.push({
+            type: "warning",
+            titre: "Certificats expirés",
+            texte:
+                `${certificatsExpires} certificat(s) ont dépassé leur date de validité.`
         });
     }
 
