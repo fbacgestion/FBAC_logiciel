@@ -614,6 +614,11 @@ function reinitialiserFormulaireAdherent() {
         "Blanc"
     );
 
+    definirValeur(
+        "memberCategory",
+        ""
+    );
+
     definirCase(
         "memberVip",
         false
@@ -1733,7 +1738,11 @@ function mettreAJourInformationReinscription() {
 }
 
 function mettreAJourResumeAdherent() {
-    const categorie = obtenirValeur("memberCategory");
+    const dateNaissance = obtenirValeur("memberBirthDate");
+    const categorie = determinerCategorieDepuisDateNaissance(dateNaissance);
+    if (categorie) {
+        definirValeur("memberCategory", categorie);
+    }
     const frequence = obtenirValeur("memberFrequency");
     const vip = obtenirCase("memberVip");
     const aides = {
@@ -2448,6 +2457,35 @@ function calculerExpirationCertificat(
         );
 }
 
+function determinerCategorieDepuisDateNaissance(dateNaissance) {
+    if (!dateNaissance) {
+        return "";
+    }
+
+    const naissance = new Date(dateNaissance + "T00:00:00");
+    if (Number.isNaN(naissance.getTime())) {
+        return "";
+    }
+
+    const dateReference = new Date();
+    const debutSaison = dateReference.getMonth() >= 8
+        ? new Date(dateReference.getFullYear(), 8, 1)
+        : new Date(dateReference.getFullYear() - 1, 8, 1);
+
+    let age = debutSaison.getFullYear() - naissance.getFullYear();
+    const anniversaireCetteAnnee = new Date(
+        debutSaison.getFullYear(),
+        naissance.getMonth(),
+        naissance.getDate()
+    );
+
+    if (anniversaireCetteAnnee > debutSaison) {
+        age--;
+    }
+
+    return age >= 18 ? "adulte" : "enfant";
+}
+
 function obtenirMontantParrainage() {
     const configuration =
         state.configuration || {};
@@ -2898,7 +2936,7 @@ function initialiserEvenementsAdherents() {
     }
 
     [
-        "memberCategory",
+        "memberBirthDate",
         "memberFrequency",
         "memberVip",
         "aidAtoutEnabled",
