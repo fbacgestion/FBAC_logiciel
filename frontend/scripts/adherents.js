@@ -2594,7 +2594,7 @@ function afficherFamille(familleId) {
     ouvrirModalParId("familyViewerModal");
 }
 
-async function supprimerFamilleDepuisInterface(familleId) {
+async async function supprimerFamilleDepuisInterface(familleId) {
     const famille = obtenirFamille(familleId, state.configuration.saisonActiveId);
     if (!famille) {
         notificationErreur("Famille introuvable.");
