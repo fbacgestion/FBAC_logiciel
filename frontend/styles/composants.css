@@ -205,6 +205,12 @@ tr:hover td{
     object-fit:cover;
 }
 
+.member-name{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
 .member-name strong{
     display:block;
     font-size:12px;
