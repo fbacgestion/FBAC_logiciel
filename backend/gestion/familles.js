@@ -116,6 +116,14 @@ function creerFamille(donnees) {
         throw new Error("La saison de la famille est obligatoire.");
     }
 
+    const configuration = lireJson("configuration.json");
+    if (
+        configuration?.saisonActiveId &&
+        configuration.saisonActiveId !== saisonId
+    ) {
+        throw new Error("Une famille ne peut être créée que pour la saison active.");
+    }
+
     const familles = obtenirFamilles();
     const famille = {
         id: genererIdFamille(),
@@ -137,6 +145,15 @@ function supprimerFamille(id) {
     }
 
     const famille = familles[index];
+    const configuration = lireJson("configuration.json");
+
+    if (
+        configuration?.saisonActiveId &&
+        famille.saisonId !== configuration.saisonActiveId
+    ) {
+        throw new Error("Une famille historique ne peut pas être supprimée.");
+    }
+
     const inscriptions = lireJson("inscriptions.json");
     const utilisee = Array.isArray(inscriptions) &&
         inscriptions.some(inscription => (
