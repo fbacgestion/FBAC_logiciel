@@ -6,7 +6,8 @@ let state = {
     configuration: {},
     personnes: [],
     inscriptions: [],
-    saisons: []
+    saisons: [],
+    familles: []
 };
 
 let ui = {
@@ -72,12 +73,14 @@ async function chargerDonnees() {
         configuration,
         personnes,
         inscriptions,
-        saisons
+        saisons,
+        familles
     ] = await Promise.all([
         window.fbac.lireConfiguration(),
         window.fbac.obtenirPersonnes(),
         window.fbac.obtenirInscriptions(),
-        window.fbac.obtenirSaisons()
+        window.fbac.obtenirSaisons(),
+        window.fbac.obtenirFamilles()
     ]);
 
     state =
@@ -85,7 +88,8 @@ async function chargerDonnees() {
             configuration,
             personnes,
             inscriptions,
-            saisons
+            saisons,
+            familles
         );
 
     sauvegarderEtatInitial();
@@ -103,7 +107,8 @@ function normaliserEtat(
     configuration,
     personnes,
     inscriptions,
-    saisons
+    saisons,
+    familles
 ) {
     const listeSaisons =
         Array.isArray(saisons)
@@ -136,6 +141,11 @@ function normaliserEtat(
             listeSaisons
         );
 
+    const listeFamilles =
+        Array.isArray(familles)
+            ? familles.map(normaliserFamille)
+            : [];
+
     return {
         configuration:
             configurationNormale,
@@ -144,7 +154,9 @@ function normaliserEtat(
         inscriptions:
             listeInscriptions,
         saisons:
-            listeSaisons
+            listeSaisons,
+        familles:
+            listeFamilles
     };
 }
 
@@ -275,6 +287,14 @@ function normaliserConfiguration(
                     3
                 )
         }
+    };
+}
+
+function normaliserFamille(famille) {
+    return {
+        ...famille,
+        id: famille?.id || "",
+        nom: famille?.nom || famille?.name || "Famille"
     };
 }
 
