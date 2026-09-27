@@ -165,44 +165,19 @@ function normaliserConfiguration(
         "";
 
     if (saisons.length) {
-        const dateActuelle = new Date();
-        const dateTexte =
-            `${dateActuelle.getFullYear()}-${String(
-                dateActuelle.getMonth() + 1
-            ).padStart(2, "0")}-${String(
-                dateActuelle.getDate()
-            ).padStart(2, "0")}`;
+        const date = new Date();
+        const annee = date.getMonth() >= 8
+            ? date.getFullYear()
+            : date.getFullYear() - 1;
 
         const saisonDate =
-            saisons.find(saison => {
-                const debut =
-                    saison.debut ||
-                    `${saison.anneeDebut}-09-01`;
-
-                const fin =
-                    saison.fin ||
-                    `${saison.anneeFin}-06-30`;
-
-                return dateTexte >= debut &&
-                    dateTexte <= fin;
-            }) ||
-            saisons
-                .filter(saison => {
-                    const debut =
-                        saison.debut ||
-                        `${saison.anneeDebut}-09-01`;
-
-                    return debut <= dateTexte;
-                })
-                .sort(
-                    (a, b) =>
-                        Number(b.anneeDebut) -
-                        Number(a.anneeDebut)
-                )[0];
+            saisons.find(saison =>
+                Number(saison.anneeDebut) === annee ||
+                saison.nom === `${annee}-${annee + 1}`
+            );
 
         if (saisonDate) {
-            saisonActiveId =
-                saisonDate.id;
+            saisonActiveId = saisonDate.id;
         }
     }
 
