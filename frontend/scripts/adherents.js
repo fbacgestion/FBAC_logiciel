@@ -401,6 +401,11 @@ function ouvrirModificationAdherent(
     );
 
     definirAideFormulaire(
+        "aidKiosk",
+        aides.kiosk
+    );
+
+    definirAideFormulaire(
         "aidSpot50",
         aides.spot50
     );
@@ -645,6 +650,12 @@ function reinitialiserFormulaireAdherent() {
     );
 
     definirValeur(
+        "aidKioskAmount",
+        state.configuration?.aides?.kiosk ??
+        50
+    );
+
+    definirValeur(
         "aidSpot50Amount",
         state.configuration?.aides?.spot50 ??
         50
@@ -670,6 +681,11 @@ function reinitialiserFormulaireAdherent() {
 
     definirCase(
         "aidPassSportEnabled",
+        false
+    );
+
+    definirCase(
+        "aidKioskEnabled",
         false
     );
 
@@ -934,6 +950,18 @@ async function enregistrerAdherentDepuisFormulaire(
                 Number(
                     obtenirValeur(
                         "aidPassSportAmount"
+                    ) || 0
+                )
+        },
+        kiosk: {
+            enabled:
+                obtenirCase(
+                    "aidKioskEnabled"
+                ),
+            amount:
+                Number(
+                    obtenirValeur(
+                        "aidKioskAmount"
                     ) || 0
                 )
         },
@@ -1759,6 +1787,10 @@ function mettreAJourResumeAdherent() {
         passSport: {
             enabled: obtenirCase("aidPassSportEnabled"),
             amount: Number(obtenirValeur("aidPassSportAmount") || 0)
+        },
+        kiosk: {
+            enabled: obtenirCase("aidKioskEnabled"),
+            amount: Number(obtenirValeur("aidKioskAmount") || 0)
         },
         spot50: {
             enabled: obtenirCase("aidSpot50Enabled"),
@@ -2962,6 +2994,8 @@ function initialiserEvenementsAdherents() {
         "aidAtoutAmount",
         "aidPassSportEnabled",
         "aidPassSportAmount",
+        "aidKioskEnabled",
+        "aidKioskAmount",
         "aidSpot50Enabled",
         "aidSpot50Amount",
         "familyDiscountEnabled",
