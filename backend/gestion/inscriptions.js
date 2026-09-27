@@ -4,6 +4,7 @@ const {
 } = require("./fichiers");
 
 const FICHIER_INSCRIPTIONS = "inscriptions.json";
+const { obtenirSaisonActuelle } = require("./saisons");
 
 function obtenirInscriptions() {
     const inscriptions = lireJson(FICHIER_INSCRIPTIONS);
@@ -162,17 +163,13 @@ function modifierInscription(
     const inscriptionActuelle =
         inscriptions[index];
 
-    const configuration =
-        lireJson("configuration.json") || {};
+    const saisonActuelle =
+        obtenirSaisonActuelle();
 
     const saisonActive =
-        configuration.saisonActiveId ||
-        configuration.saisonActive ||
+        saisonActuelle?.id ||
+        saisonActuelle?.nom ||
         "";
-
-    const estSaisonActive =
-        inscriptionActuelle.season ===
-        saisonActive;
 
     if (!estSaisonActive) {
         const champsAutorises = [
@@ -276,12 +273,12 @@ function supprimerInscription(id) {
         );
     }
 
-    const configuration =
-        lireJson("configuration.json") || {};
+    const saisonActuelle =
+        obtenirSaisonActuelle();
 
     const saisonActive =
-        configuration.saisonActiveId ||
-        configuration.saisonActive ||
+        saisonActuelle?.id ||
+        saisonActuelle?.nom ||
         "";
 
     if (
