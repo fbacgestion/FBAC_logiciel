@@ -300,6 +300,27 @@ function enregistrerHandlersIpc() {
     );
 
     ipcMain.handle(
+        "creer-saison",
+        (_, anneeDebut) => {
+            const saison = require("./gestion/saisons")
+                .creerSaison(anneeDebut);
+
+            require("./gestion/saisons")
+                .definirSaisonActuelle(saison.id);
+
+            return saison;
+        }
+    );
+
+    ipcMain.handle(
+        "definir-saison-actuelle",
+        (_, idSaison) => {
+            return require("./gestion/saisons")
+                .definirSaisonActuelle(idSaison);
+        }
+    );
+
+    ipcMain.handle(
         "enregistrer-certificat",
         (_, inscriptionId, fichier) => {
             return enregistrerCertificat(
