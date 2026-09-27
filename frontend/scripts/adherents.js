@@ -2379,7 +2379,7 @@ function remplirSelectFamille(familleId) {
 
     const saisonId = state.configuration.saisonActiveId;
 
-    const familles =
+    let familles =
         Array.isArray(state.familles)
             ? [...state.familles]
                 .filter(famille => famille.saisonId === saisonId)
@@ -2391,6 +2391,22 @@ function remplirSelectFamille(familleId) {
                     )
                 )
             : [];
+
+    const inscriptionId = document.getElementById("memberEnrollmentId")?.value;
+    const inscription = state.inscriptions.find(element => element.id === inscriptionId);
+    const familleHistorique = inscription?.familyGroupId
+        ? state.familles.find(famille =>
+            famille.id === inscription.familyGroupId &&
+            famille.saisonId === inscription.saisonId
+        )
+        : null;
+
+    if (
+        familleHistorique &&
+        !familles.some(famille => famille.id === familleHistorique.id)
+    ) {
+        familles = [familleHistorique, ...familles];
+    }
 
     select.innerHTML =
         `
@@ -2484,6 +2500,15 @@ async function creerNouvelleFamilleDepuisFormulaire() {
 }
 
 function ouvrirCreationFamille() {
+    const saisonActiveId = state.configuration.saisonActiveId;
+    const inscriptionId = document.getElementById("memberEnrollmentId")?.value;
+    const inscription = state.inscriptions.find(element => element.id === inscriptionId);
+
+    if (inscription && inscription.saisonId !== saisonActiveId) {
+        notificationErreur("Une famille ne peut être créée que pour la saison active.");
+        return;
+    }
+
     const input =
         document.getElementById("newFamilyName");
 
