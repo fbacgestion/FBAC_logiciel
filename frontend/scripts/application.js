@@ -863,9 +863,17 @@ async function synchroniserInscriptions() {
             );
 
         if (!existe) {
-            await window.fbac.supprimerInscription(
-                ancienne.id
-            );
+            const saisonActiveId =
+                state.configuration?.saisonActiveId;
+
+            if (
+                ancienne.saisonId ===
+                saisonActiveId
+            ) {
+                await window.fbac.supprimerInscription(
+                    ancienne.id
+                );
+            }
         }
     }
 }
@@ -1235,6 +1243,22 @@ function initialiserEvenementsGlobaux() {
     document.addEventListener(
         "click",
         event => {
+            const fermeture =
+                event.target.closest(
+                    "[data-close-modal]"
+                );
+
+            if (fermeture) {
+                const modalId =
+                    fermeture.dataset.closeModal;
+
+                if (modalId) {
+                    fermerModalParId(modalId);
+                }
+
+                return;
+            }
+
             const bouton =
                 event.target.closest(
                     "[data-action]"
