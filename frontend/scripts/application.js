@@ -46,7 +46,6 @@ async function initialiserApplication() {
             renderCurrentPage();
         }
 
-        initialiserEvenementsGlobaux();
     } catch (error) {
         console.error(
             "Erreur lors de l'initialisation de l'application :",
