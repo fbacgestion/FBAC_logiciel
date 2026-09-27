@@ -16,48 +16,33 @@ function obtenirSaisons() {
     return saisons;
 }
 
-function obtenirSaisonActuelle() {
-    const configuration =
-        lireJson(FICHIER_CONFIGURATION);
-
-    if (
-        configuration &&
-        configuration.saisonActiveId
-    ) {
-        const saisons = obtenirSaisons();
-
-        const saison = saisons.find(
-            element =>
-                obtenirIdentifiantSaison(element) ===
-                configuration.saisonActiveId
-        );
-
-        if (saison) {
-            return saison;
-        }
-    }
-
-    if (
-        configuration &&
-        configuration.saisonActive
-    ) {
-        return configuration.saisonActive;
-    }
-
+function obtenirSaisonActuelle(date = new Date()) {
     const saisons = obtenirSaisons();
 
     if (!saisons.length) {
         return null;
     }
 
-    return saisons
-        .slice()
-        .sort((a, b) => {
-            return obtenirNomSaison(b)
-                .localeCompare(
-                    obtenirNomSaison(a)
-                );
-        })[0];
+    const dateActuelle = formaterDate(date);
+    const saisonEnCours = saisons.find(saison => {
+        const debut = saison.debut || `${saison.anneeDebut}-09-01`;
+        const fin = saison.fin || `${saison.anneeFin}-06-30`;
+
+        return dateActuelle >= debut && dateActuelle <= fin;
+    });
+
+    if (saisonEnCours) {
+        return saisonEnCours;
+    }
+
+    const saisonsPassees = saisons
+        .filter(saison => {
+            const debut = saison.debut || `${saison.anneeDebut}-09-01`;
+            return debut <= dateActuelle;
+        })
+        .sort((a, b) => Number(b.anneeDebut) - Number(a.anneeDebut));
+
+    return saisonsPassees[0] || null;
 }
 
 function obtenirSaison(id) {
@@ -126,27 +111,16 @@ function definirSaisonActuelle(idSaison) {
         );
     }
 
-    const saisons =
-        obtenirSaisons();
-
-    const derniereSaison =
-        saisons
-            .slice()
-            .sort(
-                (a, b) =>
-                    Number(b.anneeDebut) -
-                    Number(a.anneeDebut)
-            )[0];
+    const saisonActuelle =
+        obtenirSaisonActuelle();
 
     if (
-        derniereSaison &&
-        obtenirIdentifiantSaison(
-            derniereSaison
-        ) !==
-        obtenirIdentifiantSaison(saison)
+        !saisonActuelle ||
+        obtenirIdentifiantSaison(saisonActuelle) !==
+            obtenirIdentifiantSaison(saison)
     ) {
         throw new Error(
-            "Une saison historique ne peut pas devenir la saison active."
+            "La saison active est déterminée automatiquement par la date actuelle."
         );
     }
 
@@ -168,13 +142,17 @@ function definirSaisonActuelle(idSaison) {
 }
 
 function initialiserSaisonActuelle() {
-    const saisons = obtenirSaisons();
+    let saisons = obtenirSaisons();
 
     if (!saisons.length) {
+        const date = new Date();
+        const annee =
+            date.getMonth() >= 8
+                ? date.getFullYear()
+                : date.getFullYear() - 1;
+
         const saison =
-            creerSaison(
-                new Date().getFullYear()
-            );
+            creerSaison(annee);
 
         definirSaisonActuelle(
             obtenirIdentifiantSaison(saison)
@@ -186,23 +164,38 @@ function initialiserSaisonActuelle() {
     const actuelle =
         obtenirSaisonActuelle();
 
-    if (actuelle) {
-        return actuelle;
+    if (!actuelle) {
+        return null;
     }
 
-    const derniere =
-        saisons
-            .slice()
-            .sort((a, b) => {
-                return obtenirNomSaison(b)
-                    .localeCompare(
-                        obtenirNomSaison(a)
-                    );
-            })[0];
+    const configuration =
+        lireJson(FICHIER_CONFIGURATION) || {};
 
-    return definirSaisonActuelle(
-        obtenirIdentifiantSaison(derniere)
-    );
+    const idActuel =
+        obtenirIdentifiantSaison(actuelle);
+
+    if (
+        configuration.saisonActiveId !== idActuel ||
+        configuration.saisonActive !== obtenirNomSaison(actuelle)
+    ) {
+        configuration.saisonActiveId = idActuel;
+        configuration.saisonActive = obtenirNomSaison(actuelle);
+
+        ecrireJson(
+            FICHIER_CONFIGURATION,
+            configuration
+        );
+    }
+
+    return actuelle;
+}
+
+function formaterDate(date) {
+    const annee = date.getFullYear();
+    const mois = String(date.getMonth() + 1).padStart(2, "0");
+    const jour = String(date.getDate()).padStart(2, "0");
+
+    return `${annee}-${mois}-${jour}`;
 }
 
 function obtenirIdentifiantSaison(
