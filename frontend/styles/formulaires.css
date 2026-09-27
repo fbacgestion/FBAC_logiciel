@@ -345,3 +345,22 @@
         max-height:95vh;
     }
 }
+.grade-preview{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    min-height:28px;
+    margin-top:2px;
+}
+.grade-preview-text{
+    color:var(--muted);
+    font-size:9px;
+}
+.grade-badge.large{
+    min-width:120px;
+    padding:6px 9px;
+}
+.grade-badge.large .grade-belt{
+    width:36px;
+    height:11px;
+}
