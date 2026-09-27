@@ -334,7 +334,7 @@
                 <h2 id="memberModalTitle">Nouvel adhérent</h2>
                 <span id="memberModalSubtitle"></span>
             </div>
-            <button class="close" data-close-modal="memberModal">×</button>
+            <button type="button" class="close" data-close-modal="memberModal">×</button>
         </div>
 
         <form id="memberForm">
@@ -578,7 +578,7 @@
                 <h2>Certificat médical</h2>
                 <span id="certificateViewerName"></span>
             </div>
-            <button class="close" data-close-modal="certificateModal">×</button>
+            <button type="button" class="close" data-close-modal="certificateModal">×</button>
         </div>
         <div class="modal-body" id="certificateViewerBody"></div>
     </div>
@@ -591,7 +591,7 @@
                 <h2>Reprendre un ancien adhérent</h2>
                 <span>Créer une nouvelle inscription sans supprimer l'ancienne.</span>
             </div>
-            <button class="close" data-close-modal="reenrollModal">×</button>
+            <button type="button" class="close" data-close-modal="reenrollModal">×</button>
         </div>
 
         <div class="modal-body">
@@ -621,7 +621,7 @@
                 <h2>Modifier le paiement</h2>
                 <span>Enregistrez le montant réellement encaissé.</span>
             </div>
-            <button class="close" data-close-modal="paymentModal">×</button>
+            <button type="button" class="close" data-close-modal="paymentModal">×</button>
         </div>
         <form id="paymentForm">
             <div class="modal-body">
@@ -652,30 +652,7 @@
     </div>
 </div>
 
-<div class="modal-backdrop" id="seasonModal">
-    <div class="modal">
-        <div class="modal-header">
-            <div>
-                <h2>Nouvelle saison</h2>
-                <span>La nouvelle saison deviendra automatiquement la saison active.</span>
-            </div>
-            <button class="close" data-close-modal="seasonModal">×</button>
-        </div>
 
-        <div class="modal-body">
-            <div class="field">
-                <label>Année de début</label>
-                <input type="number" id="newSeasonYear" min="2020" max="2100">
-                <small>Exemple : 2027 donnera la saison 2027-2028.</small>
-            </div>
-        </div>
-
-        <div class="modal-footer">
-            <button class="btn" data-close-modal="seasonModal">Annuler</button>
-            <button class="btn btn-primary" data-action="confirm-new-season">Créer la saison</button>
-        </div>
-    </div>
-</div>
 
 <div class="toast-container" id="toastContainer"></div>
 
