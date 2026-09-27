@@ -1720,125 +1720,55 @@ function mettreAJourInformationReinscription() {
 }
 
 function mettreAJourResumeAdherent() {
-    const categorie =
-        obtenirValeur(
-            "memberCategory"
-        );
-
-    const frequence =
-        obtenirValeur(
-            "memberFrequency"
-        );
-
-    const inscription = {
-        category:
-            categorie,
-        frequency:
-            frequence,
-        aides: {
-            atoutNormandie: {
-                enabled:
-                    obtenirCase(
-                        "aidAtoutEnabled"
-                    ),
-                amount:
-                    Number(
-                        obtenirValeur(
-                            "aidAtoutAmount"
-                        ) || 0
-                    )
-            },
-            passSport: {
-                enabled:
-                    obtenirCase(
-                        "aidPassSportEnabled"
-                    ),
-                amount:
-                    Number(
-                        obtenirValeur(
-                            "aidPassSportAmount"
-                        ) || 0
-                    )
-            },
-            spot50: {
-                enabled:
-                    obtenirCase(
-                        "aidSpot50Enabled"
-                    ),
-                amount:
-                    Number(
-                        obtenirValeur(
-                            "aidSpot50Amount"
-                        ) || 0
-                    )
-            }
+    const categorie = obtenirValeur("memberCategory");
+    const frequence = obtenirValeur("memberFrequency");
+    const vip = obtenirCase("memberVip");
+    const aides = {
+        atoutNormandie: {
+            enabled: obtenirCase("aidAtoutEnabled"),
+            amount: Number(obtenirValeur("aidAtoutAmount") || 0)
         },
-        reductionFamille:
-            obtenirCase(
-                "familyDiscountEnabled"
-            )
-                ? Number(
-                    obtenirValeur(
-                        "familyDiscountAmount"
-                    ) || 0
-                )
-                : 0,
-        parrainageAcquis:
-            0,
-        montantPaye:
-            Number(
-                obtenirValeur(
-                    "memberPaidAmount"
-                ) || 0
-            )
+        passSport: {
+            enabled: obtenirCase("aidPassSportEnabled"),
+            amount: Number(obtenirValeur("aidPassSportAmount") || 0)
+        },
+        spot50: {
+            enabled: obtenirCase("aidSpot50Enabled"),
+            amount: Number(obtenirValeur("aidSpot50Amount") || 0)
+        }
     };
-
-    const tarif =
-        calculerTarif(
-            categorie,
-            frequence
-        );
-
-    inscription.tarif =
-        tarif;
-
-    const montant =
-        calculerMontantAPayer(
-            inscription
-        );
-
-    const reste =
-        Math.max(
-            0,
-            montant -
-            inscription.montantPaye
-        );
-
-    const element =
-        document.getElementById(
-            "memberPaymentSummary"
-        );
-
-    if (!element) {
-        return;
+    const reductionFamille = obtenirCase("familyDiscountEnabled")
+        ? Number(obtenirValeur("familyDiscountAmount") || 0)
+        : 0;
+    const montantPaye = Number(obtenirValeur("memberPaidAmount") || 0);
+    const inscription = {
+        category: categorie,
+        frequency: frequence,
+        vip,
+        aides,
+        reductionFamille,
+        parrainageAcquis: 0,
+        montantPaye
+    };
+    const tarif = vip ? 0 : calculerTarif(categorie, frequence);
+    inscription.tarif = tarif;
+    const montant = calculerMontantAPayer(inscription);
+    const reste = Math.max(0, montant - montantPaye);
+    const totalAides = calculerTotalAides(aides);
+    const surpaiement = Math.max(0, montantPaye - montant);
+    definirValeur("summaryBasePrice", `${tarif.toFixed(2)} €`);
+    definirValeur("summaryAids", `-${totalAides.toFixed(2)} €`);
+    definirValeur("summaryFamily", `-${reductionFamille.toFixed(2)} €`);
+    definirValeur("summaryReferral", "-0.00 €");
+    definirValeur("summaryDue", `${montant.toFixed(2)} €`);
+    definirValeur("summaryPaid", `${montantPaye.toFixed(2)} €`);
+    definirValeur("summaryRemaining", `${reste.toFixed(2)} €`);
+    const ligneSurpaiement = document.getElementById("summaryOverpaymentLine");
+    if (ligneSurpaiement) {
+        ligneSurpaiement.classList.toggle("hidden", surpaiement <= 0);
     }
-
-    element.innerHTML = `
-        <div>
-            <span>Tarif</span>
-            <strong>${tarif.toFixed(2)} €</strong>
-        </div>
-        <div>
-            <span>Total à payer</span>
-            <strong>${montant.toFixed(2)} €</strong>
-        </div>
-        <div>
-            <span>Reste</span>
-            <strong>${reste.toFixed(2)} €</strong>
-        </div>
-    `;
+    definirValeur("summaryOverpayment", `${surpaiement.toFixed(2)} €`);
 }
-
 function remplirSelectFamille(
     familleId
 ) {
