@@ -398,6 +398,96 @@ function enregistrerHandlersIpc() {
     );
 
     ipcMain.handle(
+        "imprimer-certificat",
+        async (_, inscriptionId) => {
+            const informations =
+                obtenirInformationsCertificat(
+                    inscriptionId
+                );
+
+            if (
+                !informations ||
+                !informations.chemin ||
+                !fs.existsSync(informations.chemin)
+            ) {
+                return false;
+            }
+
+            const fenetreImpression =
+                new BrowserWindow({
+                    show: false,
+                    width: 900,
+                    height: 1200,
+                    webPreferences: {
+                        contextIsolation: true,
+                        nodeIntegration: false
+                    }
+                });
+
+            return new Promise(resolve => {
+                let termine = false;
+
+                const terminer =
+                    resultat => {
+                        if (termine) {
+                            return;
+                        }
+
+                        termine = true;
+
+                        if (
+                            !fenetreImpression.isDestroyed()
+                        ) {
+                            fenetreImpression.close();
+                        }
+
+                        resolve(resultat);
+                    };
+
+                fenetreImpression.webContents.once(
+                    "did-fail-load",
+                    () => {
+                        terminer(false);
+                    }
+                );
+
+                fenetreImpression.webContents.once(
+                    "did-finish-load",
+                    () => {
+                        setTimeout(
+                            () => {
+                                if (
+                                    fenetreImpression.isDestroyed()
+                                ) {
+                                    terminer(false);
+                                    return;
+                                }
+
+                                fenetreImpression.webContents.print(
+                                    {
+                                        silent: false,
+                                        printBackground: true
+                                    },
+                                    success => {
+                                        terminer(
+                                            success
+                                        );
+                                    }
+                                );
+                            },
+                            500
+                        );
+                    }
+                );
+
+                fenetreImpression.loadFile(
+                    informations.chemin
+                );
+            });
+        }
+    );
+
+    ipcMain.handle(
         "supprimer-certificat",
         (_, inscriptionId) => {
             return supprimerCertificat(
