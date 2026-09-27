@@ -88,6 +88,7 @@ function creerInscription(donnees) {
         category: donnees.category || "adulte",
         frequency: donnees.frequency || "1",
         grade: donnees.grade || "Blanc",
+        vip: Boolean(donnees.vip),
 
         familyGroupId:
             donnees.familyGroupId || null,
@@ -221,6 +222,11 @@ function modifierInscription(
     const nouvelleInscription = {
         ...inscriptionActuelle,
         ...donnees,
+        vip:
+            Boolean(
+                donnees.vip ??
+                inscriptionActuelle.vip
+            ),
         id,
         personId: personneId,
         season: saison
