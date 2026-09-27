@@ -238,6 +238,12 @@ function normaliserConfiguration(
                     50
                 ),
 
+            kiosk:
+                Number(
+                    aides.kiosk ??
+                    50
+                ),
+
             spot50:
                 Number(
                     aides.spot50 ??
@@ -250,7 +256,22 @@ function normaliserConfiguration(
                 source.reductionFamille ??
                 source.familyDiscount ??
                 20
-            )
+            ),
+
+        parrainage: {
+            ...(source.parrainage || {}),
+            montantParFilleul:
+                Number(
+                    source.parrainage?.montantParFilleul ??
+                    source.parrainage?.montant ??
+                    20
+                ),
+            plafond:
+                Number(
+                    source.parrainage?.plafond ??
+                    3
+                )
+        }
     };
 }
 
