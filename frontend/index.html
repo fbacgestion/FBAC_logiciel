@@ -137,6 +137,7 @@
                 <div class="table-card">
                     <div class="table-toolbar">
                         <div class="toolbar-left">
+                            <select class="search" id="memberSeasonFilter"></select>
                             <input class="search" id="memberSearch" placeholder="Rechercher un adhérent...">
                             <select class="search" id="memberStatusFilter">
                                 <option value="all">Tous les paiements</option>
@@ -243,9 +244,9 @@
                 <div class="page-header">
                     <div>
                         <h1>Saisons</h1>
-                        <p>Une saison va de septembre à juin. Les anciennes saisons sont verrouillées.</p>
+                        <p>Les saisons sont créées automatiquement au début de chaque nouvelle saison. Les anciennes saisons restent consultables.</p>
                     </div>
-                    <button class="btn btn-primary" data-action="new-season">+ Nouvelle saison</button>
+
                 </div>
                 <div class="season-list" id="seasonList"></div>
             </section>
