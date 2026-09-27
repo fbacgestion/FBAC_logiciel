@@ -567,6 +567,17 @@ function ouvrirModificationAdherent(
                 editable &&
                 Boolean(inscriptionId);
         }
+
+        const modePaiement =
+            document.getElementById(
+                "memberPaymentMethod"
+            );
+
+        if (modePaiement) {
+            modePaiement.disabled =
+                editable &&
+                Boolean(inscriptionId);
+        }
     }
 
     ouvrirModalAdherent();
