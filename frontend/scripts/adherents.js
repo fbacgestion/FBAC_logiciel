@@ -2611,15 +2611,7 @@ async function supprimerFamilleDepuisInterface(familleId) {
         return;
     }
 
-    if (state.inscriptions.some(inscription =>
-        inscription.familyGroupId === familleId &&
-        inscription.saisonId === famille.saisonId
-    )) {
-        notificationErreur("Cette famille contient encore des adhérents. Retirez d'abord les adhérents de cette famille avant de la supprimer.");
-        return;
-    }
-
-    if (!confirm("Supprimer définitivement la famille « " + famille.nom + " » ?")) {
+    if (!confirm("Supprimer le groupe famille « " + famille.nom + " » ? Les adhérents seront conservés, mais ne seront plus rattachés à ce groupe.")) {
         return;
     }
 
