@@ -402,6 +402,13 @@ function ouvrirModificationAdherent(
         inscription.frequency
     );
 
+    definirCase(
+        "memberVip",
+        Boolean(
+            inscription.vip
+        )
+    );
+
     remplirSelectGrade(inscription.grade || "Blanc");
 
     remplirSelectFamille(
@@ -623,6 +630,11 @@ function reinitialiserFormulaireAdherent() {
     definirValeur(
         "memberGrade",
         "Blanc"
+    );
+
+    definirCase(
+        "memberVip",
+        false
     );
 
     definirValeur(
@@ -1030,6 +1042,10 @@ async function enregistrerAdherentDepuisFormulaire(
                 frequency:
                     frequence,
                 grade,
+                vip:
+                    obtenirCase(
+                        "memberVip"
+                    ),
                 familyGroupId:
                     famille,
                 referrerId:
@@ -1103,6 +1119,11 @@ async function enregistrerAdherentDepuisFormulaire(
 
             inscription.grade =
                 grade;
+
+            inscription.vip =
+                obtenirCase(
+                    "memberVip"
+                );
 
             inscription.familyGroupId =
                 famille;
@@ -2349,6 +2370,10 @@ function convertirInscriptionPourBackend(
         grade:
             inscription.grade ||
             "Blanc",
+        vip:
+            Boolean(
+                inscription.vip
+            ),
         familyGroupId:
             inscription.familyGroupId ||
             null,
@@ -2879,6 +2904,7 @@ function initialiserEvenementsAdherents() {
     [
         "memberCategory",
         "memberFrequency",
+        "memberVip",
         "aidAtoutEnabled",
         "aidAtoutAmount",
         "aidPassSportEnabled",
@@ -2947,6 +2973,18 @@ function initialiserEvenementsAdherents() {
                 return;
             }
 
+            const modalId =
+                bouton.dataset.closeModal;
+
+            if (
+                modalId
+            ) {
+                fermerModalParId(
+                    modalId
+                );
+                return;
+            }
+
             const action =
                 bouton.dataset.action;
 
@@ -2999,6 +3037,42 @@ function initialiserEvenementsAdherents() {
                 afficherCertificat(
                     id
                 );
+            }
+        }
+    );
+
+    document.addEventListener(
+        "click",
+        event => {
+            if (
+                event.target.classList.contains(
+                    "modal-backdrop"
+                )
+            ) {
+                fermerModalParId(
+                    event.target.id
+                );
+            }
+        }
+    );
+
+    document.addEventListener(
+        "keydown",
+        event => {
+            if (
+                event.key ===
+                "Escape"
+            ) {
+                document
+                    .querySelectorAll(
+                        ".modal-backdrop.open"
+                    )
+                    .forEach(
+                        modal =>
+                            fermerModalParId(
+                                modal.id
+                            )
+                    );
             }
         }
     );
