@@ -225,14 +225,33 @@ function afficherAlertesTableauDeBord(inscriptions) {
                     dateExpiration < new Date()
                 );
             }
-        ).length;
+        );
 
-    if (certificatsExpires > 0) {
+    if (certificatsExpires.length > 0) {
+        const noms =
+            certificatsExpires
+                .map(inscription => {
+                    const personne =
+                        state.personnes.find(
+                            personne =>
+                                personne.id === inscription.personneId
+                        );
+
+                    return personne
+                        ? (personne.firstName + " " + personne.lastName).trim()
+                        : "Adhérent inconnu";
+                });
+
+        const nomsAffiches =
+            noms.length <= 3
+                ? noms.join(", ")
+                : noms.slice(0, 3).join(", ") + " et " + (noms.length - 3) + " autre(s)";
+
         alertes.push({
             type: "warning",
             titre: "Certificats expirés",
             texte:
-                `${certificatsExpires} certificat(s) ont dépassé leur date de validité.`
+                certificatsExpires.length + " certificat(s) à renouveler : " + nomsAffiches + "."
         });
     }
 
