@@ -48,7 +48,13 @@
             "createDesktopShortcut": true,
             "createStartMenuShortcut": true,
             "shortcutName": "FBAC Gestion",
-            "uninstallDisplayName": "FBAC Gestion"
-        }
+            "uninstallDisplayName": "FBAC Gestion",
+            "installerLanguages": [
+                "fr_FR"
+            ],
+            "language": 1036,
+            "deleteAppDataOnUninstall": false
+        },
+        "asar": true
     }
 }
