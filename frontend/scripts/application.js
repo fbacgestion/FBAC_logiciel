@@ -164,36 +164,46 @@ function normaliserConfiguration(
         source.saisonActiveId ||
         "";
 
-    if (
-        !saisonActiveId &&
-        source.saisonActive
-    ) {
-        const saison =
-            saisons.find(
-                element =>
-                    element.nom ===
-                    source.saisonActive
-            );
+    if (saisons.length) {
+        const dateActuelle = new Date();
+        const dateTexte =
+            `${dateActuelle.getFullYear()}-${String(
+                dateActuelle.getMonth() + 1
+            ).padStart(2, "0")}-${String(
+                dateActuelle.getDate()
+            ).padStart(2, "0")}`;
 
-        if (saison) {
-            saisonActiveId =
-                saison.id;
-        }
-    }
+        const saisonDate =
+            saisons.find(saison => {
+                const debut =
+                    saison.debut ||
+                    `${saison.anneeDebut}-09-01`;
 
-    if (
-        !saisonActiveId &&
-        saisons.length
-    ) {
-        saisonActiveId =
+                const fin =
+                    saison.fin ||
+                    `${saison.anneeFin}-06-30`;
+
+                return dateTexte >= debut &&
+                    dateTexte <= fin;
+            }) ||
             saisons
-                .slice()
+                .filter(saison => {
+                    const debut =
+                        saison.debut ||
+                        `${saison.anneeDebut}-09-01`;
+
+                    return debut <= dateTexte;
+                })
                 .sort(
                     (a, b) =>
-                        b.nom.localeCompare(
-                            a.nom
-                        )
-                )[0].id;
+                        Number(b.anneeDebut) -
+                        Number(a.anneeDebut)
+                )[0];
+
+        if (saisonDate) {
+            saisonActiveId =
+                saisonDate.id;
+        }
     }
 
     const tarifs =
