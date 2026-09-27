@@ -2125,13 +2125,7 @@ function ouvrirModalParId(
         return;
     }
 
-    modal.classList.add(
-        "active"
-    );
-
-    modal.classList.add(
-        "open"
-    );
+    modal.classList.add("open");
 }
 
 function fermerModalParId(
@@ -2146,13 +2140,7 @@ function fermerModalParId(
         return;
     }
 
-    modal.classList.remove(
-        "active"
-    );
-
-    modal.classList.remove(
-        "open"
-    );
+    modal.classList.remove("open");
 }
 
 function definirValeur(
@@ -2705,6 +2693,12 @@ function gererChangementCertificat(
 }
 
 function initialiserEvenementsAdherents() {
+    if (document.body.dataset.adherentsEvenementsInitialises === "true") {
+        return;
+    }
+
+    document.body.dataset.adherentsEvenementsInitialises = "true";
+
     const selectSaison =
         document.getElementById("memberSeasonFilter");
 
@@ -2886,79 +2880,45 @@ function initialiserEvenementsAdherents() {
     document.addEventListener(
         "click",
         event => {
-            const bouton =
-                event.target.closest(
-                    "[data-action]"
-                );
+            const boutonFermeture = event.target.closest("[data-close-modal]");
+
+            if (boutonFermeture) {
+                event.preventDefault();
+                fermerModalParId(boutonFermeture.dataset.closeModal);
+                return;
+            }
+
+            const bouton = event.target.closest("[data-action]");
 
             if (!bouton) {
                 return;
             }
 
-            const modalId =
-                bouton.dataset.closeModal;
+            const action = bouton.dataset.action;
+            const id = bouton.dataset.id;
 
-            if (
-                modalId
-            ) {
-                fermerModalParId(
-                    modalId
-                );
-                return;
+            if (action === "modifier-adherent") {
+                ouvrirModificationAdherent(id);
             }
 
-            const action =
-                bouton.dataset.action;
-
-            const id =
-                bouton.dataset.id;
-
-            if (
-                action ===
-                "modifier-adherent"
-            ) {
-                ouvrirModificationAdherent(
-                    id
-                );
+            if (action === "supprimer-adherent") {
+                supprimerAdherent(id);
             }
 
-            if (
-                action ===
-                "supprimer-adherent"
-            ) {
-                supprimerAdherent(
-                    id
-                );
-            }
-
-            if (
-                action === "nouvel-adherent" ||
-                action === "new-member"
-            ) {
+            if (action === "nouvel-adherent" || action === "new-member") {
                 ouvrirNouvelAdherent();
             }
 
-            if (
-                action === "reinscription" ||
-                action === "reenroll"
-            ) {
+            if (action === "reinscription" || action === "reenroll") {
                 ouvrirReinscription();
             }
 
-            if (
-                action === "confirmer-reinscription" ||
-                action === "confirm-reenroll"
-            ) {
+            if (action === "confirmer-reinscription" || action === "confirm-reenroll") {
                 confirmerReinscription();
             }
 
-            if (
-                action ===
-                "voir-certificat"
-            ) {
-                afficherCertificat(
-                    id
-                );
+            if (action === "voir-certificat") {
+                afficherCertificat(id);
             }
         }
     );
