@@ -160,10 +160,34 @@ async function enregistrerParametres() {
                     obtenirValeur(
                         "priceAdult4"
                     ) || 0
+                ),
+            enfant1Cours:
+                Number(
+                    obtenirValeur(
+                        "priceChild1"
+                    ) || 0
+                ),
+            adulte1Cours:
+                Number(
+                    obtenirValeur(
+                        "priceAdult1"
+                    ) || 0
+                ),
+            adulte4Cours:
+                Number(
+                    obtenirValeur(
+                        "priceAdult4"
+                    ) || 0
                 )
         },
         aides: {
             atout:
+                Number(
+                    obtenirValeur(
+                        "aidAtout"
+                    ) || 0
+                ),
+            atoutNormandie:
                 Number(
                     obtenirValeur(
                         "aidAtout"
