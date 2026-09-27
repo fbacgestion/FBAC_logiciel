@@ -418,10 +418,13 @@
                         <div id="memberGradePreview" class="grade-preview"></div>
                     </div>
 
-                    <div class="field">
-                        <label>Groupe famille</label>
-                        <select id="memberFamilyGroup"></select>
-                        <small>Sélectionnez le nom d'un adhérent de la famille ou "Aucun groupe".</small>
+                    <div class="field full">
+                        <label>Famille</label>
+                        <div class="family-selector">
+                            <select id="memberFamilyGroup"></select>
+                            <button type="button" class="btn btn-small" id="createFamilyButton">+ Créer une famille</button>
+                        </div>
+                        <small>Une famille possède un identifiant unique. Deux familles portant le même nom restent totalement séparées.</small>
                     </div>
 
                     <div class="section-title">Parrainage</div>
@@ -612,6 +615,44 @@
                 <button type="submit" class="btn btn-primary" id="memberSaveButton">Enregistrer</button>
             </div>
         </form>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="familyCreateModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div>
+                <h2>Créer une famille</h2>
+                <span>La famille recevra automatiquement un identifiant unique.</span>
+            </div>
+            <button type="button" class="close" data-close-modal="familyCreateModal">×</button>
+        </div>
+        <form id="familyCreateForm">
+            <div class="modal-body">
+                <div class="field">
+                    <label>Nom de la famille</label>
+                    <input type="text" id="newFamilyName" placeholder="Ex. Dupont" required>
+                    <small>Le nom sert uniquement à l'affichage. L'identifiant interne sera unique.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" data-close-modal="familyCreateModal">Annuler</button>
+                <button type="submit" class="btn btn-primary">Créer la famille</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="familyViewerModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div>
+                <h2>Famille</h2>
+                <span id="familyViewerName"></span>
+            </div>
+            <button type="button" class="close" data-close-modal="familyViewerModal">×</button>
+        </div>
+        <div class="modal-body" id="familyViewerBody"></div>
     </div>
 </div>
 
