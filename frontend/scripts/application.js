@@ -634,9 +634,6 @@ async function sauvegarderEtat() {
 
     try {
         await synchroniserConfiguration();
-        await synchroniserPersonnes();
-        await synchroniserInscriptions();
-        await synchroniserSaisons();
 
         sauvegarderEtatInitial();
     } catch (error) {
