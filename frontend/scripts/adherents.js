@@ -698,6 +698,59 @@ async function enregistrerAdherentDepuisFormulaire(
             "memberPersonId"
         );
 
+    const inscriptionExistante =
+        inscriptionId
+            ? state.inscriptions.find(
+                inscription =>
+                    inscription.id ===
+                    inscriptionId
+            )
+            : null;
+
+    if (
+        inscriptionExistante &&
+        inscriptionExistante.saisonId !==
+            saisonId
+    ) {
+        try {
+            await window.fbac.modifierInscription(
+                inscriptionExistante.id,
+                {
+                    referrerId:
+                        obtenirValeur(
+                            "memberReferrer"
+                        ) || null
+                }
+            );
+
+            inscriptionExistante.referrerId =
+                obtenirValeur(
+                    "memberReferrer"
+                ) || null;
+
+            await sauvegarderEtat();
+
+            fermerModalAdherent();
+            renderCurrentPage();
+
+            notificationSucces(
+                "Parrainage modifié avec succès."
+            );
+        } catch (error) {
+            console.error(
+                "Erreur lors de la modification du parrainage :",
+                error
+            );
+
+            notificationErreur(
+                error.message ||
+                "Impossible de modifier le parrainage."
+            );
+        }
+
+        return;
+    }
+
     const nom =
         obtenirValeur(
             "memberLastName"
