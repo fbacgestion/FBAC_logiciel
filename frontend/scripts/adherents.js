@@ -1739,11 +1739,12 @@ function mettreAJourInformationReinscription() {
 
 function mettreAJourResumeAdherent() {
     const dateNaissance = obtenirValeur("memberBirthDate");
-    const categorie = determinerCategorieDepuisDateNaissance(dateNaissance);
-    if (categorie) {
-        definirValeur("memberCategory", categorie);
+    const categorieAutomatique = determinerCategorieDepuisDateNaissance(dateNaissance);
+    if (categorieAutomatique) {
+        definirValeur("memberCategory", categorieAutomatique);
     }
 
+    const categorie = categorieAutomatique || obtenirValeur("memberCategory");
     if (categorie === "enfant") {
         definirValeur("memberFrequency", "1");
     }
@@ -1782,7 +1783,11 @@ function mettreAJourResumeAdherent() {
         referralDiscountApplied: parrainageAcquis,
         montantPaye
     };
-    const tarif = vip ? 0 : calculerTarif(categorie, frequence);
+    const tarif = vip
+        ? 0
+        : categorie
+            ? calculerTarif(categorie, frequence)
+            : 0;
     inscription.tarif = tarif;
     const montant = calculerMontantAPayer(inscription);
     const reste = Math.max(0, montant - montantPaye);
