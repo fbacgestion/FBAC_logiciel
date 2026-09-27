@@ -55,6 +55,13 @@ const {
 } = require("./gestion/photos");
 
 const {
+    initialiserFamilles,
+    obtenirFamilles,
+    creerFamille,
+    modifierFamille
+} = require("./gestion/familles");
+
+const {
     initialiserSauvegardes,
     creerSauvegarde,
     obtenirSauvegardes,
@@ -97,9 +104,12 @@ function initialiserDonnees() {
             "configuration.json",
             "personnes.json",
             "inscriptions.json",
-            "saisons.json"
+            "saisons.json",
+            "familles.json"
         ]
     );
+
+    initialiserFamilles();
 
     fs.mkdirSync(
         path.join(
@@ -317,6 +327,27 @@ function enregistrerHandlersIpc() {
             return supprimerInscription(
                 id
             );
+        }
+    );
+
+    ipcMain.handle(
+        "obtenir-familles",
+        () => {
+            return obtenirFamilles();
+        }
+    );
+
+    ipcMain.handle(
+        "creer-famille",
+        (_, donnees) => {
+            return creerFamille(donnees);
+        }
+    );
+
+    ipcMain.handle(
+        "modifier-famille",
+        (_, id, donnees) => {
+            return modifierFamille(id, donnees);
         }
     );
 
