@@ -208,18 +208,21 @@ function normaliserConfiguration(
             child1:
                 Number(
                     tarifs.child1 ??
+                    tarifs.enfant1Cours ??
                     110
                 ),
 
             adult1:
                 Number(
                     tarifs.adult1 ??
+                    tarifs.adulte1Cours ??
                     155
                 ),
 
             adult4:
                 Number(
                     tarifs.adult4 ??
+                    tarifs.adulte4Cours ??
                     255
                 )
         },
