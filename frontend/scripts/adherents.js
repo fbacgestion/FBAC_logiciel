@@ -556,6 +556,17 @@ function ouvrirModificationAdherent(
         activerFormulaireAdherent(
             editable
         );
+
+        const montantPaye =
+            document.getElementById(
+                "memberPaidAmount"
+            );
+
+        if (montantPaye) {
+            montantPaye.disabled =
+                editable &&
+                Boolean(inscriptionId);
+        }
     }
 
     ouvrirModalAdherent();
