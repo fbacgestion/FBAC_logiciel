@@ -217,6 +217,42 @@ tr:hover td{
     margin-top:3px;
 }
 
+.member-avatar-button{
+    border:0;
+    padding:0;
+    margin:0;
+    background:transparent;
+    border-radius:50%;
+    cursor:pointer;
+}
+.member-avatar-button:hover .avatar{
+    transform:scale(1.06);
+    box-shadow:0 0 0 2px rgba(255,255,255,.12);
+}
+.member-avatar-button .avatar{
+    transition:.15s;
+}
+.photo-modal{
+    max-width:900px;
+}
+.photo-viewer-body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:500px;
+    background:#0b0d10;
+}
+.photo-viewer-image{
+    display:block;
+    max-width:100%;
+    max-height:70vh;
+    width:auto;
+    height:auto;
+    object-fit:contain;
+    border-radius:8px;
+    box-shadow:0 12px 40px rgba(0,0,0,.45);
+}
+
 .member-warning-badge{
     display:inline-flex;
     align-items:center;
