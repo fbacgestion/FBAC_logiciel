@@ -1076,6 +1076,10 @@ function convertirAidesBackend(
                 source.passSport
             ),
 
+        kiosk:
+            convertirAideBackend(
+                source.kiosk
+            ),
         spot50:
             convertirAideBackend(
                 source.spot50
