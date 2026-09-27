@@ -573,22 +573,27 @@ function reinitialiserFormulaireAdherent() {
 
     definirValeur(
         "familyDiscountAmount",
-        state.configuration?.familyDiscount ||
+        state.configuration?.reductionFamille ??
+        state.configuration?.familyDiscount ??
         20
     );
 
     definirValeur(
         "aidAtoutAmount",
+        state.configuration?.aides?.atout ??
+        state.configuration?.aides?.atoutNormandie ??
         50
     );
 
     definirValeur(
         "aidPassSportAmount",
+        state.configuration?.aides?.passSport ??
         50
     );
 
     definirValeur(
         "aidSpot50Amount",
+        state.configuration?.aides?.spot50 ??
         50
     );
 
