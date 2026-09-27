@@ -1,191 +1,120 @@
 function afficherAdherents() {
-    if (
-        typeof state === "undefined" ||
-        !state
-    ) {
+    if (typeof state === "undefined" || !state) {
         return;
     }
 
     const conteneur =
-        document.getElementById("liste-adherents") ||
-        document.getElementById("membersList");
+        document.getElementById("membersTable") ||
+        document.getElementById("liste-adherents");
 
     if (!conteneur) {
         return;
     }
 
-    const saisonCourante =
-        state.configuration.saisonActiveId;
+    const saisonCourante = state.configuration.saisonActiveId;
 
-    if (
-        !ui.selectedSeason ||
-        !state.saisons.some(
-            saison =>
-                saison.id === ui.selectedSeason
-        )
-    ) {
-        ui.selectedSeason =
-            saisonCourante;
+    if (!ui.selectedSeason || !state.saisons.some(saison => saison.id === ui.selectedSeason)) {
+        ui.selectedSeason = saisonCourante;
     }
-
-    const inscriptions =
-        state.inscriptions.filter(
-            inscription =>
-                inscription.saisonId === ui.selectedSeason
-        );
 
     remplirFiltreSaisonsAdherents();
 
-    const recherche =
-        (
-            document.getElementById("recherche-adherent") ||
-            document.getElementById("memberSearch")
-        )?.value
-            ?.trim()
-            .toLowerCase() || "";
+    const recherche = (
+        document.getElementById("memberSearch") ||
+        document.getElementById("recherche-adherent")
+    )?.value?.trim().toLowerCase() || "";
 
     const filtre =
-        (
-            document.getElementById("filtre-statut-adherent") ||
-            document.getElementById("memberStatusFilter")
-        )?.value || "tous";
+        document.getElementById("memberStatusFilter")?.value ||
+        document.getElementById("filtre-statut-adherent")?.value ||
+        "all";
 
-    const resultats =
-        inscriptions
-            .map(inscription => {
-                const personne =
-                    state.personnes.find(
-                        element =>
-                            element.id ===
-                            inscription.personneId
-                    );
+    const resultats = state.inscriptions
+        .filter(inscription => inscription.saisonId === ui.selectedSeason)
+        .map(inscription => ({
+            inscription,
+            personne: state.personnes.find(element => element.id === inscription.personneId)
+        }))
+        .filter(element => {
+            if (!element.personne) {
+                return false;
+            }
 
-                return {
-                    inscription,
-                    personne
-                };
-            })
-            .filter(element => {
-                if (!element.personne) {
-                    return false;
-                }
+            const nom = `${element.personne.firstName} ${element.personne.lastName}`.trim().toLowerCase();
 
-                const nom =
-                    `${element.personne.firstName} ${element.personne.lastName}`
-                        .toLowerCase();
+            if (recherche && !nom.includes(recherche)) {
+                return false;
+            }
 
-                if (
-                    recherche &&
-                    !nom.includes(recherche)
-                ) {
-                    return false;
-                }
+            const etat = calculerEtatPaiement(element.inscription);
 
-                if (
-                    filtre === "paye" &&
-                    calculerEtatPaiement(
-                        element.inscription
-                    ) !== "paye"
-                ) {
-                    return false;
-                }
+            if (filtre === "paid" || filtre === "paye") {
+                return etat === "paye";
+            }
 
-                if (
-                    filtre === "impaye" &&
-                    calculerEtatPaiement(
-                        element.inscription
-                    ) === "paye"
-                ) {
-                    return false;
-                }
+            if (filtre === "partial" || filtre === "partiel") {
+                return etat === "partiel";
+            }
 
-                return true;
-            });
+            if (filtre === "unpaid" || filtre === "impaye") {
+                return etat === "impaye";
+            }
+
+            return true;
+        });
+
+    const saison = state.saisons.find(element => element.id === ui.selectedSeason);
+    const texteSaison = document.getElementById("membersSeasonText");
+
+    if (texteSaison) {
+        texteSaison.textContent = saison ? `Inscriptions de la saison ${saison.nom}` : "";
+    }
+
+    const verrou = document.getElementById("membersLockText");
+
+    if (verrou) {
+        verrou.textContent = ui.selectedSeason === saisonCourante
+            ? "● Saison active"
+            : "● Saison historique — lecture seule";
+    }
 
     if (!resultats.length) {
-        conteneur.innerHTML = `
-            <div class="empty-state">
-                Aucun adhérent trouvé pour cette saison.
-            </div>
-        `;
+        conteneur.innerHTML = "<tr><td colspan=\"8\" class=\"empty-state\">Aucun adhérent trouvé pour cette saison.</td></tr>";
         return;
     }
 
-    conteneur.innerHTML =
-        resultats
-            .map(
-                ({
-                    inscription,
-                    personne
-                }) =>
-                    `
-                    <div class="member-row">
-                        <div class="member-avatar">
-                            ${
-                                personne.photo
-                                    ? `<img src="${echapperHtml(personne.photo)}" alt="">`
-                                    : echapperHtml(
-                                        obtenirInitiales(
-                                            personne
-                                        )
-                                    )
-                            }
-                        </div>
-                        <div class="member-main">
-                            <strong>
-                                ${echapperHtml(
-                                    `${personne.firstName} ${personne.lastName}`.trim()
-                                )}
-                            </strong>
-                            <span>
-                                ${echapperHtml(
-                                    inscription.category ===
-                                        "enfant"
-                                        ? "Enfant"
-                                        : "Adulte"
-                                )}
-                                ·
-                                ${echapperHtml(
-                                    inscription.frequency
-                                )}
-                                cours/semaine
-                                ·
-                                ${echapperHtml(
-                                    inscription.grade
-                                )}
-                            </span>
-                        </div>
-                        <div class="member-payment">
-                            ${afficherBadgePaiement(
-                                inscription
-                            )}
-                        </div>
-                        <div class="member-actions">
-                            <button
-                                class="button button-small"
-                                data-action="modifier-adherent"
-                                data-id="${echapperHtml(
-                                    inscription.id
-                                )}"
-                            >
-                                Modifier
-                            </button>
-                            <button
-                                class="button button-small button-danger"
-                                data-action="supprimer-adherent"
-                                data-id="${echapperHtml(
-                                    inscription.id
-                                )}"
-                            >
-                                Supprimer
-                            </button>
-                        </div>
-                    </div>
-                `
-            )
-            .join("");
-}
+    conteneur.innerHTML = resultats.map(({ inscription, personne }) => {
+        const aides = [
+            inscription.aides?.atoutNormandie?.enabled ? "Atout" : "",
+            inscription.aides?.passSport?.enabled ? "Pass'Sport" : "",
+            inscription.aides?.spot50?.enabled ? "Spot50" : ""
+        ].filter(Boolean).join(", ") || "—";
 
+        const certificat = inscription.certificat?.documentId || inscription.certificate?.documentId
+            ? "Présent"
+            : "Absent";
+
+        const parrainage = Number(inscription.referralDiscountApplied ?? inscription.parrainageAcquis ?? 0);
+        const famille = inscription.familyGroupId ? "Oui" : "—";
+
+        const actions = ui.selectedSeason === saisonCourante
+            ? "<button class=\"btn btn-small\" data-action=\"modifier-adherent\" data-id=\"" + echapperHtml(inscription.id) + "\">Modifier</button> " +
+              "<button class=\"btn btn-small button-danger\" data-action=\"supprimer-adherent\" data-id=\"" + echapperHtml(inscription.id) + "\">Supprimer</button>"
+            : "<button class=\"btn btn-small\" data-action=\"modifier-adherent\" data-id=\"" + echapperHtml(inscription.id) + "\">Voir</button>";
+
+        return "<tr>" +
+            "<td><strong>" + echapperHtml(`${personne.firstName} ${personne.lastName}`.trim()) + "</strong>" +
+            (inscription.vip ? " <span class=\"badge success\">VIP</span>" : "") + "</td>" +
+            "<td>" + echapperHtml(inscription.grade || "Blanc") + "</td>" +
+            "<td>" + famille + "</td>" +
+            "<td>" + afficherBadgePaiement(inscription) + "</td>" +
+            "<td>" + echapperHtml(aides) + "</td>" +
+            "<td>" + echapperHtml(certificat) + "</td>" +
+            "<td>" + (parrainage > 0 ? "-" + parrainage + " €" : "—") + "</td>" +
+            "<td><div class=\"actions\">" + actions + "</div></td>" +
+            "</tr>";
+    }).join("");
+}
 function remplirFiltreSaisonsAdherents() {
     const select =
         document.getElementById("memberSeasonFilter");
