@@ -1383,6 +1383,25 @@ async function selectionnerSaisonGlobale(
         return;
     }
 
+    const derniereSaison =
+        [...state.saisons].sort(
+            (a, b) =>
+                Number(b.anneeDebut) -
+                Number(a.anneeDebut)
+        )[0];
+
+    if (
+        derniereSaison &&
+        derniereSaison.id !== saison.id
+    ) {
+        notificationAvertissement(
+            "Une saison historique est consultable mais ne peut pas devenir la saison active."
+        );
+
+        mettreAJourSelecteurSaison();
+        return;
+    }
+
     try {
         await window.fbac.definirSaisonActuelle(
             saison.id
