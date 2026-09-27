@@ -64,11 +64,18 @@ function afficherParrainages() {
                     const nombre =
                         filleuls.length;
 
+                    const montantParrainage =
+                        Number(
+                            state.configuration?.parrainage?.montantParFilleul ??
+                            state.configuration?.parrainage?.montant ??
+                            20
+                        );
+
                     const avantage =
                         Math.min(
                             nombre,
                             3
-                        ) * 20;
+                        ) * montantParrainage;
 
                     return `
                         <div class="referral-card">
@@ -109,7 +116,7 @@ function afficherParrainages() {
                                                         )}
                                                     </span>
                                                     <span>
-                                                        +20 €
+                                                        +${montantParrainage.toFixed(2)} €
                                                     </span>
                                                 </div>
                                             `;
@@ -223,17 +230,6 @@ function modifierParrainage(
 
     inscription.referrerId =
         parrainId || null;
-
-    inscription.parrainageAcquis =
-        calculerAvantageParrainage(
-            inscription.personneId,
-            obtenirSaisonPrecedenteId(
-                inscription.saisonId
-            )
-        );
-
-    inscription.referralDiscountApplied =
-        inscription.parrainageAcquis;
 
     sauvegarderParrainage(
         inscription
