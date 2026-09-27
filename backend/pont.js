@@ -152,6 +152,24 @@ contextBridge.exposeInMainWorld(
             );
         },
 
+        creerSauvegardeDonnees: () => {
+            return ipcRenderer.invoke(
+                "creer-sauvegarde-donnees"
+            );
+        },
+
+        obtenirSauvegardes: () => {
+            return ipcRenderer.invoke(
+                "obtenir-sauvegardes"
+            );
+        },
+
+        restaurerDerniereSauvegarde: () => {
+            return ipcRenderer.invoke(
+                "restaurer-derniere-sauvegarde"
+            );
+        },
+
         creerSaison: (
             anneeDebut
         ) => {
