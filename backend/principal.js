@@ -58,7 +58,8 @@ const {
     initialiserFamilles,
     obtenirFamilles,
     creerFamille,
-    modifierFamille
+    modifierFamille,
+    supprimerFamille
 } = require("./gestion/familles");
 
 const {
@@ -349,6 +350,11 @@ function enregistrerHandlersIpc() {
         (_, id, donnees) => {
             return modifierFamille(id, donnees);
         }
+    );
+
+    ipcMain.handle(
+        "supprimer-famille",
+        (_, id) => supprimerFamille(id)
     );
 
     ipcMain.handle(
