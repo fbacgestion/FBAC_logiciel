@@ -496,6 +496,15 @@ function ouvrirModificationAdherent(
         if (referrer) {
             referrer.disabled = false;
         }
+
+        const bouton =
+            document.getElementById(
+                "memberSaveButton"
+            );
+
+        if (bouton) {
+            bouton.disabled = false;
+        }
     } else {
         activerFormulaireAdherent(
             editable
