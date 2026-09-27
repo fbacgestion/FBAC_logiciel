@@ -2017,6 +2017,11 @@ async function afficherPhoto(
             return;
         }
 
+        const informations =
+            await window.fbac.obtenirInformationsPhoto(
+                personneId
+            );
+
         const octets =
             convertirDonneesEnUint8Array(
                 donnees
@@ -2029,6 +2034,7 @@ async function afficherPhoto(
                 ],
                 {
                     type:
+                        informations?.mimeType ||
                         "image/jpeg"
                 }
             );
