@@ -932,20 +932,6 @@ function reinitialiserFormulaireAdherent() {
             "Ajoutez le PDF du certificat médical.";
     }
 
-    const boutonNouvelleFamille = document.getElementById("createFamilyButton");
-    if (boutonNouvelleFamille && !boutonNouvelleFamille.dataset.initialise) {
-        boutonNouvelleFamille.addEventListener("click", ouvrirCreationFamille);
-        boutonNouvelleFamille.dataset.initialise = "true";
-    }
-    const formulaireNouvelleFamille = document.getElementById("familyCreateForm");
-    if (formulaireNouvelleFamille && !formulaireNouvelleFamille.dataset.initialise) {
-        formulaireNouvelleFamille.addEventListener("submit", event => {
-            event.preventDefault();
-            creerNouvelleFamilleDepuisFormulaire();
-        });
-        formulaireNouvelleFamille.dataset.initialise = "true";
-    }
-
     const boutonCertificat =
         document.getElementById(
             "viewCertificateButton"
@@ -3742,6 +3728,21 @@ function initialiserEvenementsAdherents() {
 
         photo.dataset.initialise =
             "true";
+    }
+
+    const boutonNouvelleFamille = document.getElementById("createFamilyButton");
+    if (boutonNouvelleFamille && !boutonNouvelleFamille.dataset.initialise) {
+        boutonNouvelleFamille.addEventListener("click", ouvrirCreationFamille);
+        boutonNouvelleFamille.dataset.initialise = "true";
+    }
+
+    const formulaireNouvelleFamille = document.getElementById("familyCreateForm");
+    if (formulaireNouvelleFamille && !formulaireNouvelleFamille.dataset.initialise) {
+        formulaireNouvelleFamille.addEventListener("submit", event => {
+            event.preventDefault();
+            creerNouvelleFamilleDepuisFormulaire();
+        });
+        formulaireNouvelleFamille.dataset.initialise = "true";
     }
 
     const boutonCertificat =
