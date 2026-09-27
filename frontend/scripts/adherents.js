@@ -1068,6 +1068,7 @@ async function enregistrerAdherentDepuisFormulaire(
                 await window.fbac.creerPersonne({
                     firstName: prenom,
                     lastName: nom,
+                    birthDate: dateNaissance,
                     photo: null
                 });
 
