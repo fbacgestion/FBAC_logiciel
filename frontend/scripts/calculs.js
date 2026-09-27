@@ -61,6 +61,9 @@ function calculerTotalAides(
     const passSport =
         aides.passSport;
 
+    const kiosk =
+        aides.kiosk;
+
     const spot50 =
         aides.spot50;
 
@@ -70,6 +73,9 @@ function calculerTotalAides(
         ) +
         obtenirMontantAide(
             passSport
+        ) +
+        obtenirMontantAide(
+            kiosk
         ) +
         obtenirMontantAide(
             spot50
