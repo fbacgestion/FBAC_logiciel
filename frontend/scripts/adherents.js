@@ -14,14 +14,27 @@ function afficherAdherents() {
         return;
     }
 
-    const saisonActive =
+    const saisonCourante =
         state.configuration.saisonActiveId;
+
+    if (
+        !ui.selectedSeason ||
+        !state.saisons.some(
+            saison =>
+                saison.id === ui.selectedSeason
+        )
+    ) {
+        ui.selectedSeason =
+            saisonCourante;
+    }
 
     const inscriptions =
         state.inscriptions.filter(
             inscription =>
-                inscription.saisonId === saisonActive
+                inscription.saisonId === ui.selectedSeason
         );
+
+    remplirFiltreSaisonsAdherents();
 
     const recherche =
         (
@@ -171,6 +184,47 @@ function afficherAdherents() {
                 `
             )
             .join("");
+}
+
+function remplirFiltreSaisonsAdherents() {
+    const select =
+        document.getElementById("memberSeasonFilter");
+
+    if (!select) {
+        return;
+    }
+
+    const saisons =
+        [...state.saisons].sort(
+            (a, b) =>
+                Number(b.anneeDebut || String(b.nom).slice(0, 4)) -
+                Number(a.anneeDebut || String(a.nom).slice(0, 4))
+        );
+
+    select.innerHTML =
+        saisons.map(
+            saison =>
+                `<option value="${echapperHtml(saison.id)}">${echapperHtml(saison.nom)}</option>`
+        ).join("");
+
+    select.value =
+        ui.selectedSeason;
+}
+
+function changerSaisonAffichageAdherents(saisonId) {
+    if (
+        !state.saisons.some(
+            saison =>
+                saison.id === saisonId
+        )
+    ) {
+        return;
+    }
+
+    ui.selectedSeason =
+        saisonId;
+
+    afficherAdherents();
 }
 
 function afficherBadgePaiement(
@@ -2699,6 +2753,26 @@ function gererChangementCertificat(
 }
 
 function initialiserEvenementsAdherents() {
+    const selectSaison =
+        document.getElementById("memberSeasonFilter");
+
+    if (
+        selectSaison &&
+        !selectSaison.dataset.initialise
+    ) {
+        selectSaison.addEventListener(
+            "change",
+            event =>
+                changerSaisonAffichageAdherents(
+                    event.target.value
+                )
+        );
+
+        selectSaison.dataset.initialise =
+            "true";
+    }
+
+
     remplirSelectGrade("Blanc");
 
     const formulaire =
