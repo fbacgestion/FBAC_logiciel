@@ -501,6 +501,10 @@ function normaliserAides(
                 source.passSport
             ),
 
+        kiosk:
+            normaliserAide(
+                source.kiosk
+            ),
         spot50:
             normaliserAide(
                 source.spot50
