@@ -650,3 +650,54 @@ tr:hover td{
     background:#090a0c;
     border-color:#3a3d43;
 }
+
+.family-selector{
+    display:flex;
+    gap:8px;
+    align-items:center;
+}
+.family-selector select{
+    flex:1;
+}
+.family-link{
+    display:inline-flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:2px;
+    padding:0;
+    border:0;
+    background:transparent;
+    color:inherit;
+    cursor:pointer;
+    text-align:left;
+}
+.family-link:hover .family-name{
+    text-decoration:underline;
+}
+.family-name{
+    font-weight:600;
+}
+.family-count{
+    font-size:10px;
+    opacity:.6;
+}
+.family-member-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:12px 0;
+    border-bottom:1px solid rgba(255,255,255,.07);
+}
+.family-member-row:last-child{
+    border-bottom:0;
+}
+.family-member-row>div{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+}
+.family-member-row span{
+    font-size:12px;
+    opacity:.65;
+}
