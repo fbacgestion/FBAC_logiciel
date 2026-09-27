@@ -11,12 +11,6 @@ function afficherParametres() {
 
     remplirSelecteurSaisonsParametres();
 
-    definirValeur(
-        "settingCurrentSeason",
-        configuration.saisonActiveId ||
-        ""
-    );
-
     const tarifs =
         configuration.tarifs ||
         configuration.prices ||
