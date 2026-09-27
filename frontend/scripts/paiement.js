@@ -1,3 +1,46 @@
+function obtenirPaiementsInscription(inscription) {
+    if (!Array.isArray(inscription.paiements)) {
+        inscription.paiements = [];
+    }
+
+    if (
+        inscription.paiements.length === 0 &&
+        Number(inscription.montantPaye ?? inscription.paidAmount ?? 0) > 0
+    ) {
+        inscription.paiements.push({
+            id: genererIdentifiant("paiement"),
+            date: new Date().toISOString().slice(0, 10),
+            amount: Number(inscription.montantPaye ?? inscription.paidAmount) || 0,
+            method: inscription.paymentMethod || ""
+        });
+    }
+
+    return inscription.paiements;
+}
+
+function calculerTotalPaiementsInscription(inscription) {
+    return obtenirPaiementsInscription(inscription).reduce(
+        (total, paiement) =>
+            total + (Number(paiement.amount) || 0),
+        0
+    );
+}
+
+function synchroniserTotalPaiements(inscription) {
+    const total =
+        calculerTotalPaiementsInscription(
+            inscription
+        );
+
+    inscription.montantPaye =
+        total;
+
+    inscription.paidAmount =
+        total;
+
+    return total;
+}
+
 function afficherPaiements() {
     if (
         typeof state === "undefined" ||
@@ -7,12 +50,8 @@ function afficherPaiements() {
     }
 
     const conteneur =
-        document.getElementById(
-            "paymentsTable"
-        ) ||
-        document.getElementById(
-            "liste-paiements"
-        );
+        document.getElementById("paymentsTable") ||
+        document.getElementById("liste-paiements");
 
     if (!conteneur) {
         return;
@@ -24,8 +63,7 @@ function afficherPaiements() {
     const inscriptions =
         state.inscriptions.filter(
             inscription =>
-                inscription.saisonId ===
-                saisonId
+                inscription.saisonId === saisonId
         );
 
     if (!inscriptions.length) {
@@ -40,76 +78,70 @@ function afficherPaiements() {
     }
 
     conteneur.innerHTML =
-        inscriptions
-            .map(
-                inscription => {
-                    const personne =
-                        state.personnes.find(
-                            element =>
-                                element.id ===
-                                inscription.personneId
-                        );
+        inscriptions.map(inscription => {
+            synchroniserTotalPaiements(inscription);
 
-                    const donnees =
-                        calculerDonneesPaiement(
-                            inscription
-                        );
+            const personne =
+                state.personnes.find(
+                    element =>
+                        element.id ===
+                        inscription.personneId
+                );
 
-                    return `
-                        <tr>
-                            <td>
-                                ${echapperHtml(
-                                    personne
-                                        ? `${personne.firstName} ${personne.lastName}`.trim()
-                                        : "Inconnu"
-                                )}
-                            </td>
-                            <td>
-                                ${donnees.tarif.toFixed(2)} €
-                            </td>
-                            <td>
-                                -${donnees.totalAides.toFixed(2)} €
-                            </td>
-                            <td>
-                                -${donnees.reductionFamille.toFixed(2)} €
-                            </td>
-                            <td>
-                                -${donnees.parrainageAcquis.toFixed(2)} €
-                            </td>
-                            <td>
-                                ${donnees.montantAPayer.toFixed(2)} €
-                            </td>
-                            <td>
-                                ${donnees.montantPaye.toFixed(2)} €
-                            </td>
-                            <td>
-                                ${donnees.reste.toFixed(2)} €
-                            </td>
-                            <td>
-                                ${echapperHtml(
-                                    inscription.paymentMethod ||
-                                    "—"
-                                )}
-                            </td>
-                            <td>
-                                ${afficherEtatPaiement(
-                                    donnees.etat
-                                )}
-                            </td>
-                            <td>
-                                <button
-                                    class="btn btn-small"
-                                    data-action="modifier-paiement"
-                                    data-id="${echapperHtml(inscription.id)}"
-                                >
-                                    Modifier
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                }
-            )
-            .join("");
+            const donnees =
+                calculerDonneesPaiement(
+                    inscription
+                );
+
+            const paiements =
+                obtenirPaiementsInscription(
+                    inscription
+                );
+
+            const mode =
+                paiements.length === 1
+                    ? paiements[0].method || "—"
+                    : paiements.length > 1
+                        ? `${paiements.length} paiements`
+                        : "—";
+
+            const etat =
+                donnees.surpaiement > 0
+                    ? '<span class="badge warning">Surpaiement</span>'
+                    : afficherEtatPaiement(
+                        donnees.etat
+                    );
+
+            return `
+                <tr>
+                    <td>
+                        ${echapperHtml(
+                            personne
+                                ? `${personne.firstName} ${personne.lastName}`.trim()
+                                : "Inconnu"
+                        )}
+                    </td>
+                    <td>${donnees.tarif.toFixed(2)} €</td>
+                    <td>-${donnees.totalAides.toFixed(2)} €</td>
+                    <td>-${donnees.reductionFamille.toFixed(2)} €</td>
+                    <td>-${donnees.parrainageAcquis.toFixed(2)} €</td>
+                    <td>${donnees.montantAPayer.toFixed(2)} €</td>
+                    <td>${donnees.montantPaye.toFixed(2)} €</td>
+                    <td>${donnees.reste.toFixed(2)} €</td>
+                    <td>${echapperHtml(mode)}</td>
+                    <td>${etat}</td>
+                    <td>
+                        <button
+                            class="btn btn-small"
+                            data-action="modifier-paiement"
+                            data-id="${echapperHtml(inscription.id)}"
+                        >
+                            Ajouter
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join("");
 }
 
 function afficherResumePaiements() {
@@ -126,73 +158,82 @@ function afficherResumePaiements() {
     const inscriptions =
         state.inscriptions.filter(
             inscription =>
-                inscription.saisonId ===
-                saisonId
+                inscription.saisonId === saisonId
         );
 
-    const totalAttendu =
-        inscriptions.reduce(
-            (
-                total,
-                inscription
-            ) =>
-                total +
-                calculerMontantAPayer(
-                    inscription
-                ),
-            0
-        );
+    let totalAttendu = 0;
+    let totalPaye = 0;
+    let totalSurpaiement = 0;
+    let nombreImpayes = 0;
 
-    const totalPaye =
-        inscriptions.reduce(
-            (
-                total,
+    inscriptions.forEach(inscription => {
+        synchroniserTotalPaiements(inscription);
+
+        const donnees =
+            calculerDonneesPaiement(
                 inscription
-            ) =>
-                total +
-                (
-                    Number(
-                        inscription.montantPaye
-                    ) || 0
-                ),
-            0
-        );
+            );
+
+        totalAttendu +=
+            donnees.montantAPayer;
+
+        totalPaye +=
+            donnees.montantPaye;
+
+        totalSurpaiement +=
+            donnees.surpaiement;
+
+        if (donnees.etat !== "paye") {
+            nombreImpayes++;
+        }
+    });
 
     const reste =
-        Math.max(
-            0,
-            totalAttendu -
-            totalPaye
+        inscriptions.reduce(
+            (total, inscription) =>
+                total +
+                calculerDonneesPaiement(
+                    inscription
+                ).reste,
+            0
         );
 
-    const elementAttendu =
+    document.getElementById("paymentTotalDue")?.replaceChildren(
+        document.createTextNode(
+            `${totalAttendu.toFixed(2)} €`
+        )
+    );
+
+    document.getElementById("paymentTotalPaid")?.replaceChildren(
+        document.createTextNode(
+            `${totalPaye.toFixed(2)} €`
+        )
+    );
+
+    document.getElementById("paymentRemaining")?.replaceChildren(
+        document.createTextNode(
+            `${reste.toFixed(2)} €`
+        )
+    );
+
+    const impayes =
         document.getElementById(
-            "paymentTotalDue"
+            "paymentUnpaid"
         );
 
-    const elementPaye =
-        document.getElementById(
-            "paymentTotalPaid"
+    if (impayes) {
+        impayes.textContent =
+            nombreImpayes;
+
+        impayes.parentElement?.querySelector(
+            ".kpi-extra"
+        )?.replaceChildren(
+            document.createTextNode(
+                totalSurpaiement > 0
+                    ? `${totalSurpaiement.toFixed(2)} € de surpaiements`
+                    : "Aucun surpaiement"
+            )
         );
-
-    const elementReste =
-        document.getElementById(
-            "paymentRemaining"
-        );
-
-    if (elementAttendu) {
-        elementAttendu.textContent =
-            `${totalAttendu.toFixed(2)} €`;
-    }
-
-    if (elementPaye) {
-        elementPaye.textContent =
-            `${totalPaye.toFixed(2)} €`;
-    }
-
-    if (elementReste) {
-        elementReste.textContent =
-            `${reste.toFixed(2)} €`;
     }
 }
 
@@ -200,26 +241,61 @@ function afficherEtatPaiement(
     etat
 ) {
     if (etat === "paye") {
-        return `
-            <span class="badge success">
-                Payé
-            </span>
-        `;
+        return '<span class="badge success">Payé</span>';
     }
 
     if (etat === "partiel") {
-        return `
-            <span class="badge warning">
-                Partiel
-            </span>
-        `;
+        return '<span class="badge warning">Partiel</span>';
     }
 
-    return `
-        <span class="badge danger">
-            Impayé
-        </span>
-    `;
+    return '<span class="badge danger">Impayé</span>';
+}
+
+function formaterDatePaiement(date) {
+    if (!date) {
+        return "Date inconnue";
+    }
+
+    const valeur =
+        new Date(`${date}T00:00:00`);
+
+    return Number.isNaN(valeur.getTime())
+        ? date
+        : valeur.toLocaleDateString("fr-FR");
+}
+
+function afficherHistoriquePaiements(inscription) {
+    const conteneur =
+        document.getElementById(
+            "paymentHistory"
+        );
+
+    if (!conteneur) {
+        return;
+    }
+
+    const paiements =
+        obtenirPaiementsInscription(
+            inscription
+        );
+
+    if (!paiements.length) {
+        conteneur.innerHTML =
+            "<strong>Historique des paiements</strong><br>Aucun paiement enregistré.";
+        return;
+    }
+
+    conteneur.innerHTML =
+        "<strong>Historique des paiements</strong>" +
+        paiements.map((paiement, index) => `
+            <div class="summary-line">
+                <span>
+                    ${formaterDatePaiement(paiement.date)}
+                    — ${echapperHtml(paiement.method || "Mode non renseigné")}
+                </span>
+                <strong>${(Number(paiement.amount) || 0).toFixed(2)} €</strong>
+            </div>
+        `).join("");
 }
 
 function ouvrirPaiement(
@@ -236,8 +312,12 @@ function ouvrirPaiement(
         return;
     }
 
-    const montant =
-        calculerMontantAPayer(
+    synchroniserTotalPaiements(
+        inscription
+    );
+
+    const donnees =
+        calculerDonneesPaiement(
             inscription
         );
 
@@ -248,12 +328,12 @@ function ouvrirPaiement(
 
     definirValeur(
         "paymentAmount",
-        inscription.montantPaye || 0
+        ""
     );
 
     definirValeur(
         "paymentMethod",
-        inscription.paymentMethod || ""
+        ""
     );
 
     const resume =
@@ -264,25 +344,22 @@ function ouvrirPaiement(
     if (resume) {
         resume.innerHTML = `
             Total à payer :
-            <strong>
-                ${montant.toFixed(2)} €
-            </strong>
+            <strong>${donnees.montantAPayer.toFixed(2)} €</strong>
             <br>
-            Déjà payé :
-            <strong>
-                ${(Number(
-                    inscription.montantPaye
-                ) || 0).toFixed(2)} €
-            </strong>
+            Total déjà payé :
+            <strong>${donnees.montantPaye.toFixed(2)} €</strong>
             <br>
-            Reste :
-            <strong>
-                ${calculerReste(
-                    inscription
-                ).toFixed(2)} €
-            </strong>
+            Reste à payer :
+            <strong>${donnees.reste.toFixed(2)} €</strong>
+            <br>
+            Surpaiement :
+            <strong>${donnees.surpaiement.toFixed(2)} €</strong>
         `;
     }
+
+    afficherHistoriquePaiements(
+        inscription
+    );
 
     const modal =
         document.getElementById(
@@ -290,13 +367,8 @@ function ouvrirPaiement(
         );
 
     if (modal) {
-        modal.classList.add(
-            "active"
-        );
-
-        modal.classList.add(
-            "open"
-        );
+        modal.classList.add("active");
+        modal.classList.add("open");
     }
 }
 
@@ -334,32 +406,46 @@ async function enregistrerPaiement(
         );
 
     if (
-        !Number.isFinite(
-            montant
-        ) ||
-        montant < 0
+        !Number.isFinite(montant) ||
+        montant <= 0
     ) {
         notificationErreur(
-            "Montant de paiement invalide."
+            "Saisissez un montant de paiement supérieur à 0 €."
         );
         return;
     }
 
-    inscription.montantPaye =
-        montant;
-
-    inscription.paidAmount =
-        montant;
-
-    inscription.paymentMethod =
+    const mode =
         obtenirValeur(
             "paymentMethod"
-        );
+        ) || "";
+
+    obtenirPaiementsInscription(
+        inscription
+    ).push({
+        id:
+            genererIdentifiant("paiement"),
+        date:
+            new Date().toISOString().slice(0, 10),
+        amount:
+            montant,
+        method:
+            mode
+    });
+
+    synchroniserTotalPaiements(
+        inscription
+    );
+
+    inscription.paymentMethod =
+        mode ||
+        inscription.paymentMethod ||
+        "";
 
     try {
         await window.fbac.modifierInscription(
             inscription.id,
-            convertirInscriptionPaiementBackend(
+            convertirInscriptionPourBackend(
                 inscription
             )
         );
@@ -372,19 +458,14 @@ async function enregistrerPaiement(
             );
 
         if (modal) {
-            modal.classList.remove(
-                "active"
-            );
-
-            modal.classList.remove(
-                "open"
-            );
+            modal.classList.remove("active");
+            modal.classList.remove("open");
         }
 
         renderCurrentPage();
 
         notificationSucces(
-            "Paiement enregistré."
+            `Paiement de ${montant.toFixed(2)} € enregistré.`
         );
     } catch (error) {
         console.error(
@@ -393,137 +474,75 @@ async function enregistrerPaiement(
         );
 
         notificationErreur(
+            error.message ||
             "Impossible d'enregistrer le paiement."
         );
     }
 }
 
-function convertirInscriptionPaiementBackend(
-    inscription
-) {
-    const saison =
-        state.saisons.find(
-            element =>
-                element.id ===
-                inscription.saisonId
+function initialiserPaiements() {
+    const formulaire =
+        document.getElementById(
+            "paymentForm"
         );
 
-    return {
-        personId:
-            inscription.personneId,
-        season:
-            saison
-                ? saison.id
-                : inscription.saisonId,
-        category:
-            inscription.category,
-        frequency:
-            String(
-                inscription.frequency
-            ),
-        grade:
-            inscription.grade,
-        vip:
-            Boolean(
-                inscription.vip
-            ),
-        familyGroupId:
-            inscription.familyGroupId ||
-            null,
-        referrerId:
-            inscription.referrerId ||
-            null,
-        referralDiscountApplied:
-            Number(
-                inscription.referralDiscountApplied ??
-                inscription.parrainageAcquis ??
-                0
-            ),
-        aids: {
-            atout:
-                inscription.aides?.atoutNormandie ||
-                inscription.aides?.atout ||
-                {
-                    enabled: false,
-                    amount: 0
-                },
-            passSport:
-                inscription.aides?.passSport ||
-                {
-                    enabled: false,
-                    amount: 0
-                },
-            spot50:
-                inscription.aides?.spot50 ||
-                {
-                    enabled: false,
-                    amount: 0
+    if (
+        formulaire &&
+        !formulaire.dataset.initialise
+    ) {
+        formulaire.addEventListener(
+            "submit",
+            enregistrerPaiement
+        );
+
+        formulaire.dataset.initialise =
+            "true";
+    }
+
+    if (
+        !document.body.dataset.paiementActionsInitialises
+    ) {
+        document.addEventListener(
+            "click",
+            event => {
+                const bouton =
+                    event.target.closest(
+                        '[data-action="modifier-paiement"]'
+                    );
+
+                if (!bouton) {
+                    return;
                 }
-        },
-        familyDiscountEnabled:
-            Boolean(
-                inscription.familyDiscountEnabled
-            ),
-        familyDiscountAmount:
-            Number(
-                inscription.familyDiscountAmount ??
-                inscription.reductionFamille ??
-                0
-            ),
-        paidAmount:
-            Number(
-                inscription.montantPaye
-            ) || 0,
-        paymentMethod:
-            inscription.paymentMethod ||
-            "",
-        certificate:
-            inscription.certificat ||
-            inscription.certificate ||
-            {}
-    };
-}
 
-function initialiserPaiements() {
-    const formulaire = document.getElementById("paymentForm");
-
-    if (formulaire && !formulaire.dataset.initialise) {
-        formulaire.addEventListener("submit", enregistrerPaiement);
-        formulaire.dataset.initialise = "true";
-    }
-
-    if (!document.body.dataset.paiementActionsInitialises) {
-        document.addEventListener("click", event => {
-            const bouton = event.target.closest('[data-action="modifier-paiement"]');
-
-            if (!bouton) {
-                return;
+                ouvrirPaiement(
+                    bouton.dataset.id
+                );
             }
+        );
 
-            ouvrirPaiement(bouton.dataset.id);
-        });
-
-        document.body.dataset.paiementActionsInitialises = "true";
+        document.body.dataset.paiementActionsInitialises =
+            "true";
     }
 
-    const exportButton = document.querySelector('[data-action="export-csv"]');
+    const exportButton =
+        document.querySelector(
+            '[data-action="export-csv"]'
+        );
 
-    if (exportButton && !exportButton.dataset.initialise) {
-        exportButton.addEventListener("click", exporterPaiementsCsv);
-        exportButton.dataset.initialise = "true";
+    if (
+        exportButton &&
+        !exportButton.dataset.initialise
+    ) {
+        exportButton.addEventListener(
+            "click",
+            exporterPaiementsCsv
+        );
+
+        exportButton.dataset.initialise =
+            "true";
     }
 }
-if (
-    document.readyState ===
-    "loading"
-) {
-    document.addEventListener(
-        "DOMContentLoaded",
-        initialiserPaiements
-    );
-} else {
-    initialiserPaiements();
-}
+
 function exporterPaiementsCsv() {
     const saisonId =
         state.configuration.saisonActiveId;
@@ -531,50 +550,64 @@ function exporterPaiementsCsv() {
     const inscriptions =
         state.inscriptions.filter(
             inscription =>
-                inscription.saisonId === saisonId
+                inscription.saisonId ===
+                saisonId
         );
 
-    const lignes = [
-        [
-            "Nom",
-            "Prénom",
-            "Saison",
-            "Grade",
-            "Catégorie",
-            "Fréquence",
-            "Tarif",
-            "Aides",
-            "Réduction famille",
-            "Parrainage",
-            "Total à payer",
-            "Payé",
-            "Reste",
-            "Mode paiement",
-            "Certificat",
-            "Validité"
-        ]
-    ];
+    const lignes = [[
+        "Nom",
+        "Prénom",
+        "Saison",
+        "Grade",
+        "Catégorie",
+        "Fréquence",
+        "Tarif",
+        "Aides",
+        "Réduction famille",
+        "Parrainage",
+        "Total à payer",
+        "Payé",
+        "Reste",
+        "Surpaiement",
+        "Nombre de paiements",
+        "Mode paiement",
+        "Certificat",
+        "Validité"
+    ]];
 
     inscriptions.forEach(inscription => {
+        synchroniserTotalPaiements(
+            inscription
+        );
+
         const personne =
             state.personnes.find(
                 element =>
-                    element.id === inscription.personneId
+                    element.id ===
+                    inscription.personneId
             );
 
         const saison =
             state.saisons.find(
                 element =>
-                    element.id === inscription.saisonId
+                    element.id ===
+                    inscription.saisonId
             );
 
         const donnees =
-            calculerDonneesPaiement(inscription);
+            calculerDonneesPaiement(
+                inscription
+            );
 
         const certificat =
             inscription.certificat ||
             inscription.certificate ||
             {};
+
+        const paiements =
+            obtenirPaiementsInscription(
+                inscription
+            );
 
         lignes.push([
             personne?.lastName || "",
@@ -590,7 +623,13 @@ function exporterPaiementsCsv() {
             donnees.montantAPayer.toFixed(2),
             donnees.montantPaye.toFixed(2),
             donnees.reste.toFixed(2),
-            inscription.paymentMethod || "",
+            donnees.surpaiement.toFixed(2),
+            paiements.length,
+            paiements.length === 1
+                ? paiements[0].method || ""
+                : paiements.length > 1
+                    ? "Plusieurs"
+                    : "",
             certificat.fileName || "",
             certificat.expiry || ""
         ]);
@@ -598,16 +637,15 @@ function exporterPaiementsCsv() {
 
     const csv =
         lignes
-            .map(
-                ligne =>
-                    ligne
-                        .map(
-                            valeur =>
-                                `"${String(
-                                    valeur ?? ""
-                                ).replace(/"/g, '""')}"`
-                        )
-                        .join(";")
+            .map(ligne =>
+                ligne
+                    .map(
+                        valeur =>
+                            `"${String(
+                                valeur ?? ""
+                            ).replace(/"/g, '""')}"`
+                    )
+                    .join(";")
             )
             .join("\r\n");
 
@@ -615,27 +653,52 @@ function exporterPaiementsCsv() {
         new Blob(
             ["\ufeff" + csv],
             {
-                type: "text/csv;charset=utf-8;"
+                type:
+                    "text/csv;charset=utf-8;"
             }
         );
 
     const url =
-        URL.createObjectURL(blob);
+        URL.createObjectURL(
+            blob
+        );
 
     const lien =
-        document.createElement("a");
+        document.createElement(
+            "a"
+        );
 
-    lien.href = url;
+    lien.href =
+        url;
+
     lien.download =
         `fbac-paiements-${saisonId || "export"}.csv`;
 
-    document.body.appendChild(lien);
+    document.body.appendChild(
+        lien
+    );
+
     lien.click();
+
     lien.remove();
 
-    URL.revokeObjectURL(url);
+    URL.revokeObjectURL(
+        url
+    );
 
     notificationSucces(
         "Export CSV terminé."
     );
+}
+
+if (
+    document.readyState ===
+    "loading"
+) {
+    document.addEventListener(
+        "DOMContentLoaded",
+        initialiserPaiements
+    );
+} else {
+    initialiserPaiements();
 }
