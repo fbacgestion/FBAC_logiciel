@@ -281,16 +281,6 @@ function ouvrirModificationAdherent(
         inscription.saisonId ===
         saisonActive;
 
-    if (
-        !editable &&
-        !parrainageUniquement
-    ) {
-        notificationAvertissement(
-            "Cette saison est historique et ne peut pas être modifiée."
-        );
-        return;
-    }
-
     const champInscription =
         document.getElementById(
             "memberEnrollmentId"
@@ -448,7 +438,11 @@ function ouvrirModificationAdherent(
 
     if (titre) {
         titre.textContent =
-            "Modifier l'adhérent";
+            parrainageUniquement
+                ? "Modifier le parrainage"
+                : editable
+                    ? "Modifier l'adhérent"
+                    : "Consulter l'adhérent";
     }
 
     if (sousTitre) {
