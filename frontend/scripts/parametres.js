@@ -54,6 +54,12 @@ function afficherParametres() {
     );
 
     definirValeur(
+        "aidKiosk",
+        aides.kiosk ??
+        50
+    );
+
+    definirValeur(
         "aidSpot50",
         aides.spot50 ??
         50
@@ -167,6 +173,12 @@ async function enregistrerParametres() {
                 Number(
                     obtenirValeur(
                         "aidPassSport"
+                    ) || 0
+                ),
+            kiosk:
+                Number(
+                    obtenirValeur(
+                        "aidKiosk"
                     ) || 0
                 ),
             spot50:
