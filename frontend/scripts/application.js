@@ -454,13 +454,16 @@ function normaliserInscription(
                 0
             ),
 
+        paiements:
+            Array.isArray(inscription.paiements)
+                ? inscription.paiements
+                : [],
         paidAmount:
             Number(
                 inscription.paidAmount ??
                 inscription.montantPaye ??
                 0
             ),
-
         paymentMethod:
             inscription.paymentMethod ||
             "",
