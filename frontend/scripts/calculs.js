@@ -18,8 +18,8 @@ function calculerTarif(
         cours === 1
     ) {
         return Number(
-            tarifs.child1 ??
-            tarifs.enfant1Cours ??
+            tarifs.child1 ||
+            tarifs.enfant1Cours ||
             110
         );
     }
@@ -29,8 +29,8 @@ function calculerTarif(
         cours === 1
     ) {
         return Number(
-            tarifs.adult1 ??
-            tarifs.adulte1Cours ??
+            tarifs.adult1 ||
+            tarifs.adulte1Cours ||
             155
         );
     }
@@ -40,8 +40,8 @@ function calculerTarif(
         cours === 4
     ) {
         return Number(
-            tarifs.adult4 ??
-            tarifs.adulte4Cours ??
+            tarifs.adult4 ||
+            tarifs.adulte4Cours ||
             255
         );
     }
