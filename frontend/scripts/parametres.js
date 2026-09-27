@@ -9,8 +9,6 @@ function afficherParametres() {
     const configuration =
         state.configuration || {};
 
-    remplirSelecteurSaisonsParametres();
-
     const tarifs =
         configuration.tarifs ||
         configuration.prices ||
@@ -66,36 +64,6 @@ function afficherParametres() {
     );
 }
 
-function remplirSelecteurSaisonsParametres() {
-    const select =
-        document.getElementById(
-            "settingCurrentSeason"
-        );
-
-    if (!select) {
-        return;
-    }
-
-    select.innerHTML =
-        state.saisons
-            .map(
-                saison =>
-                    `
-                    <option value="${echapperHtml(
-                        saison.id
-                    )}">
-                        ${echapperHtml(
-                            saison.nom
-                        )}
-                    </option>
-                `
-            )
-            .join("");
-
-    select.value =
-        state.configuration.saisonActiveId;
-}
-
 async function enregistrerParametres() {
     if (
         typeof window.fbac ===
@@ -107,37 +75,6 @@ async function enregistrerParametres() {
         return;
     }
 
-    const saisonActiveId =
-        obtenirValeur(
-            "settingCurrentSeason"
-        );
-
-    if (
-        saisonActiveId &&
-        !state.saisons.some(
-            saison =>
-                saison.id ===
-                saisonActiveId
-        )
-    ) {
-        notificationErreur(
-            "La saison sélectionnée est invalide."
-        );
-        return;
-    }
-
-    const configuration = {
-        ...state.configuration,
-
-        saisonActiveId,
-
-        saisonActive:
-            state.saisons.find(
-                saison =>
-                    saison.id ===
-                    saisonActiveId
-            )?.nom ||
-            "",
 
         tarifs: {
             child1:
@@ -210,8 +147,6 @@ async function enregistrerParametres() {
         state.configuration =
             configuration;
 
-        mettreAJourSelecteurSaison();
-
         renderCurrentPage();
 
         notificationSucces(
@@ -228,55 +163,6 @@ async function enregistrerParametres() {
             "Impossible d'enregistrer les paramètres."
         );
     }
-}
-
-function changerSaisonDepuisParametres(
-    saisonId
-) {
-    if (!saisonId) {
-        return;
-    }
-
-    const saison =
-        state.saisons.find(
-            element =>
-                element.id ===
-                saisonId
-        );
-
-    if (!saison) {
-        return;
-    }
-
-    const derniereSaison =
-        [...state.saisons].sort(
-            (a, b) =>
-                Number(b.anneeDebut) -
-                Number(a.anneeDebut)
-        )[0];
-
-    if (
-        derniereSaison &&
-        derniereSaison.id !== saison.id
-    ) {
-        notificationAvertissement(
-            "Une saison historique ne peut pas devenir la saison active."
-        );
-        remplirSelecteurSaisonsParametres();
-        return;
-    }
-
-    state.configuration.saisonActiveId =
-        saison.id;
-
-    state.configuration.saisonActive =
-        saison.nom;
-
-    sauvegarderEtat();
-
-    mettreAJourSelecteurSaison();
-
-    renderCurrentPage();
 }
 
 function initialiserParametres() {
