@@ -2448,6 +2448,53 @@ function remplirSelectFamille(familleId) {
 
     select.value =
         familleId || "";
+    mettreAJourBoutonSuppressionFamille();
+}
+
+function mettreAJourBoutonSuppressionFamille() {
+    const select = document.getElementById("memberFamilyGroup");
+    const bouton = document.getElementById("deleteFamilyFromMemberButton");
+    if (!select || !bouton) {
+        return;
+    }
+    const familleId = select.value;
+    const famille = state.familles.find(element =>
+        element.id === familleId &&
+        element.saisonId === state.configuration.saisonActiveId
+    );
+    bouton.disabled = !familleId || !famille;
+}
+
+async function supprimerFamilleDepuisFormulaire() {
+    const select = document.getElementById("memberFamilyGroup");
+    if (!select || !select.value) {
+        return;
+    }
+    const familleId = select.value;
+    const famille = state.familles.find(element =>
+        element.id === familleId &&
+        element.saisonId === state.configuration.saisonActiveId
+    );
+    if (!famille) {
+        notificationErreur("Cette famille ne peut pas être supprimée.");
+        mettreAJourBoutonSuppressionFamille();
+        return;
+    }
+    if (!confirm("Supprimer le groupe famille « " + famille.nom + " » ? Les adhérents seront conservés, mais ne seront plus rattachés à ce groupe.")) {
+        return;
+    }
+    try {
+        await window.fbac.supprimerFamille(familleId);
+        state.familles = state.familles.filter(element => element.id !== familleId);
+        select.value = "";
+        remplirSelectFamille("");
+        mettreAJourBoutonSuppressionFamille();
+        mettreAJourResumeAdherent();
+        notificationSucces("La famille « " + famille.nom + " » a été supprimée.");
+    } catch (error) {
+        console.error("Erreur lors de la suppression de la famille depuis la fiche :", error);
+        notificationErreur(error?.message || "Impossible de supprimer la famille.");
+    }
 }
 
 async function creerNouvelleFamilleDepuisFormulaire() {
@@ -3818,6 +3865,18 @@ function initialiserEvenementsAdherents() {
 
         photo.dataset.initialise =
             "true";
+    }
+
+    const selectFamille = document.getElementById("memberFamilyGroup");
+    if (selectFamille && !selectFamille.dataset.initialise) {
+        selectFamille.addEventListener("change", mettreAJourBoutonSuppressionFamille);
+        selectFamille.dataset.initialise = "true";
+    }
+
+    const boutonSupprimerFamille = document.getElementById("deleteFamilyFromMemberButton");
+    if (boutonSupprimerFamille && !boutonSupprimerFamille.dataset.initialise) {
+        boutonSupprimerFamille.addEventListener("click", supprimerFamilleDepuisFormulaire);
+        boutonSupprimerFamille.dataset.initialise = "true";
     }
 
     const boutonNouvelleFamille = document.getElementById("createFamilyButton");
