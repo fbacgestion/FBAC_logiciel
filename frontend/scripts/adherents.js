@@ -2694,15 +2694,15 @@ async function afficherPhoto(
                 blob
             );
 
-        imageElement.src =
-            url;
-
         imageElement.onload =
             () => {
                 URL.revokeObjectURL(
                     url
                 );
             };
+
+        imageElement.src =
+            url;
     } catch (error) {
         console.error(
             "Erreur lors du chargement de la photo :",
