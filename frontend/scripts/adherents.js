@@ -354,6 +354,28 @@ function ouvrirModificationAdherent(
         inscription.referrerId || ""
     );
 
+    const montantParrainage =
+        obtenirMontantParrainage();
+
+    const nombreParrainages =
+        montantParrainage > 0
+            ? Math.min(
+                3,
+                Math.round(
+                    Number(
+                        inscription.referralDiscountApplied ??
+                        inscription.parrainageAcquis ??
+                        0
+                    ) / montantParrainage
+                )
+            )
+            : 0;
+
+    definirValeur(
+        "memberReferralCount",
+        nombreParrainages
+    );
+
     definirValeur(
         "memberPaymentMethod",
         inscription.paymentMethod || ""
@@ -629,6 +651,11 @@ function reinitialiserFormulaireAdherent() {
 
     remplirSelectParrain(
         null
+    );
+
+    definirValeur(
+        "memberReferralCount",
+        "0"
     );
 
     definirCase(
@@ -1024,14 +1051,12 @@ async function enregistrerAdherentDepuisFormulaire(
                 referrerId:
                     parrain,
                 parrainageAcquis:
-                    calculerParrainageAcquis(
-                        personne.id,
-                        saisonId
+                    calculerMontantParrainage(
+                        obtenirNombreParrainagesSelectionne()
                     ),
                 referralDiscountApplied:
-                    calculerParrainageAcquis(
-                        personne.id,
-                        saisonId
+                    calculerMontantParrainage(
+                        obtenirNombreParrainagesSelectionne()
                     ),
                 aides,
                 reductionFamille:
@@ -1103,6 +1128,14 @@ async function enregistrerAdherentDepuisFormulaire(
 
             inscription.referrerId =
                 parrain;
+
+            inscription.parrainageAcquis =
+                calculerMontantParrainage(
+                    obtenirNombreParrainagesSelectionne()
+                );
+
+            inscription.referralDiscountApplied =
+                inscription.parrainageAcquis;
 
             inscription.aides =
                 aides;
@@ -1720,6 +1753,10 @@ function mettreAJourResumeAdherent() {
     const reductionFamille = obtenirCase("familyDiscountEnabled")
         ? Number(obtenirValeur("familyDiscountAmount") || 0)
         : 0;
+    const parrainageAcquis =
+        calculerMontantParrainage(
+            obtenirNombreParrainagesSelectionne()
+        );
     const montantPaye = Number(obtenirValeur("memberPaidAmount") || 0);
     const inscription = {
         category: categorie,
@@ -1727,7 +1764,8 @@ function mettreAJourResumeAdherent() {
         vip,
         aides,
         reductionFamille,
-        parrainageAcquis: 0,
+        parrainageAcquis,
+        referralDiscountApplied: parrainageAcquis,
         montantPaye
     };
     const tarif = vip ? 0 : calculerTarif(categorie, frequence);
@@ -1739,7 +1777,7 @@ function mettreAJourResumeAdherent() {
     definirValeur("summaryBasePrice", `${tarif.toFixed(2)} €`);
     definirValeur("summaryAids", `-${totalAides.toFixed(2)} €`);
     definirValeur("summaryFamily", `-${reductionFamille.toFixed(2)} €`);
-    definirValeur("summaryReferral", "-0.00 €");
+    definirValeur("summaryReferral", `-${parrainageAcquis.toFixed(2)} €`);
     definirValeur("summaryDue", `${montant.toFixed(2)} €`);
     definirValeur("summaryPaid", `${montantPaye.toFixed(2)} €`);
     definirValeur("summaryRemaining", `${reste.toFixed(2)} €`);
@@ -2410,6 +2448,49 @@ function calculerExpirationCertificat(
         );
 }
 
+function obtenirMontantParrainage() {
+    const configuration =
+        state.configuration || {};
+
+    const parrainage =
+        configuration.parrainage || {};
+
+    return Number(
+        parrainage.montantParFilleul ??
+        parrainage.montant ??
+        20
+    );
+}
+
+function calculerMontantParrainage(
+    nombre
+) {
+    const quantite =
+        Math.min(
+            3,
+            Math.max(
+                0,
+                Number(nombre) || 0
+            )
+        );
+
+    return quantite * obtenirMontantParrainage();
+}
+
+function obtenirNombreParrainagesSelectionne() {
+    return Math.min(
+        3,
+        Math.max(
+            0,
+            Number(
+                obtenirValeur(
+                    "memberReferralCount"
+                ) || 0
+            )
+        )
+    );
+}
+
 function calculerParrainageAcquis(
     personneId,
     saisonId
@@ -2430,10 +2511,9 @@ function calculerParrainageAcquis(
                     personneId
         ).length;
 
-    return Math.min(
-        nombre,
-        3
-    ) * 20;
+    return calculerMontantParrainage(
+        nombre
+    );
 }
 
 function obtenirSaisonPrecedente(
@@ -2829,7 +2909,8 @@ function initialiserEvenementsAdherents() {
         "aidSpot50Amount",
         "familyDiscountEnabled",
         "familyDiscountAmount",
-        "memberPaidAmount"
+        "memberPaidAmount",
+        "memberReferralCount"
     ].forEach(
         id => {
             const element =
