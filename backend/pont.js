@@ -152,24 +152,6 @@ contextBridge.exposeInMainWorld(
             );
         },
 
-        creerSaison: (
-            anneeDebut
-        ) => {
-            return ipcRenderer.invoke(
-                "creer-saison",
-                anneeDebut
-            );
-        },
-
-        definirSaisonActuelle: (
-            idSaison
-        ) => {
-            return ipcRenderer.invoke(
-                "definir-saison-actuelle",
-                idSaison
-            );
-        },
-
         enregistrerCertificat: (
             inscriptionId,
             fichier
