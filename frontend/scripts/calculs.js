@@ -106,6 +106,69 @@ function obtenirMontantAide(
     ) || 0;
 }
 
+function obtenirAidesEffectives(inscription) {
+    const tarif =
+        inscription.vip
+            ? 0
+            : Number(inscription.tarif) ||
+              calculerTarif(
+                  inscription.category,
+                  inscription.frequency
+              );
+
+    let reste =
+        Math.max(
+            0,
+            tarif -
+            Number(
+                inscription.reductionFamille ??
+                inscription.familyDiscountAmount ??
+                0
+            ) -
+            Number(
+                inscription.parrainageAcquis ??
+                inscription.referralDiscountApplied ??
+                0
+            )
+        );
+
+    const sources = [
+        ["atoutNormandie", inscription.aides?.atoutNormandie || inscription.aides?.atout],
+        ["passSport", inscription.aides?.passSport],
+        ["kiosk", inscription.aides?.kiosk],
+        ["spot50", inscription.aides?.spot50]
+    ];
+
+    const details = {};
+
+    for (const [nom, aide] of sources) {
+        const demande =
+            aide && aide.enabled
+                ? Math.max(0, Number(aide.amount) || 0)
+                : 0;
+
+        const montant =
+            Math.min(
+                demande,
+                reste
+            );
+
+        details[nom] = montant;
+        reste -= montant;
+    }
+
+    return {
+        total:
+            sources.reduce(
+                (total, [nom]) =>
+                    total +
+                    (details[nom] || 0),
+                0
+            ),
+        details
+    };
+}
+
 function calculerMontantAPayer(
     inscription
 ) {
@@ -125,9 +188,9 @@ function calculerMontantAPayer(
         );
 
     const aides =
-        calculerTotalAides(
-            inscription.aides
-        );
+        obtenirAidesEffectives(
+            inscription
+        ).total;
 
     const reductionFamille =
         Number(
@@ -255,9 +318,14 @@ function calculerDonneesPaiement(
                 ),
 
         totalAides:
-            calculerTotalAides(
-                inscription.aides
-            ),
+            obtenirAidesEffectives(
+                inscription
+            ).total,
+
+        aidesEffectives:
+            obtenirAidesEffectives(
+                inscription
+            ).details,
 
         reductionFamille:
             Number(
