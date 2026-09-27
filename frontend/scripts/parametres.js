@@ -17,18 +17,21 @@ function afficherParametres() {
     definirValeur(
         "priceChild1",
         tarifs.child1 ??
+        tarifs.enfant1Cours ??
         110
     );
 
     definirValeur(
         "priceAdult1",
         tarifs.adult1 ??
+        tarifs.adulte1Cours ??
         155
     );
 
     definirValeur(
         "priceAdult4",
         tarifs.adult4 ??
+        tarifs.adulte4Cours ??
         255
     );
 
