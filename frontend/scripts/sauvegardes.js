@@ -52,6 +52,14 @@ function initialiserRestaurationInterface() {
         bouton.addEventListener(
             "click",
             async () => {
+                if (
+                    !window.confirm(
+                        "Restaurer la dernière sauvegarde ? Une sauvegarde de sécurité sera créée avant la restauration."
+                    )
+                ) {
+                    return;
+                }
+
                 const resultat =
                     await lancerRestaurationDonnees();
 
