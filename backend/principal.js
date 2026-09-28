@@ -70,6 +70,20 @@ const {
     demarrerSauvegardesAutomatiques
 } = require("./gestion/sauvegardes");
 
+
+const {
+    initialiser: initialiserComptabilite,
+    obtenirOperations: obtenirOperationsComptables,
+    obtenirOperation: obtenirOperationComptable,
+    creerOperation: creerOperationComptable,
+    modifierOperation: modifierOperationComptable,
+    supprimerOperation: supprimerOperationComptable,
+    obtenirParametres: obtenirParametresComptables,
+    enregistrerParametres: enregistrerParametresComptables,
+    synchroniserCotisations,
+    obtenirSynthese: obtenirSyntheseComptable
+} = require("./gestion/comptabilite");
+
 function initialiserDonnees() {
     const dossierDonnees =
         path.join(
@@ -106,11 +120,13 @@ function initialiserDonnees() {
             "personnes.json",
             "inscriptions.json",
             "saisons.json",
-            "familles.json"
+            "familles.json",
+            "comptabilite.json"
         ]
     );
 
-    initialiserFamilles();\n    initialiserComptabilite();
+    initialiserFamilles();
+    initialiserComptabilite();\n    initialiserComptabilite();
 
     fs.mkdirSync(
         path.join(
@@ -329,6 +345,65 @@ function enregistrerHandlersIpc() {
                 id
             );
         }
+    );
+
+    ipcMain.handle(
+        "obtenir-comptabilite",
+        () => {
+            synchroniserCotisations(
+                obtenirInscriptions(),
+                obtenirPersonnes(),
+                obtenirSaisons(),
+                lireJson("configuration.json") || {}
+            );
+            return obtenirOperationsComptables();
+        }
+    );
+
+    ipcMain.handle(
+        "obtenir-synthese-comptable",
+        (_, saisonId) => {
+            synchroniserCotisations(
+                obtenirInscriptions(),
+                obtenirPersonnes(),
+                obtenirSaisons(),
+                lireJson("configuration.json") || {}
+            );
+            return obtenirSyntheseComptable(saisonId, lireJson("configuration.json") || {});
+        }
+    );
+
+    ipcMain.handle(
+        "creer-operation-comptable",
+        (_, donnees) => creerOperationComptable(donnees)
+    );
+
+    ipcMain.handle(
+        "modifier-operation-comptable",
+        (_, id, donnees) => modifierOperationComptable(id, donnees)
+    );
+
+    ipcMain.handle(
+        "supprimer-operation-comptable",
+        (_, id) => supprimerOperationComptable(id)
+    );
+
+    ipcMain.handle(
+        "obtenir-parametres-comptables",
+        (_, saisonId) => obtenirParametresComptables(saisonId, lireJson("configuration.json") || {})
+    );
+
+    ipcMain.handle(
+        "enregistrer-parametres-comptables",
+        (_, saisonId, donnees) => enregistrerParametresComptables(saisonId, donnees)
+    );
+
+    ipcMain.handle(
+        "obtenir-categories-comptables",
+        () => ({
+            recettes: require("./gestion/comptabilite").CATEGORIES_RECETTES,
+            depenses: require("./gestion/comptabilite").CATEGORIES_DEPENSES
+        })
     );
 
     ipcMain.handle(
