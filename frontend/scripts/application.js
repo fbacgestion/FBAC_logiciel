@@ -1244,6 +1244,12 @@ function renderCurrentPage() {
             }
             break;
 
+        case "comptabilite":
+            if (typeof afficherComptabilite === "function") {
+                rafraichirComptabilite();
+            }
+            break;
+
         case "parametres":
             if (
                 typeof afficherParametres ===

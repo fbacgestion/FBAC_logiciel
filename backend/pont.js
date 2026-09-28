@@ -6,7 +6,39 @@ const {
 contextBridge.exposeInMainWorld(
     "fbac",
     {
-        version: "1.0.0",
+        version: "1.1.0",
+        obtenirComptabilite: () => {
+            return ipcRenderer.invoke("obtenir-comptabilite");
+        },
+
+        obtenirSyntheseComptable: saisonId => {
+            return ipcRenderer.invoke("obtenir-synthese-comptable", saisonId);
+        },
+
+        creerOperationComptable: donnees => {
+            return ipcRenderer.invoke("creer-operation-comptable", donnees);
+        },
+
+        modifierOperationComptable: (id, donnees) => {
+            return ipcRenderer.invoke("modifier-operation-comptable", id, donnees);
+        },
+
+        supprimerOperationComptable: id => {
+            return ipcRenderer.invoke("supprimer-operation-comptable", id);
+        },
+
+        obtenirParametresComptables: saisonId => {
+            return ipcRenderer.invoke("obtenir-parametres-comptables", saisonId);
+        },
+
+        enregistrerParametresComptables: (saisonId, donnees) => {
+            return ipcRenderer.invoke("enregistrer-parametres-comptables", saisonId, donnees);
+        },
+
+        obtenirCategoriesComptables: () => {
+            return ipcRenderer.invoke("obtenir-categories-comptables");
+        },
+
 
         lireConfiguration: () => {
             return ipcRenderer.invoke(

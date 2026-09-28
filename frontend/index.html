@@ -39,6 +39,11 @@
                 <span class="nav-icon">↗</span>
                 <span>Parrainages</span>
             </button>
+            <div class="nav-title">Comptabilité</div>
+            <button data-page="accounting">
+                <span class="nav-icon">▣</span>
+                <span>Vue financière</span>
+            </button>
             <div class="nav-title">Administration</div>
             <button data-page="settings">
                 <span class="nav-icon">⚙</span>
@@ -237,6 +242,59 @@
             </section>
 
             
+            <section class="page" id="page-accounting">
+                <div class="page-header">
+                    <div>
+                        <h1>Vue financière</h1>
+                        <p>Recettes, dépenses, trésorerie et ventilation des cotisations de la saison active.</p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn" data-action="rafraichir-comptabilite">↻ Actualiser</button>
+                        <button class="btn" data-action="nouvelle-recette">+ Recette</button>
+                        <button class="btn btn-primary" data-action="nouvelle-depense">+ Dépense</button>
+                    </div>
+                </div>
+                <div class="kpis compta-kpis">
+                    <div class="kpi"><div class="kpi-label">Recettes</div><div class="kpi-value" id="comptaTotalRecettes">0 €</div><div class="kpi-extra">encaissé</div></div>
+                    <div class="kpi"><div class="kpi-label">Dépenses</div><div class="kpi-value" id="comptaTotalDepenses">0 €</div><div class="kpi-extra">enregistrées</div></div>
+                    <div class="kpi"><div class="kpi-label">Résultat</div><div class="kpi-value" id="comptaResultat">0 €</div><div class="kpi-extra">recettes − dépenses</div></div>
+                    <div class="kpi"><div class="kpi-label">Trésorerie</div><div class="kpi-value" id="comptaTresorerie">0 €</div><div class="kpi-extra">banque + caisse paramétrées</div></div>
+                </div>
+                <div class="compta-layout">
+                    <div class="card">
+                        <div class="card-header"><strong>Évolution mensuelle</strong><span class="compta-legend"><i class="recette"></i> Recettes <i class="depense"></i> Dépenses</span></div>
+                        <div class="card-body"><div class="compta-chart" id="comptaChart"></div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><strong>Ventilation des cotisations</strong></div>
+                        <div class="card-body">
+                            <div class="compta-split"><span>Part licences</span><strong id="comptaLicence">0 €</strong></div>
+                            <div class="compta-split"><span>Part club</span><strong id="comptaClub">0 €</strong></div>
+                            <p class="compta-note">La licence est un paramètre propre à chaque saison. Les paiements déjà enregistrés conservent leur ventilation historique.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card compta-parameters">
+                    <div class="card-header"><strong>Paramètres financiers — saison active</strong><button class="btn btn-small btn-primary" data-action="enregistrer-parametres-comptables">Enregistrer</button></div>
+                    <div class="card-body">
+                        <div class="form-grid">
+                            <div class="field"><label>Licence fédérale incluse</label><input type="number" id="comptaLicenceParam" min="0" step="0.01"></div>
+                            <div class="field"><label>Solde bancaire de départ / suivi</label><input type="number" id="comptaBanqueParam" min="0" step="0.01"></div>
+                            <div class="field"><label>Solde caisse de départ / suivi</label><input type="number" id="comptaCaisseParam" min="0" step="0.01"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-card">
+                    <div class="table-toolbar"><div><strong>Journal des opérations</strong><span class="toolbar-note">Les paiements adhérents sont synchronisés automatiquement.</span></div></div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>Date</th><th>Libellé</th><th>Catégorie</th><th>Mode</th><th>Montant</th><th></th></tr></thead>
+                            <tbody id="comptaOperations"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
             <section class="page" id="page-settings">
                 <div class="page-header">
                     <div>
@@ -763,6 +821,29 @@
 
 
 
+<div class="modal-backdrop" id="comptaOperationModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div><h2 id="comptaOperationTitle">Nouvelle opération</h2><span>Saisie manuelle — la saison active est utilisée.</span></div>
+            <button type="button" class="close" data-close-modal="comptaOperationModal">×</button>
+        </div>
+        <form id="comptaOperationForm">
+            <div class="modal-body">
+                <input type="hidden" id="comptaOperationType" value="recette">
+                <div class="form-grid">
+                    <div class="field"><label>Date</label><input type="date" id="comptaDate" required></div>
+                    <div class="field"><label>Montant</label><input type="number" id="comptaMontant" min="0.01" step="0.01" required></div>
+                    <div class="field"><label>Libellé</label><input type="text" id="comptaLibelle" required placeholder="Ex. Achat de matériel"></div>
+                    <div class="field"><label>Catégorie</label><select id="comptaCategorie"></select></div>
+                    <div class="field"><label>Mode de paiement</label><select id="comptaMode"><option value="">Non renseigné</option><option>Espèces</option><option>Chèque</option><option>Virement</option><option>Carte</option><option>Prélèvement</option><option>Autre</option></select></div>
+                </div>
+                <div class="field"><label>Note</label><textarea id="comptaNote" rows="3" placeholder="Référence, fournisseur, justificatif…"></textarea></div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn" data-close-modal="comptaOperationModal">Annuler</button><button type="submit" class="btn btn-primary">Enregistrer</button></div>
+        </form>
+    </div>
+</div>
+
 <div class="toast-container" id="toastContainer"></div>
 
 <script src="scripts/calculs.js"></script>
@@ -774,6 +855,7 @@
 <script src="scripts/parrainages.js"></script>
 <script src="scripts/saisons.js"></script>
 <script src="scripts/parametres.js"></script>
+<script src="scripts/comptabilite.js"></script>
 <script src="scripts/sauvegardes.js"></script>
 <script src="scripts/application.js"></script>
 </body>
