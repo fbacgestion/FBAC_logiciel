@@ -16,7 +16,7 @@ async function chargerComptabilite() {
     if (!window.fbac) return;
     const saisonId = saisonComptableActive();
     const [operations, synthese, categories] = await Promise.all([
-        window.fbac.obtenirComptabilite(),
+        window.fbac.obtenirComptabilite(saisonId),
         window.fbac.obtenirSyntheseComptable(saisonId),
         window.fbac.obtenirCategoriesComptables()
     ]);

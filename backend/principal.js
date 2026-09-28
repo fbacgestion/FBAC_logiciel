@@ -349,14 +349,15 @@ function enregistrerHandlersIpc() {
 
     ipcMain.handle(
         "obtenir-comptabilite",
-        () => {
+        (_, saisonId) => {
+            const configuration = lireJson("configuration.json") || {};
             synchroniserCotisations(
                 obtenirInscriptions(),
                 obtenirPersonnes(),
                 obtenirSaisons(),
-                lireJson("configuration.json") || {}
+                configuration
             );
-            return obtenirOperationsComptables({ saisonId });
+            return obtenirOperationsComptables(saisonId ? { saisonId } : {});
         }
     );
 
