@@ -110,7 +110,7 @@ function initialiserDonnees() {
         ]
     );
 
-    initialiserFamilles();
+    initialiserFamilles();\n    initialiserComptabilite();
 
     fs.mkdirSync(
         path.join(
@@ -588,7 +588,7 @@ function enregistrerHandlersIpc() {
     );
 }
 
-function creerFenetre() {
+function crearOperationSeguro(donnees) {\n    return creerOperationComptable(donnees);\n}\n\nfunction creerFenetre() {
     const fenetre =
         new BrowserWindow({
             width: 1400,
