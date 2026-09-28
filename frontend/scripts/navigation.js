@@ -60,7 +60,9 @@ function changerPage(page) {
         titre.textContent = titres[page];
     }
 
-    if (typeof renderCurrentPage === "function") {
+    if (pageInterne === "comptabilite" && typeof rafraichirComptabilite === "function") {
+        rafraichirComptabilite();
+    } else if (typeof renderCurrentPage === "function") {
         renderCurrentPage();
     }
 }
