@@ -83,6 +83,31 @@ function afficherGraphiqueCompta(synthese) {
     }).join("");
 }
 
+async function chargerParametresComptables() {
+    const saisonId = saisonComptableActive();
+    const parametres = await window.fbac.obtenirParametresComptables(saisonId);
+    const licence = document.getElementById("comptaLicenceParam");
+    const banque = document.getElementById("comptaBanqueParam");
+    const caisse = document.getElementById("comptaCaisseParam");
+    if (licence) licence.value = parametres?.licence ?? 39;
+    if (banque) banque.value = parametres?.compteBancaire ?? 0;
+    if (caisse) caisse.value = parametres?.caisse ?? 0;
+}
+
+async function enregistrerParametresComptablesDepuisInterface() {
+    try {
+        await window.fbac.enregistrerParametresComptables(saisonComptableActive(), {
+            licence: Number(document.getElementById("comptaLicenceParam")?.value || 0),
+            compteBancaire: Number(document.getElementById("comptaBanqueParam")?.value || 0),
+            caisse: Number(document.getElementById("comptaCaisseParam")?.value || 0)
+        });
+        await rafraichirComptabilite();
+        notificationSucces("Paramètres financiers enregistrés pour la saison active.");
+    } catch (error) {
+        notificationErreur(error.message || "Impossible d'enregistrer les paramètres financiers.");
+    }
+}
+
 async function rafraichirComptabilite() {
     try {
         await chargerComptabilite();
@@ -152,7 +177,7 @@ function initialiserComptabilite() {
             const action = event.target.closest("[data-action]");
             if (action?.dataset.action === "nouvelle-recette") ouvrirOperationComptable("recette");
             if (action?.dataset.action === "nouvelle-depense") ouvrirOperationComptable("depense");
-            if (action?.dataset.action === "rafraichir-comptabilite") rafraichirComptabilite();
+            if (action?.dataset.action === "rafraichir-comptabilite") rafraichirComptabilite();\n            if (action?.dataset.action === "enregistrer-parametres-comptables") enregistrerParametresComptablesDepuisInterface();
         });
         document.body.dataset.comptaInitialisee = "true";
     }
