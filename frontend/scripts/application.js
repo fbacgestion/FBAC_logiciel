@@ -719,6 +719,9 @@ async function sauvegarderEtat() {
         await synchroniserConfiguration();
 
         sauvegarderEtatInitial();
+        if (ui.page === "comptabilite" && typeof rafraichirComptabilite === "function") {
+            await rafraichirComptabilite();
+        }
     } catch (error) {
         console.error(
             "Erreur lors de la sauvegarde :",
