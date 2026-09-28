@@ -356,7 +356,7 @@ function enregistrerHandlersIpc() {
                 obtenirSaisons(),
                 lireJson("configuration.json") || {}
             );
-            return obtenirOperationsComptables();
+            return obtenirOperationsComptables({ saisonId });
         }
     );
 
