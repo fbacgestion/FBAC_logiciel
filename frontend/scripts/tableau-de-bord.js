@@ -1,4 +1,4 @@
-function afficherTableauDeBord() {
+async function afficherTableauDeBord() {
     if (typeof state === "undefined" || !state) {
         return;
     }
@@ -160,6 +160,58 @@ function afficherTableauDeBord() {
     }
 
     afficherAlertesTableauDeBord(inscriptions);
+    await afficherGraphiquesTableauDeBord();
+}
+
+async function afficherGraphiquesTableauDeBord() {
+    let synthese = null;
+    const syntheseElement = document.getElementById("dashboardEnrollmentChart");
+    const donutElement = document.getElementById("dashboardCategoryChart");
+    const legendElement = document.getElementById("dashboardCategoryLegend");
+    const saisonId = state?.configuration?.saisonActiveId || "";
+    if (!syntheseElement || !donutElement || !legendElement) return;
+    try {
+        synthese = typeof window.fbac?.obtenirSyntheseComptable === "function"
+            ? await window.fbac.obtenirSyntheseComptable(saisonId)
+            : null;
+        const mois = Object.entries(synthese?.mois || {}).sort((a, b) => a[0].localeCompare(b[0])).slice(-8);
+        if (!mois.length) {
+            syntheseElement.innerHTML = '<div class="dashboard-chart-empty">Les encaissements apparaîtront ici automatiquement.</div>';
+        } else {
+            const maximum = Math.max(1, ...mois.flatMap(([, valeur]) => [Number(valeur.recettes) || 0, Number(valeur.depenses) || 0]));
+            syntheseElement.innerHTML = mois.map(([id, valeur]) => {
+                const recettes = Number(valeur.recettes) || 0;
+                const depenses = Number(valeur.depenses) || 0;
+                return `<div class="dashboard-month"><div class="dashboard-bars"><span class="dashboard-bar income" style="height:${Math.max(4, recettes / maximum * 100)}%" title="Recettes : ${recettes.toFixed(2)} €"></span><span class="dashboard-bar expense" style="height:${Math.max(4, depenses / maximum * 100)}%" title="Dépenses : ${depenses.toFixed(2)} €"></span></div><small>${echapperDashboard(id.slice(5))}</small></div>`;
+            }).join("");
+        }
+    } catch (error) {
+        console.error("Erreur graphiques dashboard :", error);
+        syntheseElement.innerHTML = '<div class="dashboard-chart-empty">Graphique indisponible.</div>';
+    }
+    const saison = state.saisons.find(saison => saison.id === saisonId);
+    const inscriptions = saison ? state.inscriptions.filter(inscription => inscription.saisonId === saison.id) : [];
+    const enfants = inscriptions.filter(inscription => inscription.category === "enfant").length;
+    const adultes = inscriptions.length - enfants;
+    const total = enfants + adultes;
+    const enfantDegres = total ? enfants / total * 360 : 0;
+    donutElement.style.setProperty("--dashboard-enfant", `${enfantDegres}deg`);
+    donutElement.style.setProperty("--dashboard-adulte", `${360 - enfantDegres}deg`);
+    donutElement.innerHTML = `<div class="dashboard-donut-center"><strong>${total}</strong><span>adhérents</span></div>`;
+    legendElement.innerHTML = `<span><i class="legend-dot child"></i>Enfants <strong>${enfants}</strong></span><span><i class="legend-dot adult"></i>Adultes <strong>${adultes}</strong></span>`;
+    const income = Number(synthese?.totalRecettes) || 0;
+    const expense = Number(synthese?.totalDepenses) || 0;
+    const result = Number(synthese?.resultat) || income - expense;
+    const cash = Number(synthese?.compteBancaire || 0) + Number(synthese?.caisse || 0);
+    const set = (id, value) => { const element = document.getElementById(id); if (element) element.textContent = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(value); };
+    set("dashboardFinancialIncome", income);
+    set("dashboardFinancialExpense", expense);
+    set("dashboardFinancialResult", result);
+    set("dashboardFinancialCash", cash);
+}
+
+function echapperDashboard(value) {
+    return String(value ?? "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[character]));
 }
 
 function afficherAlertesTableauDeBord(inscriptions) {

@@ -10,7 +10,7 @@ function changerPage(page) {
         referrals: "parrainages",
         seasons: "saisons",
         settings: "parametres",
-        accounting: "comptabilite"
+        accounting: "accounting"
     };
 
     const pageInterne =
@@ -62,9 +62,7 @@ function changerPage(page) {
         titre.textContent = titres[page];
     }
 
-    if (pageInterne === "comptabilite" && typeof rafraichirComptabilite === "function") {
-        rafraichirComptabilite();
-    } else if (typeof renderCurrentPage === "function") {
+    if (typeof renderCurrentPage === "function") {
         renderCurrentPage();
     }
 }

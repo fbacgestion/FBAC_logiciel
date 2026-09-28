@@ -1247,6 +1247,7 @@ function renderCurrentPage() {
             }
             break;
 
+        case "accounting":
         case "comptabilite":
             if (typeof afficherComptabilite === "function") {
                 rafraichirComptabilite();

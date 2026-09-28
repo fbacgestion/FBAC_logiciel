@@ -15,6 +15,10 @@ contextBridge.exposeInMainWorld(
             return ipcRenderer.invoke("obtenir-synthese-comptable", saisonId);
         },
 
+        genererRapportFinancier: saisonId => {
+            return ipcRenderer.invoke("generer-rapport-financier", saisonId);
+        },
+
         creerOperationComptable: donnees => {
             return ipcRenderer.invoke("creer-operation-comptable", donnees);
         },
