@@ -7,8 +7,8 @@ contextBridge.exposeInMainWorld(
     "fbac",
     {
         version: "1.1.0",
-        obtenirComptabilite: () => {
-            return ipcRenderer.invoke("obtenir-comptabilite");
+        obtenirComptabilite: saisonId => {
+            return ipcRenderer.invoke("obtenir-comptabilite", saisonId);
         },
 
         obtenirSyntheseComptable: saisonId => {
