@@ -9,7 +9,8 @@ function changerPage(page) {
         payments: "paiements",
         referrals: "parrainages",
         seasons: "saisons",
-        settings: "parametres"
+        settings: "parametres",
+        accounting: "comptabilite"
     };
 
     const pageInterne =
@@ -25,7 +26,7 @@ function changerPage(page) {
     });
 
     const pageElement =
-        document.getElementById(`page-${page}`);
+        document.getElementById(`page-${pageInterne}`);
 
     if (pageElement) {
         pageElement.classList.add("active");
@@ -50,7 +51,8 @@ function changerPage(page) {
         payments: "Paiements",
         referrals: "Parrainages",
         seasons: "Saisons",
-        settings: "Paramètres"
+        settings: "Paramètres",
+        accounting: "Vue financière"
     };
 
     const titre =
