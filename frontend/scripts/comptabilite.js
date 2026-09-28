@@ -153,6 +153,17 @@ async function enregistrerOperationComptable(event) {
     }
 }
 
+async function genererRapportFinancierDepuisInterface() {
+    try {
+        const chemin = await window.fbac.genererRapportFinancier(saisonComptableActive());
+        if (chemin) {
+            notificationSucces("Rapport financier PDF généré.");
+        }
+    } catch (error) {
+        notificationErreur(error.message || "Impossible de générer le rapport financier.");
+    }
+}
+
 async function supprimerOperationComptableDepuisInterface(id) {
     if (!confirm("Supprimer cette opération ?")) return;
     try {
@@ -179,6 +190,7 @@ function initialiserComptabilite() {
             if (action?.dataset.action === "nouvelle-depense") ouvrirOperationComptable("depense");
             if (action?.dataset.action === "rafraichir-comptabilite") rafraichirComptabilite();
             if (action?.dataset.action === "enregistrer-parametres-comptables") enregistrerParametresComptablesDepuisInterface();
+            if (action?.dataset.action === "generer-rapport-financier") genererRapportFinancierDepuisInterface();
         });
         document.body.dataset.comptaInitialisee = "true";
     }
