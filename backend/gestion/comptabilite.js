@@ -103,9 +103,32 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
         const licence = Math.max(0, Number(saisonParametres[inscription.season]?.licence) || 0);
         let licenceDejaAffectee = 0;
         for (const paiement of paiements) {
-            const montant = Math.max(0, Number(paiement.amount) || 0); if (!montant) continue;
-            const partLicence = Math.min(Math.max(0, licence - licenceDejaAffectee), montant); const partClub = Math.max(0, montant - partLicence); licenceDejaAffectee += partLicence;
-            automatiques.push({ id: "cotisation_" + inscription.id + "_" + paiement.id, date: paiement.date || new Date().toISOString().slice(0, 10), type: "recette", libelle: "Cotisation — " + (personne ? (personne.firstName + " " + personne.lastName).trim() : "Adhérent"), categorie: "cotisations", montant, modePaiement: paiement.method || "", saisonId: inscription.season || "", source: "cotisation", inscriptionId: inscription.id, personneId: inscription.personId || null, paiementId: paiement.id || null, licenceMontant: partLicence, clubMontant: partClub, note: partLicence > 0 ? "Ventilation : " + partLicence.toFixed(2) + " € licence / " + partClub.toFixed(2) + " € club." : "" });
+            const montant = Math.max(0, Number(paiement.amount) || 0);
+            if (!montant) continue;
+            const id = "cotisation_" + inscription.id + "_" + paiement.id;
+            const ancienne = data.operations.find(operation => operation.id === id && operation.source === "cotisation");
+            const partLicence = ancienne
+                ? Math.min(Math.max(0, Number(ancienne.licenceMontant) || 0), montant)
+                : Math.min(Math.max(0, licence - licenceDejaAffectee), montant);
+            const partClub = Math.max(0, montant - partLicence);
+            licenceDejaAffectee += partLicence;
+            automatiques.push({
+                id,
+                date: paiement.date || new Date().toISOString().slice(0, 10),
+                type: "recette",
+                libelle: "Cotisation — " + (personne ? (personne.firstName + " " + personne.lastName).trim() : "Adhérent"),
+                categorie: "cotisations",
+                montant,
+                modePaiement: paiement.method || "",
+                saisonId: inscription.season || "",
+                source: "cotisation",
+                inscriptionId: inscription.id,
+                personneId: inscription.personId || null,
+                paiementId: paiement.id || null,
+                licenceMontant: partLicence,
+                clubMontant: partClub,
+                note: partLicence > 0 ? "Ventilation : " + partLicence.toFixed(2) + " € licence / " + partClub.toFixed(2) + " € club." : ""
+            });
         }
     }
     data.operations = data.operations.filter(operation => operation.source !== "cotisation").concat(automatiques); sauvegarder(data); return automatiques;
