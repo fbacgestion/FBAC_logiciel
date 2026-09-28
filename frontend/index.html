@@ -104,6 +104,27 @@
                     </div>
                 </div>
 
+                <div class="dashboard-analytics">
+                    <div class="card dashboard-chart-card">
+                        <div class="card-header"><strong>Évolution des inscriptions</strong><span class="dashboard-chart-subtitle">Saison active</span></div>
+                        <div class="card-body"><div class="dashboard-chart" id="dashboardEnrollmentChart"></div></div>
+                    </div>
+                    <div class="card dashboard-chart-card">
+                        <div class="card-header"><strong>Répartition des adhérents</strong><span class="dashboard-chart-subtitle">Enfants / adultes</span></div>
+                        <div class="card-body"><div class="dashboard-donut" id="dashboardCategoryChart"></div><div class="dashboard-chart-legend" id="dashboardCategoryLegend"></div></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-financial-card card">
+                    <div class="card-header"><strong>Situation financière</strong><button class="btn btn-small" data-page-link="accounting">Voir la comptabilité</button></div>
+                    <div class="dashboard-financial-grid">
+                        <div><span>Recettes</span><strong id="dashboardFinancialIncome">0 €</strong></div>
+                        <div><span>Dépenses</span><strong id="dashboardFinancialExpense">0 €</strong></div>
+                        <div><span>Résultat</span><strong id="dashboardFinancialResult">0 €</strong></div>
+                        <div><span>Trésorerie</span><strong id="dashboardFinancialCash">0 €</strong></div>
+                    </div>
+                </div>
+
                 <div class="dashboard-grid">
                     <div class="card">
                         <div class="card-header">
@@ -250,6 +271,7 @@
                     </div>
                     <div class="actions">
                         <button class="btn" data-action="rafraichir-comptabilite">↻ Actualiser</button>
+                        <button class="btn" data-action="generer-rapport-financier">📄 Rapport PDF</button>
                         <button class="btn" data-action="nouvelle-recette">+ Recette</button>
                         <button class="btn btn-primary" data-action="nouvelle-depense">+ Dépense</button>
                     </div>
