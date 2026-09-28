@@ -1,7 +1,8 @@
 const {
     app,
     BrowserWindow,
-    ipcMain
+    ipcMain,
+    dialog
 } = require("electron");
 
 const path = require("path");
@@ -375,6 +376,46 @@ function enregistrerHandlersIpc() {
     );
 
     ipcMain.handle(
+        "generer-rapport-financier",
+        async (_, saisonId) => {
+            const configuration = lireJson("configuration.json") || {};
+            synchroniserCotisations(
+                obtenirInscriptions(),
+                obtenirPersonnes(),
+                obtenirSaisons(),
+                configuration
+            );
+            const synthese = obtenirSyntheseComptable(saisonId, configuration);
+            const saison = obtenirSaison(saisonId);
+            const resultat = await dialog.showSaveDialog({
+                title: "Enregistrer le rapport financier",
+                defaultPath: path.join(app.getPath("documents"), "FBAC-Rapport-financier-" + (saison?.nom || saisonId || "saison") + ".pdf"),
+                filters: [{ name: "Document PDF", extensions: ["pdf"] }]
+            });
+            if (resultat.canceled || !resultat.filePath) return false;
+            const html = creerHtmlRapportFinancier(synthese, saison);
+            const fenetre = new BrowserWindow({
+                show: false,
+                width: 1200,
+                height: 1600,
+                webPreferences: { contextIsolation: true, nodeIntegration: false }
+            });
+            try {
+                await fenetre.loadURL("data:text/html;charset=utf-8," + encodeURIComponent(html));
+                const pdf = await fenetre.webContents.printToPDF({
+                    printBackground: true,
+                    pageSize: "A4",
+                    margins: { marginType: "default" }
+                });
+                fs.writeFileSync(resultat.filePath, pdf);
+                return resultat.filePath;
+            } finally {
+                if (!fenetre.isDestroyed()) fenetre.close();
+            }
+        }
+    );
+
+    ipcMain.handle(
         "creer-operation-comptable",
         (_, donnees) => creerOperationComptable(donnees)
     );
@@ -662,6 +703,40 @@ function enregistrerHandlersIpc() {
             );
         }
     );
+}
+
+function echapperRapport(valeur) {
+    return String(valeur ?? "").replace(/[&<>"']/g, caractere => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+    }[caractere]));
+}
+
+function creerHtmlRapportFinancier(synthese, saison) {
+    const euro = valeur => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(Number(valeur) || 0);
+    const mois = Object.entries(synthese?.mois || {}).sort((a, b) => a[0].localeCompare(b[0])).slice(-12);
+    const maximum = Math.max(1, ...mois.flatMap(([, valeur]) => [valeur.recettes || 0, valeur.depenses || 0]));
+    const graphique = mois.map(([id, valeur]) => {
+        const recettes = Number(valeur.recettes) || 0;
+        const depenses = Number(valeur.depenses) || 0;
+        return '<div class="month"><div class="bars"><i class="income" style="height:' + Math.max(4, recettes / maximum * 100) + '%"></i><i class="expense" style="height:' + Math.max(4, depenses / maximum * 100) + '%"></i></div><small>' + echapperRapport(id.slice(5)) + '</small></div>';
+    }).join("");
+    const operations = (synthese?.operations || []).map(operation => '<tr><td>' + echapperRapport(operation.date) + '</td><td>' + echapperRapport(operation.libelle) + '</td><td>' + echapperRapport(operation.categorie) + '</td><td>' + echapperRapport(operation.modePaiement || "—") + '</td><td class="' + (operation.type === "recette" ? "positive" : "negative") + '">' + (operation.type === "depense" ? "−" : "+") + euro(operation.montant) + '</td></tr>').join("");
+    const categories = Object.entries(synthese?.categories || {}).sort((a, b) => b[1] - a[1]).map(([categorie, montant]) => '<tr><td>' + echapperRapport(categorie) + '</td><td>' + euro(montant) + '</td></tr>').join("");
+    return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>
+body{font-family:Arial,sans-serif;color:#20242b;margin:0;padding:34px;font-size:11px}h1{font-size:26px;margin:0 0 4px;color:#111}h2{font-size:15px;margin:24px 0 10px;border-bottom:2px solid #e30613;padding-bottom:6px}.head{display:flex;justify-content:space-between;border-bottom:3px solid #e30613;padding-bottom:18px}.brand{font-size:12px;color:#e30613;font-weight:700}.muted{color:#68707d}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:18px 0}.kpi{border:1px solid #e0e3e8;border-radius:8px;padding:12px}.kpi span{display:block;color:#68707d;font-size:10px}.kpi strong{display:block;font-size:17px;margin-top:5px}.positive{color:#16844d}.negative{color:#c0392b}.chart{height:190px;display:flex;align-items:flex-end;gap:9px;border-bottom:1px solid #dfe3e8;padding:10px}.month{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px}.bars{height:100%;width:100%;display:flex;align-items:flex-end;justify-content:center;gap:2px}.bars i{display:block;width:8px;border-radius:4px 4px 0 0}.income{background:#e30613}.expense{background:#606875}.legend{margin:7px 0;color:#68707d}.legend b{color:#e30613}.legend i{display:inline-block;width:7px;height:7px;background:#606875;border-radius:50%;margin-left:12px}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:7px 6px;border-bottom:1px solid #e7e9ed}th{font-size:10px;color:#68707d;text-transform:uppercase}.right{text-align:right}.footer{margin-top:28px;color:#68707d;font-size:9px;text-align:center}
+</style></head><body>
+<div class="head"><div><div class="brand">FBAC — FULL BOXE AMÉRICAINE CLUB</div><h1>Rapport financier</h1><div class="muted">Saison ${echapperRapport(saison?.nom || synthese?.saisonId || "")}</div></div><div class="muted">Généré le ${new Date().toLocaleDateString("fr-FR")}</div></div>
+<div class="kpis"><div class="kpi"><span>RECETTES</span><strong>${euro(synthese?.totalRecettes)}</strong></div><div class="kpi"><span>DÉPENSES</span><strong>${euro(synthese?.totalDepenses)}</strong></div><div class="kpi"><span>RÉSULTAT</span><strong class="${synthese?.resultat >= 0 ? "positive" : "negative"}">${euro(synthese?.resultat)}</strong></div><div class="kpi"><span>TRÉSORERIE</span><strong>${euro((synthese?.compteBancaire || 0) + (synthese?.caisse || 0))}</strong></div></div>
+<h2>Évolution mensuelle</h2><div class="chart">${graphique}</div><div class="legend"><b>■ Recettes</b><i></i> Dépenses</div>
+<h2>Ventilation des cotisations</h2><table><tr><th>Élément</th><th class="right">Montant</th></tr><tr><td>Licences encaissées</td><td class="right">${euro(synthese?.licenceEncaissee)}</td></tr><tr><td>Part club</td><td class="right">${euro(synthese?.clubEncaisse)}</td></tr><tr><td>Licence paramétrée pour la saison</td><td class="right">${euro(synthese?.licenceParametree)}</td></tr></table>
+<h2>Répartition par catégorie</h2><table><tr><th>Catégorie</th><th class="right">Montant</th></tr>${categories || '<tr><td colspan="2">Aucune opération</td></tr>'}</table>
+<h2>Journal des opérations</h2><table><tr><th>Date</th><th>Libellé</th><th>Catégorie</th><th>Mode</th><th class="right">Montant</th></tr>${operations || '<tr><td colspan="5">Aucune opération</td></tr>'}</table>
+<div class="footer">FBAC Gestion — Rapport généré automatiquement à partir des données comptables de la saison.</div>
+</body></html>`;
 }
 
 function creerFenetre() {
