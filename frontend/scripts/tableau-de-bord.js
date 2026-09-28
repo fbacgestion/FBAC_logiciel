@@ -164,13 +164,14 @@ async function afficherTableauDeBord() {
 }
 
 async function afficherGraphiquesTableauDeBord() {
+    let synthese = null;
     const syntheseElement = document.getElementById("dashboardEnrollmentChart");
     const donutElement = document.getElementById("dashboardCategoryChart");
     const legendElement = document.getElementById("dashboardCategoryLegend");
     const saisonId = state?.configuration?.saisonActiveId || "";
     if (!syntheseElement || !donutElement || !legendElement) return;
     try {
-        const synthese = typeof window.fbac?.obtenirSyntheseComptable === "function"
+        synthese = typeof window.fbac?.obtenirSyntheseComptable === "function"
             ? await window.fbac.obtenirSyntheseComptable(saisonId)
             : null;
         const mois = Object.entries(synthese?.mois || {}).sort((a, b) => a[0].localeCompare(b[0])).slice(-8);
@@ -198,10 +199,10 @@ async function afficherGraphiquesTableauDeBord() {
     donutElement.style.setProperty("--dashboard-adulte", `${360 - enfantDegres}deg`);
     donutElement.innerHTML = `<div class="dashboard-donut-center"><strong>${total}</strong><span>adhérents</span></div>`;
     legendElement.innerHTML = `<span><i class="legend-dot child"></i>Enfants <strong>${enfants}</strong></span><span><i class="legend-dot adult"></i>Adultes <strong>${adultes}</strong></span>`;
-    const income = Number(comptabilite?.synthese?.totalRecettes) || Number((await window.fbac?.obtenirSyntheseComptable?.(saisonId))?.totalRecettes) || 0;
-    const expense = Number(comptabilite?.synthese?.totalDepenses) || 0;
-    const result = income - expense;
-    const cash = Number(comptabilite?.synthese?.compteBancaire || 0) + Number(comptabilite?.synthese?.caisse || 0);
+    const income = Number(synthese?.totalRecettes) || 0;
+    const expense = Number(synthese?.totalDepenses) || 0;
+    const result = Number(synthese?.resultat) || income - expense;
+    const cash = Number(synthese?.compteBancaire || 0) + Number(synthese?.caisse || 0);
     const set = (id, value) => { const element = document.getElementById(id); if (element) element.textContent = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(value); };
     set("dashboardFinancialIncome", income);
     set("dashboardFinancialExpense", expense);
