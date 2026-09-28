@@ -177,7 +177,8 @@ function initialiserComptabilite() {
             const action = event.target.closest("[data-action]");
             if (action?.dataset.action === "nouvelle-recette") ouvrirOperationComptable("recette");
             if (action?.dataset.action === "nouvelle-depense") ouvrirOperationComptable("depense");
-            if (action?.dataset.action === "rafraichir-comptabilite") rafraichirComptabilite();\n            if (action?.dataset.action === "enregistrer-parametres-comptables") enregistrerParametresComptablesDepuisInterface();
+            if (action?.dataset.action === "rafraichir-comptabilite") rafraichirComptabilite();
+            if (action?.dataset.action === "enregistrer-parametres-comptables") enregistrerParametresComptablesDepuisInterface();
         });
         document.body.dataset.comptaInitialisee = "true";
     }
