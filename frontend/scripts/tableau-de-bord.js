@@ -192,7 +192,7 @@ async function afficherGraphiquesTableauDeBord() {
     const saison = state.saisons.find(saison => saison.id === saisonId);
     const inscriptions = saison ? state.inscriptions.filter(inscription => inscription.saisonId === saison.id) : [];
     const enfants = inscriptions.filter(inscription => inscription.category === "enfant").length;
-    const adultes = inscriptions.filter(inscription => inscription.category === "adulte").length;
+    const adultes = inscriptions.length - enfants;
     const total = enfants + adultes;
     const enfantDegres = total ? enfants / total * 360 : 0;
     donutElement.style.setProperty("--dashboard-enfant", `${enfantDegres}deg`);
