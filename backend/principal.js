@@ -663,7 +663,7 @@ function enregistrerHandlersIpc() {
     );
 }
 
-function crearOperationSeguro(donnees) {\n    return creerOperationComptable(donnees);\n}\n\nfunction creerFenetre() {
+function creerFenetre() {
     const fenetre =
         new BrowserWindow({
             width: 1400,
