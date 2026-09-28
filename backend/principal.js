@@ -126,7 +126,7 @@ function initialiserDonnees() {
     );
 
     initialiserFamilles();
-    initialiserComptabilite();\n    initialiserComptabilite();
+    initialiserComptabilite();
 
     fs.mkdirSync(
         path.join(
