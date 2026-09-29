@@ -9,7 +9,7 @@ function changerPage(page) {
         payments: "paiements",
         referrals: "parrainages",
         seasons: "saisons",
-        settings: "parametres",
+        settings: "settings",
         accounting: "accounting"
     };
 
