@@ -85,13 +85,11 @@ function supprimerOperation(id) {
     data.operations = data.operations.filter(element => element.id !== id); sauvegarder(data); return operation;
 }
 function obtenirParametres(saisonId, configuration = {}) {
-    const data = obtenirDonnees();
-    const existant = data.parametres[saisonId] || {};
     const global = configuration.comptabilite || {};
     return {
-        licence: Number(existant.licence ?? global.licenceFederale ?? 39),
-        compteBancaire: Number(existant.compteBancaire ?? global.soldeBancaireInitial ?? 0),
-        caisse: Number(existant.caisse ?? global.soldeCaisseInitial ?? 0)
+        licence: Number(global.licenceFederale ?? 39),
+        compteBancaire: Number(global.soldeBancaireInitial ?? 0),
+        caisse: Number(global.soldeCaisseInitial ?? 0)
     };
 }
 function enregistrerParametres(saisonId, parametres) {
