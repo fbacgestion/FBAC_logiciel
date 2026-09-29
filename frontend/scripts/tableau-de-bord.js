@@ -4,7 +4,7 @@ async function afficherTableauDeBord() {
     }
 
     const saison = state.saisons.find(
-        saison => saison.id === state.configuration.saisonActiveId
+        saison => saison.id === obtenirSaisonConsulteeId()
     );
 
     const inscriptions = saison
