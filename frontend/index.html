@@ -296,16 +296,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="card compta-parameters">
-                    <div class="card-header"><strong>Paramètres financiers — saison active</strong><button class="btn btn-small btn-primary" data-action="enregistrer-parametres-comptables">Enregistrer</button></div>
-                    <div class="card-body">
-                        <div class="form-grid">
-                            <div class="field"><label>Licence fédérale incluse</label><input type="number" id="comptaLicenceParam" min="0" step="0.01"></div>
-                            <div class="field"><label>Solde bancaire de départ / suivi</label><input type="number" id="comptaBanqueParam" min="0" step="0.01"></div>
-                            <div class="field"><label>Solde caisse de départ / suivi</label><input type="number" id="comptaCaisseParam" min="0" step="0.01"></div>
-                        </div>
-                    </div>
-                </div>
                 <div class="table-card">
                     <div class="table-toolbar"><div><strong>Journal des opérations</strong><span class="toolbar-note">Les paiements adhérents sont synchronisés automatiquement.</span></div></div>
                     <div class="table-wrap">
@@ -321,7 +311,7 @@
                 <div class="page-header">
                     <div>
                         <h1>Paramètres</h1>
-                        <p>Tarifs, aides, réduction famille et saison active.</p>
+                        <p>Configuration générale du club, des cotisations, des aides et de la comptabilité.</p>
                     </div>
                     <button class="btn btn-primary" data-action="save-settings">Enregistrer les paramètres</button>
                 </div>
@@ -375,6 +365,25 @@
                             </div>
                         </div>
                         <p>Ces montants sont des valeurs paramétrables. Le montant réel peut être modifié directement sur chaque fiche adhérent.</p>
+                    </div>
+
+                    <div class="setting-card">
+                        <h3>Comptabilité</h3>
+                        <div class="form-grid">
+                            <div class="field">
+                                <label>Licence fédérale incluse</label>
+                                <input type="number" id="comptaLicenceParam" min="0" step="0.01">
+                            </div>
+                            <div class="field">
+                                <label>Solde bancaire initial</label>
+                                <input type="number" id="comptaBanqueParam" min="0" step="0.01">
+                            </div>
+                            <div class="field">
+                                <label>Solde caisse initial</label>
+                                <input type="number" id="comptaCaisseParam" min="0" step="0.01">
+                            </div>
+                        </div>
+                        <p>Ces valeurs servent de base au suivi financier de la saison active. Elles sont gérées ici avec les autres paramètres de l'application.</p>
                     </div>
 
                     <div class="setting-card">
