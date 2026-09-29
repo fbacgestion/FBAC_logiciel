@@ -19,7 +19,7 @@ function afficherParrainages() {
     }
 
     const saisonId =
-        state.configuration.saisonActiveId;
+        obtenirSaisonConsulteeId();
 
     const parrains =
         state.personnes
