@@ -330,6 +330,8 @@ function normaliserConfiguration(
                 20
             ),
 
+        facturation: { ...(source.facturation||{}), association: { nom: source.facturation?.association?.nom||"FBAC - Full Boxe Américaine Club", adresse: source.facturation?.association?.adresse||"24 le Haut du Bingard", codePostal: source.facturation?.association?.codePostal||"50490", ville: source.facturation?.association?.ville||"Muneville-le-Bingard", siret: source.facturation?.association?.siret||"", email: source.facturation?.association?.email||"", telephone: source.facturation?.association?.telephone||"", site: source.facturation?.association?.site||"" }, numerotation: { ...(source.facturation?.numerotation||{}), prefixe: source.facturation?.numerotation?.prefixe||"", inclureAnnee: source.facturation?.numerotation?.inclureAnnee!==false, remplissage: Number(source.facturation?.numerotation?.remplissage)||2, prochainNumero: Number(source.facturation?.numerotation?.prochainNumero)||9 }, mentionTva: source.facturation?.mentionTva||"TVA non applicable (article 293 B du CGI)", mentions: source.facturation?.mentions||"" },
+
         parrainage: {
             ...(source.parrainage || {}),
             montantParFilleul:
@@ -1306,6 +1308,11 @@ function renderCurrentPage() {
             ) {
                 afficherSaisons();
             }
+            break;
+
+        case "invoicing":
+        case "facturation":
+            if(typeof afficherPageFacturation==="function") afficherPageFacturation();
             break;
 
         case "accounting":
