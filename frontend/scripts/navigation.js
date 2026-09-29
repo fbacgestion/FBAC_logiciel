@@ -5,10 +5,10 @@ function changerPage(page) {
 
     const correspondances = {
         dashboard: "dashboard",
-        members: "adherents",
-        payments: "paiements",
-        referrals: "parrainages",
-        seasons: "saisons",
+        members: "members",
+        payments: "payments",
+        referrals: "referrals",
+        seasons: "seasons",
         settings: "settings",
         accounting: "accounting"
     };
