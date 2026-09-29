@@ -86,10 +86,11 @@ function supprimerOperation(id) {
 }
 function obtenirParametres(saisonId, configuration = {}) {
     const global = configuration.comptabilite || {};
+    const saison = obtenirDonnees().parametres?.[saisonId] || {};
     return {
-        licence: Number(global.licenceFederale ?? 39),
-        compteBancaire: Number(global.soldeBancaireInitial ?? 0),
-        caisse: Number(global.soldeCaisseInitial ?? 0)
+        licence: Number(saison.licence ?? global.licenceFederale ?? 39),
+        compteBancaire: Number(saison.compteBancaire ?? global.soldeBancaireInitial ?? 0),
+        caisse: Number(saison.caisse ?? global.soldeCaisseInitial ?? 0)
     };
 }
 function enregistrerParametres(saisonId, parametres) {
@@ -138,12 +139,50 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
     data.operations = data.operations.filter(operation => operation.source !== "cotisation").concat(automatiques); sauvegarder(data); return automatiques;
 }
 function obtenirSynthese(saisonId, configuration = {}) {
-    const operations = obtenirOperations({ saisonId }); const recettes = operations.filter(operation => operation.type === "recette"); const depenses = operations.filter(operation => operation.type === "depense");
-    const totalRecettes = recettes.reduce((total, operation) => total + operation.montant, 0); const totalDepenses = depenses.reduce((total, operation) => total + operation.montant, 0);
-    const categories = {}; const mois = {};
-    for (const operation of operations) { categories[operation.categorie] = (categories[operation.categorie] || 0) + operation.montant; const cle = String(operation.date || "").slice(0, 7) || "inconnu"; if (!mois[cle]) mois[cle] = { recettes: 0, depenses: 0 }; mois[cle][operation.type === "recette" ? "recettes" : "depenses"] += operation.montant; }
+    const operations = obtenirOperations({ saisonId });
+    const recettes = operations.filter(operation => operation.type === "recette");
+    const depenses = operations.filter(operation => operation.type === "depense");
+    const totalRecettes = recettes.reduce((total, operation) => total + operation.montant, 0);
+    const totalDepenses = depenses.reduce((total, operation) => total + operation.montant, 0);
+    const categories = {};
+    const mois = {};
+    for (const operation of operations) {
+        categories[operation.categorie] = (categories[operation.categorie] || 0) + operation.montant;
+        const cle = String(operation.date || "").slice(0, 7) || "inconnu";
+        if (!mois[cle]) mois[cle] = { recettes: 0, depenses: 0 };
+        mois[cle][operation.type === "recette" ? "recettes" : "depenses"] += operation.montant;
+    }
     const parametres = obtenirParametres(saisonId, configuration);
-    return { saisonId, totalRecettes, totalDepenses, resultat: totalRecettes - totalDepenses, licenceEncaissee: recettes.reduce((total, operation) => total + operation.licenceMontant, 0), clubEncaisse: recettes.reduce((total, operation) => total + operation.clubMontant, 0), licenceParametree: parametres.licence, compteBancaire: parametres.compteBancaire, caisse: parametres.caisse, categories, mois, operations: operations.slice(0, 100) };
+    const modesBanque = new Set(["cheque", "virement", "carte", "cb", "prélèvement", "prelevement"]);
+    const modesCaisse = new Set(["espèces", "especes"]);
+    const calculerSolde = (initial, modes) => operations.reduce((solde, operation) => {
+        const mode = String(operation.modePaiement || "").trim().toLowerCase();
+        if (!modes.has(mode)) return solde;
+        const montant = Number(operation.montant) || 0;
+        return solde + (operation.type === "depense" ? -montant : montant);
+    }, Number(initial) || 0);
+    const compteBancaire = calculerSolde(parametres.compteBancaire, modesBanque);
+    const caisse = calculerSolde(parametres.caisse, modesCaisse);
+    const operationsNonAffectees = operations.filter(operation => {
+        const mode = String(operation.modePaiement || "").trim().toLowerCase();
+        return !modesBanque.has(mode) && !modesCaisse.has(mode);
+    });
+    return {
+        saisonId,
+        totalRecettes,
+        totalDepenses,
+        resultat: totalRecettes - totalDepenses,
+        licenceEncaissee: recettes.reduce((total, operation) => total + operation.licenceMontant, 0),
+        clubEncaisse: recettes.reduce((total, operation) => total + operation.clubMontant, 0),
+        licenceParametee: parametres.licence,
+        compteBancaire,
+        caisse,
+        tresorerie: compteBancaire + caisse,
+        operationsNonAffectees: operationsNonAffectees.slice(0, 100),
+        categories,
+        mois,
+        operations: operations.slice(0, 100)
+    };
 }
 function initialiser() { sauvegarder(obtenirDonnees()); }
 module.exports = { CATEGORIES_RECETTES, CATEGORIES_DEPENSES, initialiser, obtenirOperations, obtenirOperation, creerOperation, modifierOperation, supprimerOperation, obtenirParametres, enregistrerParametres, synchroniserCotisations, obtenirSynthese };
