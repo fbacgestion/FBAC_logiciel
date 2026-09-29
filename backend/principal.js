@@ -387,6 +387,29 @@ function enregistrerHandlersIpc() {
         return resultat.filePath;
     });
 
+    ipcMain.handle("imprimer-facture", async (_, id) => {
+        const facture = obtenirFacture(id);
+        const chemin = obtenirCheminPdf(facture);
+        if (!chemin || !fs.existsSync(chemin)) throw new Error("Fichier PDF introuvable.");
+        const fenetre = new BrowserWindow({
+            show: false,
+            width: 900,
+            height: 1280,
+            webPreferences: { contextIsolation: true, nodeIntegration: false }
+        });
+        return new Promise(resolve => {
+            const terminer = resultat => {
+                if (!fenetre.isDestroyed()) fenetre.close();
+                resolve(resultat);
+            };
+            fenetre.webContents.once("did-finish-load", () => {
+                fenetre.webContents.print({ silent: false, printBackground: true }, terminer);
+            });
+            fenetre.webContents.once("did-fail-load", () => terminer(false));
+            fenetre.loadFile(chemin);
+        });
+    });
+
     ipcMain.handle(
         "obtenir-comptabilite",
         (_, saisonId) => {
