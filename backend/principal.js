@@ -85,6 +85,7 @@ const {
     synchroniserCotisations,
     obtenirSynthese: obtenirSyntheseComptable
 } = require("./gestion/comptabilite");
+const { initialiserFactures, obtenirFactures, obtenirFacture, creerFacture, modifierFacture, supprimerFacture, enregistrerPdf, obtenirCheminPdf, genererHtmlFacture } = require("./gestion/factures");
 
 function initialiserDonnees() {
     const dossierDonnees =
@@ -123,12 +124,14 @@ function initialiserDonnees() {
             "inscriptions.json",
             "saisons.json",
             "familles.json",
-            "comptabilite.json"
+            "comptabilite.json",
+            "factures.json"
         ]
     );
 
     initialiserFamilles();
     initialiserComptabilite();
+    initialiserFactures(dossierDonnees, path.join(dossierFichiers, "factures"));
 
     fs.mkdirSync(
         path.join(
