@@ -9,7 +9,7 @@ function euroCompta(montant) {
 }
 
 function saisonComptableActive() {
-    return state?.configuration?.saisonActiveId || state?.saisons?.[0]?.id || "";
+    return obtenirSaisonConsulteeId() || state?.saisons?.[0]?.id || "";
 }
 
 async function chargerComptabilite() {
@@ -118,6 +118,10 @@ function obtenirLibelleOperation(type) {
 }
 
 function ouvrirOperationComptable(type) {
+    if (saisonConsulteeEstHistorique()) {
+        notificationErreur("Cette saison historique est en lecture seule.");
+        return;
+    }
     const modal = document.getElementById("comptaOperationModal");
     if (!modal) return;
     document.getElementById("comptaOperationType").value = type;
@@ -139,6 +143,10 @@ function ouvrirOperationComptable(type) {
 
 async function enregistrerOperationComptable(event) {
     event.preventDefault();
+    if (saisonConsulteeEstHistorique()) {
+        notificationErreur("Cette saison historique est en lecture seule.");
+        return;
+    }
     const type = document.getElementById("comptaOperationType").value;
     const donnees = {
         type,
@@ -174,6 +182,10 @@ async function genererRapportFinancierDepuisInterface() {
 }
 
 async function supprimerOperationComptableDepuisInterface(id) {
+    if (saisonConsulteeEstHistorique()) {
+        notificationErreur("Cette saison historique est en lecture seule.");
+        return;
+    }
     if (!confirm("Supprimer cette opération ?")) return;
     try {
         await window.fbac.supprimerOperationComptable(id);
