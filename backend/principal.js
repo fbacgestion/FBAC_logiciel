@@ -85,7 +85,7 @@ const {
     synchroniserCotisations,
     obtenirSynthese: obtenirSyntheseComptable
 } = require("./gestion/comptabilite");
-const { initialiserFactures, obtenirFactures, obtenirFacture, creerFacture, modifierFacture, supprimerFacture, enregistrerPdf, obtenirCheminPdf, genererHtmlFacture } = require("./gestion/factures");
+const { initialiserFactures, obtenirFactures, obtenirFacture, creerFacture, modifierFacture, supprimerFacture, enregistrerPdf, obtenirCheminPdf, genererHtmlFacture, prochain, numero } = require("./gestion/factures");
 
 function initialiserDonnees() {
     const dossierDonnees =
@@ -774,7 +774,7 @@ function construireApercuFacture(donnees, configuration) {
     return {
         ...donnees,
         id: "apercu",
-        numero: "APERÇU",
+        numero: numero(configuration, donnees.date || new Date().toISOString().slice(0, 10), prochain(configuration)),
         saisonNom: donnees.saisonNom || saison?.nom || "",
         association: {
             nom: association.nom || "FBAC - Full Boxe Américaine Club",
