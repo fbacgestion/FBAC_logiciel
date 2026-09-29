@@ -373,6 +373,20 @@ function enregistrerHandlersIpc() {
     });
     ipcMain.handle("supprimer-facture", (_, id) => supprimerFacture(id));
 
+    ipcMain.handle("enregistrer-facture-sous", async (_, id) => {
+        const facture = obtenirFacture(id);
+        const chemin = obtenirCheminPdf(facture);
+        if (!chemin || !fs.existsSync(chemin)) throw new Error("Fichier PDF introuvable.");
+        const resultat = await dialog.showSaveDialog({
+            title: "Enregistrer la facture",
+            defaultPath: path.join(app.getPath("documents"), facture.pdfNom),
+            filters: [{ name: "Document PDF", extensions: ["pdf"] }]
+        });
+        if (resultat.canceled || !resultat.filePath) return false;
+        fs.copyFileSync(chemin, resultat.filePath);
+        return resultat.filePath;
+    });
+
     ipcMain.handle(
         "obtenir-comptabilite",
         (_, saisonId) => {
