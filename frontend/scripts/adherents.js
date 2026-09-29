@@ -109,7 +109,14 @@ function afficherAdherents() {
                     ? "<span class=\"member-warning-badge\">⚠ Certificat manquant</span>"
                     : "";
 
-        const parrainage = Number(inscription.referralDiscountApplied ?? inscription.parrainageAcquis ?? 0);
+        const parrainagesValides = Math.min(
+            3,
+            state.inscriptions.filter(
+                filleul =>
+                    filleul.season === inscription.season &&
+                    filleul.referrerId === inscription.personId
+            ).length
+        );
         const famille = genererAffichageFamille(inscription);
 
         const actions = ui.selectedSeason === saisonCourante
@@ -133,7 +140,7 @@ function afficherAdherents() {
             "<td>" + afficherBadgePaiement(inscription) + "</td>" +
             "<td>" + echapperHtml(aides) + "</td>" +
             "<td>" + certificat + "</td>" +
-            "<td>" + (parrainage > 0 ? "-" + parrainage + " €" : "—") + "</td>" +
+            "<td>" + (parrainagesValides > 0 ? parrainagesValides + "/3" : "—") + "</td>" +
             "<td><div class=\"actions\">" + actions + "</div></td>" +
             "</tr>";
     }).join("");
@@ -1287,14 +1294,8 @@ async function enregistrerAdherentDepuisFormulaire(
                     famille,
                 referrerId:
                     parrain,
-                parrainageAcquis:
-                    calculerMontantParrainage(
-                        obtenirNombreParrainagesSelectionne()
-                    ),
-                referralDiscountApplied:
-                    calculerMontantParrainage(
-                        obtenirNombreParrainagesSelectionne()
-                    ),
+                parrainageAcquis: 0,
+                referralDiscountApplied: 0,
                 aides,
                 reductionFamille:
                     reductionFamilleActive
@@ -1379,13 +1380,9 @@ async function enregistrerAdherentDepuisFormulaire(
             inscription.referrerId =
                 parrain;
 
-            inscription.parrainageAcquis =
-                calculerMontantParrainage(
-                    obtenirNombreParrainagesSelectionne()
-                );
+            inscription.parrainageAcquis = 0;
 
-            inscription.referralDiscountApplied =
-                inscription.parrainageAcquis;
+            inscription.referralDiscountApplied = 0;
 
             inscription.aides =
                 aides;
@@ -2072,10 +2069,7 @@ function mettreAJourResumeAdherent() {
             )
             : 0;
 
-    const parrainageAcquis =
-        calculerMontantParrainage(
-            obtenirNombreParrainagesSelectionne()
-        );
+    const parrainageAcquis = 0;
 
     const montantPaye =
         Number(
