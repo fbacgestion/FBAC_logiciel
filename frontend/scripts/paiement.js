@@ -58,7 +58,7 @@ function afficherPaiements() {
     }
 
     const saisonId =
-        state.configuration.saisonActiveId;
+        obtenirSaisonConsulteeId();
 
     const inscriptions =
         state.inscriptions.filter(
@@ -153,7 +153,7 @@ function afficherResumePaiements() {
     }
 
     const saisonId =
-        state.configuration.saisonActiveId;
+        obtenirSaisonConsulteeId();
 
     const inscriptions =
         state.inscriptions.filter(
@@ -301,6 +301,11 @@ function afficherHistoriquePaiements(inscription) {
 function ouvrirPaiement(
     inscriptionId
 ) {
+    if (saisonConsulteeEstHistorique()) {
+        notificationErreur("Cette saison historique est en lecture seule.");
+        return;
+    }
+
     const inscription =
         state.inscriptions.find(
             element =>
@@ -375,6 +380,12 @@ function ouvrirPaiement(
 async function enregistrerPaiement(
     event
 ) {
+    if (saisonConsulteeEstHistorique()) {
+        if (event) event.preventDefault();
+        notificationErreur("Cette saison historique est en lecture seule.");
+        return;
+    }
+
     if (event) {
         event.preventDefault();
     }
@@ -545,7 +556,7 @@ function initialiserPaiements() {
 
 function exporterPaiementsCsv() {
     const saisonId =
-        state.configuration.saisonActiveId;
+        obtenirSaisonConsulteeId();
 
     const inscriptions =
         state.inscriptions.filter(
