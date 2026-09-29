@@ -1,2 +1,0 @@
-Nom attendu : icon.ico
-Chemin : build/icon.ico
