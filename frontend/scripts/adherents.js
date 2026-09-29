@@ -711,9 +711,7 @@ function ouvrirModificationAdherent(
             );
 
         if (montantPaye) {
-            montantPaye.disabled =
-                editable &&
-                Boolean(inscriptionId);
+            montantPaye.disabled = !editable;
         }
 
         const modePaiement =
@@ -722,9 +720,7 @@ function ouvrirModificationAdherent(
             );
 
         if (modePaiement) {
-            modePaiement.disabled =
-                editable &&
-                Boolean(inscriptionId);
+            modePaiement.disabled = !editable;
         }
     }
 
