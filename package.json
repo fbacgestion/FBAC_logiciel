@@ -40,7 +40,8 @@
                     ]
                 }
             ],
-            "executableName": "FBAC-Gestion"
+            "executableName": "FBAC-Gestion",
+            "icon": "build/icon.ico"
         },
         "nsis": {
             "oneClick": false,
