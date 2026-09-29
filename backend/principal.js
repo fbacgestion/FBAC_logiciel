@@ -352,6 +352,27 @@ function enregistrerHandlersIpc() {
         }
     );
 
+    ipcMain.handle("obtenir-factures", () => obtenirFactures());
+    ipcMain.handle("obtenir-facture", (_, id) => obtenirFacture(id));
+    ipcMain.handle("apercu-facture", (_, donnees) => {
+        const configuration = lireJson("configuration.json") || {};
+        return genererHtmlFacture(construireApercuFacture(donnees, configuration));
+    });
+    ipcMain.handle("creer-facture", async (_, donnees) => {
+        const configuration = lireJson("configuration.json") || {};
+        const facture = creerFacture(donnees, configuration);
+        await genererPdfFacture(facture);
+        incrementerNumerotationFacture(configuration);
+        return facture;
+    });
+    ipcMain.handle("modifier-facture", async (_, id, donnees) => {
+        const configuration = lireJson("configuration.json") || {};
+        const facture = modifierFacture(id, donnees, configuration);
+        await genererPdfFacture(facture);
+        return facture;
+    });
+    ipcMain.handle("supprimer-facture", (_, id) => supprimerFacture(id));
+
     ipcMain.handle(
         "obtenir-comptabilite",
         (_, saisonId) => {
