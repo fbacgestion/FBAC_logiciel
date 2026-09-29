@@ -1,20 +1,25 @@
 {
-  "nomClub": "Full Boxe Américaine Club",
-  "saisonActuelle": "2026-2027",
-  "tarifs": {
-    "enfant1Cours": 110,
-    "adulte1Cours": 155,
-    "adulte4Cours": 255
-  },
-  "aides": {
-    "atoutNormandie": 50,
-    "passSport": 50,
-    "kiosk": 50,
-    "spot50": 50
-  },
-  "reductionFamille": 20,
-  "parrainage": {
-    "montantParFilleul": 20,
-    "plafond": 60
-  }
+    "nomClub": "Full Boxe Américaine Club",
+    "saisonActuelle": "2026-2027",
+    "tarifs": {
+        "enfant1Cours": 110,
+        "adulte1Cours": 155,
+        "adulte4Cours": 255
+    },
+    "aides": {
+        "atoutNormandie": 50,
+        "passSport": 50,
+        "kiosk": 50,
+        "spot50": 50
+    },
+    "reductionFamille": 20,
+    "parrainage": {
+        "montantParFilleul": 20,
+        "plafond": 60
+    },
+    "comptabilite": {
+        "licenceFederale": 39,
+        "soldeBancaireInitial": 0,
+        "soldeCaisseInitial": 0
+    }
 }
