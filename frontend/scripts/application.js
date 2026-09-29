@@ -22,6 +22,59 @@ let donneesInitiales = null;
 let sauvegardeEnCours = false;
 let sauvegardeEnAttente = false;
 
+function obtenirSaisonConsulteeId() {
+    const saisonActiveId = state?.configuration?.saisonActiveId || "";
+    const saisonId = ui?.selectedSeason;
+    return state?.saisons?.some(saison => saison.id === saisonId)
+        ? saisonId
+        : saisonActiveId;
+}
+
+function saisonConsulteeEstHistorique() {
+    return obtenirSaisonConsulteeId() !== (state?.configuration?.saisonActiveId || "");
+}
+
+function actualiserSelecteurSaisonGlobale() {
+    const select = document.getElementById("globalSeasonSelector");
+    if (!select || !Array.isArray(state?.saisons)) return;
+    const saisonConsulteeId = obtenirSaisonConsulteeId();
+    const saisons = [...state.saisons].sort(
+        (a, b) =>
+            Number(b.anneeDebut || String(b.nom).slice(0, 4)) -
+            Number(a.anneeDebut || String(a.nom).slice(0, 4))
+    );
+    select.innerHTML = saisons.map(
+        saison =>
+            `<option value="${echapperHtml(saison.id)}">${echapperHtml(saison.nom)}</option>`
+    ).join("");
+    select.value = saisonConsulteeId;
+    const badge = document.getElementById("seasonLockBadge");
+    const saison = state.saisons.find(element => element.id === saisonConsulteeId);
+    if (badge) {
+        badge.textContent = saisonConsulteeId === state.configuration.saisonActiveId
+            ? `● Saison active — ${saison?.nom || ""}`
+            : `● Consultation historique — ${saison?.nom || ""}`;
+    }
+}
+
+async function changerSaisonConsultee(saisonId) {
+    if (!state.saisons.some(saison => saison.id === saisonId)) return;
+    ui.selectedSeason = saisonId;
+    actualiserSelecteurSaisonGlobale();
+    if (typeof remplirFiltreSaisonsAdherents === "function") {
+        remplirFiltreSaisonsAdherents();
+    }
+    renderCurrentPage();
+}
+
+function initialiserSelecteurSaisonGlobale() {
+    const select = document.getElementById("globalSeasonSelector");
+    if (!select || select.dataset.initialise) return;
+    select.addEventListener("change", event => changerSaisonConsultee(event.target.value));
+    select.dataset.initialise = "true";
+    actualiserSelecteurSaisonGlobale();
+}
+
 async function initialiserApplication() {
     try {
         await chargerDonnees();
@@ -38,6 +91,10 @@ async function initialiserApplication() {
             "function"
         ) {
             initialiserEvenementsAdherents();
+        }
+
+        if (typeof initialiserSelecteurSaisonGlobale === "function") {
+            initialiserSelecteurSaisonGlobale();
         }
 
         if (
