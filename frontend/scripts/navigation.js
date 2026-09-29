@@ -10,7 +10,8 @@ function changerPage(page) {
         referrals: "referrals",
         seasons: "seasons",
         settings: "settings",
-        accounting: "accounting"
+        accounting: "accounting",
+        invoicing: "invoicing"
     };
 
     const pageInterne =
@@ -52,7 +53,8 @@ function changerPage(page) {
         referrals: "Parrainages",
         seasons: "Saisons",
         settings: "Paramètres",
-        accounting: "Vue financière"
+        accounting: "Vue financière",
+        invoicing: "Facturation"
     };
 
     const titre =
