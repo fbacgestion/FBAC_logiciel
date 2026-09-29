@@ -1405,6 +1405,8 @@ async function enregistrerAdherentDepuisFormulaire(
             inscription.paymentMethod =
                 paiement;
 
+            synchroniserPaiementDepuisFicheAdherent(inscription, montantPaye, paiement);
+
             inscription.certificat =
                 inscription.certificat ||
                 {
@@ -3237,6 +3239,21 @@ function convertirPersonnePourBackend(
             personne.photo ||
             null
     };
+}
+
+function synchroniserPaiementDepuisFicheAdherent(inscription, montant, mode) {
+    const paiements = Array.isArray(inscription.paiements) ? inscription.paiements : [];
+    const montantNumerique = Math.max(0, Number(montant) || 0);
+    if (montantNumerique <= 0) {
+        inscription.paiements = [];
+        return;
+    }
+    if (paiements.length === 1) {
+        paiements[0].amount = montantNumerique;
+        paiements[0].method = mode || "";
+        return;
+    }
+    inscription.paiements = [{ id: paiements[0]?.id || genererIdentifiant("paiement"), date: paiements[0]?.date || new Date().toISOString().slice(0, 10), amount: montantNumerique, method: mode || "" }];
 }
 
 function convertirInscriptionPourBackend(
