@@ -2175,7 +2175,7 @@ function mettreAJourResumeAdherent() {
         )
         ?.replaceChildren(
             document.createTextNode(
-                `-${aidesEffectives.total.toFixed(2)} €`
+                `${aidesEffectives.total.toFixed(2)} €`
             )
         );
 
@@ -2185,7 +2185,7 @@ function mettreAJourResumeAdherent() {
         )
         ?.replaceChildren(
             document.createTextNode(
-                `-${(aidesEffectives.details.atoutNormandie || 0).toFixed(2)} €`
+                `${(aidesEffectives.details.atoutNormandie || 0).toFixed(2)} €`
             )
         );
 
@@ -2195,7 +2195,7 @@ function mettreAJourResumeAdherent() {
         )
         ?.replaceChildren(
             document.createTextNode(
-                `-${(aidesEffectives.details.passSport || 0).toFixed(2)} €`
+                `${(aidesEffectives.details.passSport || 0).toFixed(2)} €`
             )
         );
 
@@ -2205,7 +2205,7 @@ function mettreAJourResumeAdherent() {
         )
         ?.replaceChildren(
             document.createTextNode(
-                `-${(aidesEffectives.details.kiosk || 0).toFixed(2)} €`
+                `${(aidesEffectives.details.kiosk || 0).toFixed(2)} €`
             )
         );
 
@@ -2215,7 +2215,7 @@ function mettreAJourResumeAdherent() {
         )
         ?.replaceChildren(
             document.createTextNode(
-                `-${(aidesEffectives.details.spot50 || 0).toFixed(2)} €`
+                `${(aidesEffectives.details.spot50 || 0).toFixed(2)} €`
             )
         );
 
