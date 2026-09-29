@@ -332,15 +332,15 @@
                         <div class="form-grid">
                             <div class="field">
                                 <label>Enfant — 1 cours / semaine</label>
-                                <input type="number" id="priceChild1" min="0" step="1">
+                                <input type="number" id="priceChild1" min="0" step="0.50">
                             </div>
                             <div class="field">
                                 <label>Adulte — 1 cours / semaine</label>
-                                <input type="number" id="priceAdult1" min="0" step="1">
+                                <input type="number" id="priceAdult1" min="0" step="0.50">
                             </div>
                             <div class="field">
                                 <label>Adulte — 4 cours / semaine</label>
-                                <input type="number" id="priceAdult4" min="0" step="1">
+                                <input type="number" id="priceAdult4" min="0" step="0.50">
                             </div>
                         </div>
                     </div>
@@ -350,19 +350,19 @@
                         <div class="form-grid">
                             <div class="field">
                                 <label>Atout Normandie — montant par défaut</label>
-                                <input type="number" id="aidAtout" min="0" step="1">
+                                <input type="number" id="aidAtout" min="0" step="0.50">
                             </div>
                             <div class="field">
                                 <label>Pass'Sport — montant par défaut</label>
-                                <input type="number" id="aidPassSport" min="0" step="1">
+                                <input type="number" id="aidPassSport" min="0" step="0.50">
                             </div>
                             <div class="field">
                                 <label>Kiosk — montant par défaut</label>
-                                <input type="number" id="aidKiosk" min="0" step="1">
+                                <input type="number" id="aidKiosk" min="0" step="0.50">
                             </div>
                             <div class="field">
                                 <label>Spot50 — montant par défaut</label>
-                                <input type="number" id="aidSpot50" min="0" step="1">
+                                <input type="number" id="aidSpot50" min="0" step="0.50">
                             </div>
                         </div>
                         <p>Ces montants sont des valeurs paramétrables. Le montant réel peut être modifié directement sur chaque fiche adhérent.</p>
@@ -373,15 +373,15 @@
                         <div class="form-grid">
                             <div class="field">
                                 <label>Licence fédérale incluse</label>
-                                <input type="number" id="comptaLicenceParam" min="0" step="0.01">
+                                <input type="number" id="comptaLicenceParam" min="0" step="0.50">
                             </div>
                             <div class="field">
                                 <label>Solde bancaire initial</label>
-                                <input type="number" id="comptaBanqueParam" min="0" step="0.01">
+                                <input type="number" id="comptaBanqueParam" min="0" step="0.50">
                             </div>
                             <div class="field">
                                 <label>Solde caisse initial</label>
-                                <input type="number" id="comptaCaisseParam" min="0" step="0.01">
+                                <input type="number" id="comptaCaisseParam" min="0" step="0.50">
                             </div>
                         </div>
                         <p>Ces valeurs servent de base au suivi financier de la saison active. Elles sont gérées ici avec les autres paramètres de l'application.</p>
@@ -400,7 +400,7 @@
                         <h3>Réduction famille</h3>
                         <div class="field">
                             <label>Montant par défaut</label>
-                            <input type="number" id="familyDiscount" min="0" step="1">
+                            <input type="number" id="familyDiscount" min="0" step="0.50">
                         </div>
                         <p>La réduction famille peut ensuite être activée ou désactivée individuellement sur chaque adhérent.</p>
                     </div>
@@ -409,7 +409,7 @@
                         <h3>Parrainage</h3>
                         <div class="field">
                             <label>Montant par parrainage</label>
-                            <input type="number" id="referralAmount" min="0" step="1">
+                            <input type="number" id="referralAmount" min="0" step="0.50">
                         </div>
                         <div class="readonly-box">
                             <div class="summary-line">
@@ -578,7 +578,7 @@
                                         Atout Normandie
                                     </label>
                                 </div>
-                                <input type="number" id="aidAtoutAmount" min="0" step="1" placeholder="Montant">
+                                <input type="number" id="aidAtoutAmount" min="0" step="0.50" placeholder="Montant">
                             </div>
 
                             <div class="aid-item">
@@ -588,7 +588,7 @@
                                         Pass'Sport
                                     </label>
                                 </div>
-                                <input type="number" id="aidPassSportAmount" min="0" step="1" placeholder="Montant">
+                                <input type="number" id="aidPassSportAmount" min="0" step="0.50" placeholder="Montant">
                             </div>
 
                             <div class="aid-item">
@@ -598,7 +598,7 @@
                                         Kiosk
                                     </label>
                                 </div>
-                                <input type="number" id="aidKioskAmount" min="0" step="1" placeholder="Montant">
+                                <input type="number" id="aidKioskAmount" min="0" step="0.50" placeholder="Montant">
                             </div>
 
                             <div class="aid-item">
@@ -608,7 +608,7 @@
                                         Spot50
                                     </label>
                                 </div>
-                                <input type="number" id="aidSpot50Amount" min="0" step="1" placeholder="Montant">
+                                <input type="number" id="aidSpot50Amount" min="0" step="0.50" placeholder="Montant">
                             </div>
                         </div>
                     </div>
@@ -625,7 +625,7 @@
 
                     <div class="field">
                         <label>Montant de la réduction</label>
-                        <input type="number" id="familyDiscountAmount" min="0" step="1">
+                        <input type="number" id="familyDiscountAmount" min="0" step="0.50">
                     </div>
 
                     <div class="section-title">Paiement</div>
@@ -643,7 +643,7 @@
 
                     <div class="field">
                         <label>Montant payé</label>
-                        <input type="number" id="memberPaidAmount" min="0" step="0.01">
+                        <input type="number" id="memberPaidAmount" min="0" step="0.50">
                     </div>
 
                     <div class="field full">
@@ -829,7 +829,7 @@
                 <div style="height:15px"></div>
                 <div class="field">
                     <label>Nouveau paiement</label>
-                    <input type="number" id="paymentAmount" min="0" step="0.01" required>
+                    <input type="number" id="paymentAmount" min="0" step="0.50" required>
                 </div>
                 <div class="field">
                     <label>Mode de paiement</label>
@@ -864,7 +864,7 @@
                 <input type="hidden" id="comptaOperationType" value="recette">
                 <div class="form-grid">
                     <div class="field"><label>Date</label><input type="date" id="comptaDate" required></div>
-                    <div class="field"><label>Montant</label><input type="number" id="comptaMontant" min="0.01" step="0.01" required></div>
+                    <div class="field"><label>Montant</label><input type="number" id="comptaMontant" min="0.01" step="0.50" required></div>
                     <div class="field" id="comptaLibelleSelectField"><label>Libellé</label><select id="comptaLibelleSelect" required><option value="">Sélectionner un libellé</option><option value="Stage">Stage</option><option value="Vente de matériel">Vente de matériel</option><option value="Sponsoring">Sponsoring</option><option value="Remboursement">Remboursement</option><option value="__autre__">Autre</option></select></div><div class="field hidden" id="comptaLibelleAutreField"><label>Libellé personnalisé</label><input type="text" id="comptaLibelleAutre" placeholder="Saisir le libellé"></div><div class="field" id="comptaLibelleDepenseField"><label>Libellé</label><input type="text" id="comptaLibelleDepense" required placeholder="Ex. Achat de matériel"></div>
                     <div class="field"><label>Catégorie</label><select id="comptaCategorie"></select></div>
                     <div class="field"><label>Mode de paiement</label><select id="comptaMode"><option value="">Non renseigné</option><option>Espèces</option><option>Chèque</option><option>Virement</option><option>Carte</option><option>Prélèvement</option><option>Autre</option></select></div>
