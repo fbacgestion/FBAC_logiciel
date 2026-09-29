@@ -122,7 +122,7 @@ function afficherPaiements() {
                         )}
                     </td>
                     <td>${donnees.tarif.toFixed(2)} €</td>
-                    <td>-${donnees.totalAides.toFixed(2)} €</td>
+                    <td>${donnees.totalAides.toFixed(2)} €</td>
                     <td>-${donnees.reductionFamille.toFixed(2)} €</td>
                     <td>-${donnees.parrainageAcquis.toFixed(2)} €</td>
                     <td>${donnees.montantAPayer.toFixed(2)} €</td>
