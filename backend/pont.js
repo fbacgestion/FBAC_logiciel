@@ -6,7 +6,15 @@ const {
 contextBridge.exposeInMainWorld(
     "fbac",
     {
-        version: "1.1.0",
+        version: "1.2.0",
+        obtenirFactures:()=>ipcRenderer.invoke("obtenir-factures"),
+        obtenirFacture:id=>ipcRenderer.invoke("obtenir-facture",id),
+        apercuFacture:d=>ipcRenderer.invoke("apercu-facture",d),
+        creerFacture:d=>ipcRenderer.invoke("creer-facture",d),
+        modifierFacture:(id,d)=>ipcRenderer.invoke("modifier-facture",id,d),
+        supprimerFacture:id=>ipcRenderer.invoke("supprimer-facture",id),
+        imprimerFacture:id=>ipcRenderer.invoke("imprimer-facture",id),
+        enregistrerFactureSous:id=>ipcRenderer.invoke("enregistrer-facture-sous",id),
         obtenirComptabilite: saisonId => {
             return ipcRenderer.invoke("obtenir-comptabilite", saisonId);
         },
