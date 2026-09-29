@@ -2,7 +2,8 @@ const {
     app,
     BrowserWindow,
     ipcMain,
-    dialog
+    dialog,
+    Menu
 } = require("electron");
 
 const path = require("path");
@@ -739,6 +740,25 @@ body{font-family:Arial,sans-serif;color:#20242b;margin:0;padding:34px;font-size:
 </body></html>`;
 }
 
+let menuApplication = null;
+let menuVisible = false;
+
+function initialiserMenuApplication() {
+    if (menuApplication) return;
+    menuApplication = Menu.getApplicationMenu();
+    menuVisible = Boolean(menuApplication);
+    if (menuApplication) {
+        Menu.setApplicationMenu(null);
+        menuVisible = false;
+    }
+}
+
+function basculerMenuApplication() {
+    if (!menuApplication) return;
+    menuVisible = !menuVisible;
+    Menu.setApplicationMenu(menuVisible ? menuApplication : null);
+}
+
 function creerFenetre() {
     const fenetre =
         new BrowserWindow({
@@ -758,6 +778,12 @@ function creerFenetre() {
             }
         });
 
+    fenetre.webContents.on("before-input-event", (_, input) => {
+        if (input.type === "keyDown" && input.key === "F10") {
+            basculerMenuApplication();
+        }
+    });
+
     fenetre.loadFile(
         path.join(
             __dirname,
@@ -772,6 +798,7 @@ app.whenReady().then(() => {
     initialiserSaisonActuelle();
 
     enregistrerHandlersIpc();
+    initialiserMenuApplication();
 
     creerFenetre();
 
