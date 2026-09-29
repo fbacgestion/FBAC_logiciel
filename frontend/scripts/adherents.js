@@ -109,7 +109,14 @@ function afficherAdherents() {
                     ? "<span class=\"member-warning-badge\">⚠ Certificat manquant</span>"
                     : "";
 
-        const parrainage = Number(inscription.referralDiscountApplied ?? inscription.parrainageAcquis ?? 0);
+        const parrainagesValides = Math.min(
+            3,
+            state.inscriptions.filter(
+                filleul =>
+                    filleul.season === inscription.season &&
+                    filleul.referrerId === inscription.personId
+            ).length
+        );
         const famille = genererAffichageFamille(inscription);
 
         const actions = ui.selectedSeason === saisonCourante
@@ -133,7 +140,7 @@ function afficherAdherents() {
             "<td>" + afficherBadgePaiement(inscription) + "</td>" +
             "<td>" + echapperHtml(aides) + "</td>" +
             "<td>" + certificat + "</td>" +
-            "<td>" + (parrainage > 0 ? "-" + parrainage + " €" : "—") + "</td>" +
+            "<td>" + (parrainagesValides > 0 ? parrainagesValides + "/3" : "—") + "</td>" +
             "<td><div class=\"actions\">" + actions + "</div></td>" +
             "</tr>";
     }).join("");
