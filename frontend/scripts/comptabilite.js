@@ -93,6 +93,30 @@ async function rafraichirComptabilite() {
     }
 }
 
+function actualiserLibelleOperation(type) {
+    const select = document.getElementById("comptaLibelleSelect");
+    const autreField = document.getElementById("comptaLibelleAutreField");
+    const autreInput = document.getElementById("comptaLibelleAutre");
+    const depenseField = document.getElementById("comptaLibelleDepenseField");
+    const depenseInput = document.getElementById("comptaLibelleDepense");
+    if (!select || !autreField || !autreInput || !depenseField || !depenseInput) return;
+    const estRecette = type === "recette";
+    select.required = estRecette;
+    autreInput.required = estRecette && select.value === "__autre__";
+    depenseInput.required = !estRecette;
+    autreField.classList.toggle("hidden", !estRecette || select.value !== "__autre__");
+    depenseField.classList.toggle("hidden", estRecette);
+}
+
+function obtenirLibelleOperation(type) {
+    if (type === "recette") {
+        const select = document.getElementById("comptaLibelleSelect");
+        const autre = document.getElementById("comptaLibelleAutre");
+        return select?.value === "__autre__" ? autre?.value.trim() : select?.value || "";
+    }
+    return document.getElementById("comptaLibelleDepense")?.value.trim() || "";
+}
+
 function ouvrirOperationComptable(type) {
     const modal = document.getElementById("comptaOperationModal");
     if (!modal) return;
@@ -101,6 +125,15 @@ function ouvrirOperationComptable(type) {
     const select = document.getElementById("comptaCategorie");
     const categories = type === "depense" ? comptabilite.categories.depenses : comptabilite.categories.recettes;
     select.innerHTML = categories.map(categorie => `<option value="${escapeHtmlCompta(categorie.id)}">${escapeHtmlCompta(categorie.nom)}</option>`).join("");
+    const selectLibelle = document.getElementById("comptaLibelleSelect");
+    const autreLibelle = document.getElementById("comptaLibelleAutre");
+    const depenseLibelle = document.getElementById("comptaLibelleDepense");
+    if (selectLibelle) selectLibelle.value = "";
+    if (autreLibelle) autreLibelle.value = "";
+    if (depenseLibelle) depenseLibelle.value = "";
+    actualiserLibelleOperation(type);
+    const date = document.getElementById("comptaDate");
+    if (date && !date.value) date.value = new Date().toISOString().slice(0, 10);
     modal.classList.add("active", "open");
 }
 
@@ -110,7 +143,7 @@ async function enregistrerOperationComptable(event) {
     const donnees = {
         type,
         date: document.getElementById("comptaDate").value,
-        libelle: document.getElementById("comptaLibelle").value.trim(),
+        libelle: obtenirLibelleOperation(type),
         categorie: document.getElementById("comptaCategorie").value,
         montant: Number(document.getElementById("comptaMontant").value),
         modePaiement: document.getElementById("comptaMode").value,
@@ -121,6 +154,7 @@ async function enregistrerOperationComptable(event) {
         await window.fbac.creerOperationComptable(donnees);
         document.getElementById("comptaOperationModal").classList.remove("active", "open");
         event.target.reset();
+        actualiserLibelleOperation("recette");
         await rafraichirComptabilite();
         notificationSucces(type === "depense" ? "Dépense enregistrée." : "Recette enregistrée.");
     } catch (error) {
@@ -152,6 +186,11 @@ async function supprimerOperationComptableDepuisInterface(id) {
 
 function initialiserComptabilite() {
     const formulaire = document.getElementById("comptaOperationForm");
+    const selectLibelle = document.getElementById("comptaLibelleSelect");
+    if (selectLibelle && !selectLibelle.dataset.initialise) {
+        selectLibelle.addEventListener("change", () => actualiserLibelleOperation("recette"));
+        selectLibelle.dataset.initialise = "true";
+    }
     if (formulaire && !formulaire.dataset.initialise) {
         formulaire.addEventListener("submit", enregistrerOperationComptable);
         formulaire.dataset.initialise = "true";
