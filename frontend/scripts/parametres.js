@@ -72,6 +72,36 @@ function afficherParametres() {
         20
     );
 
+    const comptabilite =
+        configuration.comptabilite || {};
+
+    definirValeur(
+        "comptaLicenceParam",
+        comptabilite.licenceFederale ?? 39
+    );
+
+    definirValeur(
+        "comptaBanqueParam",
+        comptabilite.soldeBancaireInitial ?? 0
+    );
+
+    definirValeur(
+        "comptaCaisseParam",
+        comptabilite.soldeCaisseInitial ?? 0
+    );
+
+    const saison =
+        configuration.saisonActuelle ||
+        configuration.saisonActiveId ||
+        "";
+
+    const saisonElement =
+        document.getElementById("settingCurrentSeason");
+
+    if (saisonElement) {
+        saisonElement.textContent = saison || "Aucune saison définie";
+    }
+
     const parrainage =
         configuration.parrainage || {};
 
@@ -219,13 +249,38 @@ async function enregistrerParametres() {
                 ) || 0
             ),
         parrainage: {
+            ...(state.configuration?.parrainage || {}),
             montantParFilleul:
                 Number(
                     obtenirValeur(
                         "referralAmount"
                     ) || 0
                 ),
-            plafond: 3
+            plafond:
+                Number(
+                    state.configuration?.parrainage?.plafond
+                ) || 60
+        },
+        comptabilite: {
+            ...(state.configuration?.comptabilite || {}),
+            licenceFederale:
+                Number(
+                    obtenirValeur(
+                        "comptaLicenceParam"
+                    ) || 0
+                ),
+            soldeBancaireInitial:
+                Number(
+                    obtenirValeur(
+                        "comptaBanqueParam"
+                    ) || 0
+                ),
+            soldeCaisseInitial:
+                Number(
+                    obtenirValeur(
+                        "comptaCaisseParam"
+                    ) || 0
+                )
         }
     };
 
@@ -243,8 +298,7 @@ async function enregistrerParametres() {
     configuration.parrainage = {
         ...(configuration.parrainage || {}),
         montantParFilleul:
-            configuration.parrainage.montantParFilleul,
-        plafond: 3
+            configuration.parrainage.montantParFilleul
     };
 
     mettreAJourAffichageParrainage(
