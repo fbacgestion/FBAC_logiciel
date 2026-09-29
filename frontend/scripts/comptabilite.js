@@ -98,10 +98,12 @@ function actualiserLibelleOperation(type) {
     const autreField = document.getElementById("comptaLibelleAutreField");
     const autreInput = document.getElementById("comptaLibelleAutre");
     const depenseField = document.getElementById("comptaLibelleDepenseField");
-    if (!select || !autreField || !autreInput || !depenseField) return;
+    const depenseInput = document.getElementById("comptaLibelleDepense");
+    if (!select || !autreField || !autreInput || !depenseField || !depenseInput) return;
     const estRecette = type === "recette";
     select.required = estRecette;
     autreInput.required = estRecette && select.value === "__autre__";
+    depenseInput.required = !estRecette;
     autreField.classList.toggle("hidden", !estRecette || select.value !== "__autre__");
     depenseField.classList.toggle("hidden", estRecette);
 }
