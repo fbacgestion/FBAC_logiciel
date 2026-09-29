@@ -914,6 +914,35 @@
     </div>
 </div>
 
+<div class="modal-backdrop" id="factureModal">
+    <div class="modal large">
+        <div class="modal-header"><div><h2 id="factureModalTitle">Nouvelle facture</h2><span>Client, coordonnées et lignes.</span></div><button type="button" class="close" data-close-modal="factureModal">×</button></div>
+        <form id="factureForm"><div class="modal-body">
+            <div class="form-grid">
+                <div class="field"><label>Adhérent</label><select id="factureClient"></select></div>
+                <div class="field"><label>Date</label><input type="date" id="factureDate" required></div>
+                <div class="field"><label>Nom</label><input type="text" id="factureNom" required></div>
+                <div class="field"><label>Prénom</label><input type="text" id="facturePrenom" required></div>
+                <div class="field"><label>Adresse</label><input type="text" id="factureAdresse"></div>
+                <div class="field"><label>Code postal</label><input type="text" id="factureCodePostal"></div>
+                <div class="field"><label>Ville</label><input type="text" id="factureVille"></div>
+                <div class="field"><label>SIRET client</label><input type="text" id="factureSiretClient"></div>
+                <div class="field"><label>Objet</label><input type="text" id="factureObjet"></div>
+                <div class="field"><label>Formule destinataire</label><input type="text" id="factureDestinataire" placeholder="Ex. Pour monsieur BENJAMIN HOUIX"></div>
+            </div>
+            <div class="facture-lines-head"><strong>Désignations</strong><span>Qté · Prix · Remise</span></div>
+            <div class="facture-lines" id="factureLines"></div>
+            <div class="actions facture-add-line"><button type="button" class="btn" id="factureAddLine">+ Ajouter une ligne</button><strong>Total : <span id="factureFormTotal">0,00 €</span></strong></div>
+        </div><div class="modal-footer"><button type="button" class="btn" data-close-modal="factureModal">Annuler</button><button type="button" class="btn btn-primary" data-facture-action="preview">Aperçu</button></div></form>
+    </div>
+</div>
+<div class="modal-backdrop" id="facturePreviewModal">
+    <div class="modal invoice-preview-modal">
+        <div class="modal-header"><div><h2>Aperçu de la facture</h2><span>Validation finale avant création du PDF.</span></div><button type="button" class="close" data-close-modal="facturePreviewModal">×</button></div>
+        <div class="modal-body facture-preview-body"><iframe id="facturePreviewFrame" title="Aperçu de la facture"></iframe></div>
+        <div class="modal-footer"><button type="button" class="btn" data-action="facture-back-preview">← Modifier</button><button type="button" class="btn btn-primary" data-action="facture-confirm">✓ Valider et générer</button></div>
+    </div>
+</div>
 <div class="toast-container" id="toastContainer"></div>
 
 <script src="scripts/calculs.js"></script>
@@ -926,6 +955,7 @@
 <script src="scripts/saisons.js"></script>
 <script src="scripts/parametres.js"></script>
 <script src="scripts/comptabilite.js"></script>
+<script src="scripts/facturation.js"></script>
 <script src="scripts/sauvegardes.js"></script>
 <script src="scripts/application.js"></script>
 </body>
