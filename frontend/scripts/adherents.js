@@ -1294,14 +1294,8 @@ async function enregistrerAdherentDepuisFormulaire(
                     famille,
                 referrerId:
                     parrain,
-                parrainageAcquis:
-                    calculerMontantParrainage(
-                        obtenirNombreParrainagesSelectionne()
-                    ),
-                referralDiscountApplied:
-                    calculerMontantParrainage(
-                        obtenirNombreParrainagesSelectionne()
-                    ),
+                parrainageAcquis: 0,
+                referralDiscountApplied: 0,
                 aides,
                 reductionFamille:
                     reductionFamilleActive
