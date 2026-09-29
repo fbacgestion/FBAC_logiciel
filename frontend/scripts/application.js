@@ -1204,6 +1204,7 @@ function renderCurrentPage() {
             }
             break;
 
+        case "members":
         case "adherents":
             if (
                 typeof afficherAdherents ===
@@ -1213,6 +1214,7 @@ function renderCurrentPage() {
             }
             break;
 
+        case "payments":
         case "paiements":
             if (
                 typeof afficherPaiements ===
@@ -1229,6 +1231,7 @@ function renderCurrentPage() {
             }
             break;
 
+        case "referrals":
         case "parrainages":
             if (
                 typeof afficherParrainages ===
@@ -1238,6 +1241,7 @@ function renderCurrentPage() {
             }
             break;
 
+        case "seasons":
         case "saisons":
             if (
                 typeof afficherSaisons ===
