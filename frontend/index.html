@@ -45,6 +45,10 @@
                 <span class="nav-icon">▣</span>
                 <span>Vue financière</span>
             </button>
+            <button data-page="invoicing">
+                <span class="nav-icon">▤</span>
+                <span>Facturation</span>
+            </button>
             <div class="nav-title">Administration</div>
             <button data-page="settings">
                 <span class="nav-icon">⚙</span>
@@ -307,6 +311,17 @@
                             <tbody id="comptaOperations"></tbody>
                         </table>
                     </div>
+                </div>
+            </section>
+
+            <section class="page" id="page-invoicing">
+                <div class="page-header">
+                    <div><h1>Facturation</h1><p>Créez, consultez et gérez les factures PDF de FBAC.</p></div>
+                    <div class="actions"><input class="search" id="factureSearch" type="search" placeholder="Rechercher une facture ou un client"><button class="btn btn-primary" data-facture-action="new">+ Nouvelle facture</button></div>
+                </div>
+                <div class="table-card">
+                    <div class="table-toolbar"><div><strong>Factures générées</strong><span class="toolbar-note">Les PDF sont conservés automatiquement dans le dossier factures.</span></div></div>
+                    <div class="table-wrap"><table><thead><tr><th>N°</th><th>Date</th><th>Client</th><th>Objet</th><th>Total</th><th>Actions</th></tr></thead><tbody id="facturesTable"></tbody></table></div>
                 </div>
             </section>
 
