@@ -3939,6 +3939,17 @@ function initialiserEvenementsAdherents() {
             "true";
     }
 
+    const selectGrade =
+        document.getElementById("memberGrade");
+
+    if (selectGrade && !selectGrade.dataset.apercuInitialise) {
+        selectGrade.addEventListener("change", event => {
+            afficherApercuGrade(event.target.value);
+            mettreAJourResumeAdherent();
+        });
+        selectGrade.dataset.apercuInitialise = "true";
+    }
+
     [
         "memberBirthDate",
         "memberFrequency",
