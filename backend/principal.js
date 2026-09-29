@@ -730,6 +730,59 @@ function enregistrerHandlersIpc() {
     );
 }
 
+function construireApercuFacture(donnees, configuration) {
+    const facturation = configuration.facturation || {};
+    const association = facturation.association || {};
+    const saison = obtenirSaison(donnees.saisonId);
+    return {
+        ...donnees,
+        id: "apercu",
+        numero: "APERÇU",
+        saisonNom: donnees.saisonNom || saison?.nom || "",
+        association: {
+            nom: association.nom || "FBAC - Full Boxe Américaine Club",
+            adresse: association.adresse || "24 le Haut du Bingard",
+            codePostal: association.codePostal || "50490",
+            ville: association.ville || "Muneville-le-Bingard",
+            siret: association.siret || "",
+            email: association.email || "",
+            telephone: association.telephone || "",
+            site: association.site || ""
+        },
+        lignes: donnees.lignes || [],
+        total: (donnees.lignes || []).reduce((s, l) => s + Math.max(0, (Number(l.quantite) || 0) * (Number(l.prixUnitaire) || 0) - (Number(l.remise) || 0)), 0),
+        mentionTva: facturation.mentionTva || "TVA non applicable (article 293 B du CGI)",
+        mentions: facturation.mentions || ""
+    };
+}
+
+async function genererPdfFacture(facture) {
+    const fenetre = new BrowserWindow({
+        show: false,
+        width: 900,
+        height: 1280,
+        webPreferences: { contextIsolation: true, nodeIntegration: false }
+    });
+    try {
+        await fenetre.loadURL("data:text/html;charset=utf-8," + encodeURIComponent(genererHtmlFacture(facture)));
+        const pdf = await fenetre.webContents.printToPDF({
+            printBackground: true,
+            pageSize: "A4",
+            margins: { marginType: "none" }
+        });
+        enregistrerPdf(facture, pdf);
+    } finally {
+        if (!fenetre.isDestroyed()) fenetre.close();
+    }
+}
+
+function incrementerNumerotationFacture(configuration) {
+    configuration.facturation = configuration.facturation || {};
+    configuration.facturation.numerotation = configuration.facturation.numerotation || {};
+    configuration.facturation.numerotation.prochainNumero = (Number(configuration.facturation.numerotation.prochainNumero) || 1) + 1;
+    ecrireJson("configuration.json", configuration);
+}
+
 function echapperRapport(valeur) {
     return String(valeur ?? "").replace(/[&<>"']/g, caractere => ({
         "&": "&amp;",
