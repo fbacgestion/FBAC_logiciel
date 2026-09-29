@@ -106,15 +106,31 @@ function obtenirMontantAide(
     ) || 0;
 }
 
+function obtenirTarifInscription(inscription) {
+    if (inscription?.vip) {
+        return 0;
+    }
+
+    if (inscription?.tarif !== undefined && inscription?.tarif !== null && inscription?.tarif !== "") {
+        const tarif = Number(inscription.tarif);
+        if (Number.isFinite(tarif)) {
+            return tarif;
+        }
+    }
+
+    if (!inscription?.category || !inscription?.frequency) {
+        return 0;
+    }
+
+    return calculerTarif(
+        inscription.category,
+        inscription.frequency
+    );
+}
+
 function obtenirAidesEffectives(inscription) {
     const tarif =
-        inscription.vip
-            ? 0
-            : Number(inscription.tarif) ||
-              calculerTarif(
-                  inscription.category,
-                  inscription.frequency
-              );
+        obtenirTarifInscription(inscription);
 
     let reste =
         Math.max(
@@ -179,13 +195,7 @@ function calculerMontantAPayer(
     }
 
     const tarif =
-        Number(
-            inscription.tarif
-        ) ||
-        calculerTarif(
-            inscription.category,
-            inscription.frequency
-        );
+        obtenirTarifInscription(inscription);
 
     const aides =
         obtenirAidesEffectives(
@@ -307,15 +317,7 @@ function calculerDonneesPaiement(
 
     return {
         tarif:
-            inscription.vip
-                ? 0
-                : Number(
-                    inscription.tarif
-                ) ||
-                calculerTarif(
-                    inscription.category,
-                    inscription.frequency
-                ),
+            obtenirTarifInscription(inscription),
 
         totalAides:
             obtenirAidesEffectives(
