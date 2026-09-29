@@ -1254,6 +1254,7 @@ function renderCurrentPage() {
             }
             break;
 
+        case "settings":
         case "parametres":
             if (
                 typeof afficherParametres ===
