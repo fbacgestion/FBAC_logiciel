@@ -210,11 +210,13 @@ function calculerMontantAPayer(
         );
 
     const parrainageAcquis =
-        Number(
-            inscription.parrainageAcquis ??
-            inscription.referralDiscountApplied ??
-            0
-        );
+        inscription.season === state?.configuration?.saisonActiveId
+            ? 0
+            : Number(
+                inscription.parrainageAcquis ??
+                inscription.referralDiscountApplied ??
+                0
+            );
 
     return Math.max(
         0,
