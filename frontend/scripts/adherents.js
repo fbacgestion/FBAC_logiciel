@@ -1380,13 +1380,9 @@ async function enregistrerAdherentDepuisFormulaire(
             inscription.referrerId =
                 parrain;
 
-            inscription.parrainageAcquis =
-                calculerMontantParrainage(
-                    obtenirNombreParrainagesSelectionne()
-                );
+            inscription.parrainageAcquis = 0;
 
-            inscription.referralDiscountApplied =
-                inscription.parrainageAcquis;
+            inscription.referralDiscountApplied = 0;
 
             inscription.aides =
                 aides;
@@ -2073,10 +2069,7 @@ function mettreAJourResumeAdherent() {
             )
             : 0;
 
-    const parrainageAcquis =
-        calculerMontantParrainage(
-            obtenirNombreParrainagesSelectionne()
-        );
+    const parrainageAcquis = 0;
 
     const montantPaye =
         Number(
