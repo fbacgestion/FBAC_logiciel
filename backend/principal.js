@@ -31,7 +31,8 @@ const {
     obtenirPersonne,
     creerPersonne,
     modifierPersonne,
-    supprimerPersonne
+    supprimerPersonne,
+    obtenirPersonnesToutes
 } = require("./gestion/personnes");
 
 const {
@@ -201,7 +202,7 @@ function enregistrerHandlersIpc() {
     ipcMain.handle(
         "obtenir-personnes",
         () => {
-            return obtenirPersonnes();
+            return obtenirPersonnesToutes();
         }
     );
 
