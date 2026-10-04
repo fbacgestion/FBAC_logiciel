@@ -38,7 +38,7 @@ function creerPersonne(donnees) {
         );
     }
 
-    const personnes = obtenirPersonnes();
+    const personnes = obtenirPersonnesToutes();
 
     const personne = {
         id: donnees.id || genererId(),
@@ -65,7 +65,7 @@ function modifierPersonne(id, donnees) {
         );
     }
 
-    const personnes = obtenirPersonnes();
+    const personnes = obtenirPersonnesToutes();
 
     const index = personnes.findIndex(
         personne => personne.id === id
