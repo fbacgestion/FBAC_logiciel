@@ -27,15 +27,7 @@ function obtenirMontantAide(aide) {
 }
 
 function calculerTotalAides(aides = {}) {
-    return obtenirMoteurFinancier()
-        .obtenirAidesEffectives(
-            { aides },
-            obtenirMoteurFinancier().obtenirTarif(
-                { category: "adulte", frequency: 1 },
-                obtenirConfigurationCalcul()
-            ),
-            obtenirConfigurationCalcul()
-        ).total;
+    return obtenirMoteurFinancier().calculerTotalAides(aides);
 }
 
 function obtenirTarifInscription(inscription) {
