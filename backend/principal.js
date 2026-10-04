@@ -950,10 +950,4 @@ app.on(
             app.quit();
         }
     }
-)const {
-    lire: lireConfigurationCentrale,
-    enregistrer: enregistrerConfigurationCentrale,
-    normaliser: normaliserConfiguration
-} = require("./core/configuration");
-
-;
+);
