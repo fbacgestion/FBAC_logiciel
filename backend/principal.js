@@ -851,9 +851,10 @@ function creerHtmlRapportFinancier(synthese, saison) {
         const depenses = Number(valeur.depenses) || 0;
         return '<div class="month"><div class="bars"><i class="income" style="height:' + Math.max(4, recettes / maximum * 100) + '%"></i><i class="expense" style="height:' + Math.max(4, depenses / maximum * 100) + '%"></i></div><small>' + echapperRapport(id.slice(5)) + '</small></div>';
     }).join("");
+    const recettes = Number(synthese?.totalRecettes) || 0;
+    const depenses = Number(synthese?.totalDepenses) || 0;
     const operations = (synthese?.operations || []).map(operation => '<tr><td>' + echapperRapport(operation.date) + '</td><td>' + echapperRapport(operation.libelle) + '</td><td>' + echapperRapport(operation.categorie) + '</td><td>' + echapperRapport(operation.modePaiement || "—") + '</td><td class="' + (operation.type === "recette" ? "positive" : "negative") + '">' + (operation.type === "depense" ? "−" : "+") + euro(operation.montant) + '</td></tr>').join("");
     const categories = Object.entries(synthese?.categories || {}).sort((a, b) => b[1] - a[1]).map(([categorie, montant]) => { const part = recettes > 0 ? Number(montant) / recettes * 100 : 0; return '<tr><td>' + echapperRapport(categorie) + '</td><td class="right">' + euro(montant) + '</td><td class="right">' + part.toFixed(1) + ' %</td></tr>'; }).join("");
-    const tauxEncaissement = recettes > 0 ? 100 : 0;
     const resultat = Number(synthese?.resultat) || recettes - depenses;
     const tresorerie = (Number(synthese?.compteBancaire) || 0) + (Number(synthese?.caisse) || 0);
     const nonAffectees = Array.isArray(synthese?.operationsNonAffectees) ? synthese.operationsNonAffectees.length : 0;
@@ -867,7 +868,7 @@ body{font-family:Arial,sans-serif;color:#20242b;margin:0;padding:34px;font-size:
 </style></head><body>
 <div class="head"><div><div class="brand">FBAC — FULL BOXE AMÉRICAINE CLUB</div><h1>Rapport financier</h1><div class="muted">Saison ${echapperRapport(saison?.nom || synthese?.saisonId || "")}</div></div><div class="muted">Généré le ${new Date().toLocaleDateString("fr-FR")}</div></div>
 <div class="kpis"><div class="kpi accent"><span>RECETTES</span><strong>${euro(recettes)}</strong></div><div class="kpi"><span>DÉPENSES</span><strong>${euro(depenses)}</strong></div><div class="kpi"><span>RÉSULTAT</span><strong class="${resultat >= 0 ? "positive" : "negative"}">${euro(resultat)}</strong></div><div class="kpi"><span>TRÉSORERIE</span><strong>${euro(tresorerie)}</strong></div></div>
-<div class="summary-grid"><div class="summary-card"><span>Solde bancaire</span><strong>${euro(synthese?.compteBancaire)}</strong></div><div class="summary-card"><span>Caisse</span><strong>${euro(synthese?.caisse)}</strong></div><div class="summary-card"><span>Opérations</span><strong>${(synthese?.operations || []).length}</strong></div><div class="summary-card"><span>Part des recettes encaissées</span><strong>${tauxEncaissement.toFixed(1)} %</strong></div></div>
+<div class="summary-grid"><div class="summary-card"><span>Solde bancaire</span><strong>${euro(synthese?.compteBancaire)}</strong></div><div class="summary-card"><span>Caisse</span><strong>${euro(synthese?.caisse)}</strong></div><div class="summary-card"><span>Opérations</span><strong>${(synthese?.operations || []).length}</strong></div><div class="summary-card"><span>Opérations non affectées</span><strong>${nonAffectees}</strong></div></div>
 <h2>Évolution mensuelle</h2><div class="chart">${graphique}</div><div class="legend"><b>■ Recettes</b><i></i> Dépenses</div>
 <h2>Ventilation des cotisations</h2><table><tr><th>Élément</th><th class="right">Montant</th></tr><tr><td>Licences encaissées</td><td class="right">${euro(synthese?.licenceEncaissee)}</td></tr><tr><td>Part club</td><td class="right">${euro(synthese?.clubEncaisse)}</td></tr><tr><td>Licence paramétrée pour la saison</td><td class="right">${euro(synthese?.licenceParametree)}</td></tr></table>
 <h2>Répartition par catégorie</h2><table><tr><th>Catégorie</th><th class="right">Montant</th><th class="right">Part des recettes</th></tr>${categories || '<tr><td colspan="3">Aucune opération</td></tr>'}</table>
