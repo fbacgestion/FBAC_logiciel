@@ -24,7 +24,7 @@ function obtenirPersonnesToutes() {
 }
 
 function obtenirPersonne(id) {
-    const personnes = obtenirPersonnes();
+    const personnes = obtenirPersonnesToutes();
 
     return personnes.find(
         personne => personne.id === id
