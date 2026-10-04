@@ -97,9 +97,9 @@ function afficherAdherents() {
         ].filter(Boolean).join(", ") || "—";
 
         const certificatDocumentId = inscription.certificat?.documentId || inscription.certificate?.documentId;
-        const certificat = certificatDocumentId
-            ? "<button type=\"button\" class=\"btn btn-small\" data-action=\"voir-certificat\" data-id=\"" + echapperHtml(inscription.id) + "\">Visualiser</button>"
-            : "";
+        const certificat = (certificatDocumentId
+            ? "<button type=\"button\" class=\"btn btn-small\" data-action=\"voir-certificat\" data-id=\"" + echapperHtml(inscription.id) + "\">Visualiser</button> "
+            : "") + afficherBadgeCertificat(inscription);
 
         const etatCertificat = obtenirEtatCertificat(inscription);
         const alerteCertificat =
