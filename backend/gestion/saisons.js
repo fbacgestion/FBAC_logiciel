@@ -1,77 +1,64 @@
-const {
-    lireJson,
-    ecrireJson
-} = require("./fichiers");
+const { lireJson, ecrireJson } = require("./fichiers");
 
 const FICHIER_SAISONS = "saisons.json";
 const FICHIER_CONFIGURATION = "configuration.json";
 
 function obtenirSaisons() {
     const saisons = lireJson(FICHIER_SAISONS);
-
-    if (!Array.isArray(saisons)) {
-        return [];
-    }
-
-    return saisons;
+    return Array.isArray(saisons) ? saisons : [];
 }
 
 function obtenirSaisonActuelle(date = new Date()) {
-    const annee =
-        date.getMonth() >= 8
-            ? date.getFullYear()
-            : date.getFullYear() - 1;
-
-    const nom =
-        `${annee}-${annee + 1}`;
-
-    return obtenirSaisonParNom(nom);
+    const annee = date.getMonth() >= 8 ? date.getFullYear() : date.getFullYear() - 1;
+    return obtenirSaisonParNom(`${annee}-${annee + 1}`);
 }
 
 function obtenirSaisonParNom(nom) {
-    const saisons = obtenirSaisons();
+    return obterSaisonParNomInterne(nom);
+}
 
-    return saisons.find(
-        saison =>
-            obtenirNomSaison(saison) === nom
-    ) || null;
+function obterSaisonParNomInterne(nom) {
+    const saisons = obtenirSaisons();
+    return saisons.find(saison => obterNomSaison(saison) === nom) || null;
 }
 
 function obtenirSaison(id) {
     const saisons = obtenirSaisons();
+    return saisons.find(saison => obterIdentifiantSaison(saison) === id) || null;
+}
 
-    return saisons.find(
-        saison =>
-            obtenirIdentifiantSaison(saison) === id
-    ) || null;
+function obtenirSaisonActive() {
+    const configuration = lireJson(FICHIER_CONFIGURATION) || {};
+    const id = configuration.saisonActiveId || "";
+    return id ? obtenirSaison(id) : null;
+}
+
+function definirSaisonActive(id) {
+    const saison = obtenirSaison(id);
+    if (!saison) {
+        throw new Error("Saison introuvable.");
+    }
+
+    const configuration = lireJson(FICHIER_CONFIGURATION) || {};
+    configuration.saisonActiveId = obterIdentifiantSaison(saison);
+    configuration.saisonActive = obterNomSaison(saison);
+    ecrireJson(FICHIER_CONFIGURATION, configuration);
+    return saison;
 }
 
 function creerSaison(anneeDebut) {
     const annee = Number(anneeDebut);
 
-    if (
-        !Number.isInteger(annee) ||
-        annee < 2020 ||
-        annee > 2100
-    ) {
-        throw new Error(
-            "Année de saison invalide."
-        );
+    if (!Number.isInteger(annee) || annee < 2020 || annee > 2100) {
+        throw new Error("Année de saison invalide.");
     }
 
-    const nom =
-        `${annee}-${annee + 1}`;
-
+    const nom = `${annee}-${annee + 1}`;
     const saisons = obtenirSaisons();
-
-    const existe =
-        saisons.some(
-            saison =>
-                obtenirNomSaison(saison) === nom
-        );
+    const existe = saisons.some(saison => obterNomSaison(saison) === nom);
 
     if (existe) {
-        return obtenirSaisonParNom(nom);
+        return obterSaisonParNomInterne(nom);
     }
 
     const saison = {
@@ -84,79 +71,57 @@ function creerSaison(anneeDebut) {
     };
 
     saisons.push(saison);
-
-    ecrireJson(
-        FICHIER_SAISONS,
-        saisons
-    );
-
+    ecrireJson(FICHIER_SAISONS, saisons);
     return saison;
 }
 
+function initialiserSaisonsSansChangement() {
+    let saisons = obtenirSaisons();
+    let saisonActive = obtenirSaisonActive();
+
+    if (!saisonActive) {
+        const annee = new Date().getMonth() >= 8
+            ? new Date().getFullYear()
+            : new Date().getFullYear() - 1;
+
+        saisonActive = obterSaisonParNomInterne(`${annee}-${annee + 1}`);
+
+        if (!saisonActive) {
+            saisonActive = creerSaison(annee);
+            saisons = obterSaisons();
+        }
+
+        definirSaisonActive(obterIdentifiantSaison(saisonActive));
+    }
+
+    return saisonActive;
+}
+
+/*
+ * Compatibilité avec l'ancien démarrage.
+ * Cette fonction ne change plus une saison active déjà définie.
+ */
 function initialiserSaisonActuelle() {
-    const date = new Date();
-
-    const annee =
-        date.getMonth() >= 8
-            ? date.getFullYear()
-            : date.getFullYear() - 1;
-
-    let saison =
-        obtenirSaisonParNom(
-            `${annee}-${annee + 1}`
-        );
-
-    if (!saison) {
-        saison =
-            creerSaison(annee);
-    }
-
-    const configuration =
-        lireJson(FICHIER_CONFIGURATION) || {};
-
-    configuration.saisonActiveId =
-        obtenirIdentifiantSaison(saison);
-
-    configuration.saisonActive =
-        obtenirNomSaison(saison);
-
-    ecrireJson(
-        FICHIER_CONFIGURATION,
-        configuration
-    );
-
-    return saison;
+    return initialiserSaisonsSansChangement();
 }
 
-function obtenirIdentifiantSaison(
-    saison
-) {
-    if (
-        typeof saison === "string"
-    ) {
-        return saison;
-    }
-
-    return saison?.id ||
-        saison?.nom ||
-        "";
+function obterIdentifiantSaison(saison) {
+    if (typeof saison === "string") return saison;
+    return saison?.id || saison?.nom || "";
 }
 
-function obtenirNomSaison(saison) {
-    if (
-        typeof saison === "string"
-    ) {
-        return saison;
-    }
-
-    return saison?.nom ||
-        saison?.id ||
-        "";
+function obterNomSaison(saison) {
+    if (typeof saison === "string") return saison;
+    return saison?.nom || saison?.id || "";
 }
 
 module.exports = {
     initialiserSaisonActuelle,
+    initialiserSaisonsSansChangement,
     obtenirSaisons,
     obtenirSaison,
-    obtenirSaisonActuelle
+    obtenirSaisonActuelle,
+    obtenirSaisonActive,
+    definirSaisonActive,
+    creerSaison
 };
