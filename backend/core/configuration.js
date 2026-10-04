@@ -18,6 +18,11 @@ const VALEURS_DEFAUT = {
     parrainage: {
         montantParFilleul: 20,
         plafond: 3
+    },
+    comptabilite: {
+        licenceFederale: 39,
+        soldeBancaireInitial: 0,
+        soldeCaisseInitial: 0
     }
 };
 
@@ -43,6 +48,31 @@ function normaliserAides(source = {}) {
     };
 }
 
+function extraireParametresFinanciers(configuration = {}) {
+    const source = configuration && typeof configuration === "object" ? configuration : {};
+    const tarifs = normaliserTarifs(source.tarifs || source.prices || {});
+    const aides = normaliserAides(source.aides || source.aidDefaults || {});
+    const parrainage = source.parrainage || {};
+    const comptabilite = source.comptabilite || {};
+
+    return {
+        tarifs,
+        aides,
+        reductionFamille: nombre(source.reductionFamille ?? source.familyDiscount, VALEURS_DEFAUT.reductionFamille),
+        parrainage: {
+            montantParFilleul: nombre(
+                parrainage.montantParFilleul ?? parrainage.montant,
+                VALEURS_DEFAUT.parrainage.montantParFilleul
+            ),
+            plafond: nombre(parrainage.plafond, VALEURS_DEFAUT.parrainage.plafond)
+        },
+        licenceFederale: nombre(
+            comptabilite.licenceFederale,
+            VALEURS_DEFAUT.comptabilite.licenceFederale
+        )
+    };
+}
+
 function normaliser(configuration = {}) {
     const source = configuration && typeof configuration === "object"
         ? configuration
@@ -51,6 +81,7 @@ function normaliser(configuration = {}) {
     const tarifs = normaliserTarifs(source.tarifs || source.prices || {});
     const aides = normaliserAides(source.aides || source.aidDefaults || {});
     const parrainage = source.parrainage || {};
+    const comptabilite = source.comptabilite || {};
 
     return {
         ...source,
@@ -70,8 +101,84 @@ function normaliser(configuration = {}) {
                 parrainage.plafond,
                 VALEURS_DEFAUT.parrainage.plafond
             )
-        }
+        },
+        comptabilite: {
+            ...comptabilite,
+            licenceFederale: nombre(
+                comptabilite.licenceFederale,
+                VALEURS_DEFAUT.comptabilite.licenceFederale
+            ),
+            soldeBancaireInitial: nombre(
+                comptabilite.soldeBancaireInitial,
+                VALEURS_DEFAUT.comptabilite.soldeBancaireInitial
+            ),
+            soldeCaisseInitial: nombre(
+                comptabilite.soldeCaisseInitial,
+                VALEURS_DEFAUT.comptabilite.soldeCaisseInitial
+            )
+        },
+        parametresSaisons:
+            source.parametresSaisons &&
+            typeof source.parametresSaisons === "object"
+                ? source.parametresSaisons
+                : {}
     };
+}
+
+function obtenirParametresSaison(saisonId, configuration = {}) {
+    const normalisee = normaliser(configuration);
+    const saison = normalisee.parametresSaisons?.[saisonId];
+
+    if (saison && typeof saison === "object") {
+        return {
+            ...extraireParametresFinanciers(normalisee),
+            ...saison,
+            tarifs: {
+                ...extraireParametresFinanciers(normalisee).tarifs,
+                ...(saison.tarifs || {})
+            },
+            aides: {
+                ...extraireParametresFinanciers(normalisee).aides,
+                ...(saison.aides || {})
+            },
+            parrainage: {
+                ...extraireParametresFinanciers(normalisee).parrainage,
+                ...(saison.parrainage || {})
+            }
+        };
+    }
+
+    return extraireParametresFinanciers(normalisee);
+}
+
+function figerParametresSaison(saisonId, configuration = {}, forcer = false) {
+    if (!saisonId) return normaliser(configuration);
+
+    const normalisee = normaliser(configuration);
+    normalisee.parametresSaisons = {
+        ...(normalisee.parametresSaisons || {})
+    };
+
+    if (!normalisee.parametresSaisons[saisonId] || forcer) {
+        normalisee.parametresSaisons[saisonId] =
+            extraireParametresFinanciers(normalisee);
+    }
+
+    return normalisee;
+}
+
+function initialiserParametresSaisons(saisons = [], configuration = {}) {
+    let normalisee = normaliser(configuration);
+
+    for (const saison of saisons || []) {
+        const id = saison?.id || saison?.nom;
+        if (id) {
+            normalisee = figerParametresSaison(id, normalisee);
+        }
+    }
+
+    ecrireJson(FICHIER, normalisee);
+    return normalisee;
 }
 
 function lire() {
@@ -80,6 +187,15 @@ function lire() {
 
 function enregistrer(configuration) {
     const normalisee = normaliser(configuration);
+    const saisonActiveId = normalisee.saisonActiveId || "";
+
+    if (saisonActiveId) {
+        normalisee.parametresSaisons = {
+            ...(normalisee.parametresSaisons || {}),
+            [saisonActiveId]: extraireParametresFinanciers(normalisee)
+        };
+    }
+
     ecrireJson(FICHIER, normalisee);
     return normalisee;
 }
@@ -97,10 +213,25 @@ function obtenirSaisonActiveId(configuration, saisons = []) {
     return "";
 }
 
-module.exports = {
-    VALEURS_DEFAUT,
-    normaliser,
-    lire,
-    enregistrer,
-    obtenirSaisonActiveId
-};
+if (typeof module !== "undefined") {
+    module.exports = {
+        VALEURS_DEFAUT,
+        normaliser,
+        lire,
+        enregistrer,
+        obtenirSaisonActiveId,
+        extraireParametresFinanciers,
+        obtenirParametresSaison,
+        figerParametresSaison,
+        initialiserParametresSaisons
+    };
+}
+
+if (typeof window !== "undefined") {
+    window.FBACConfiguration = {
+        VALEURS_DEFAUT,
+        normaliser,
+        extraireParametresFinanciers,
+        obtenirParametresSaison
+    };
+}
