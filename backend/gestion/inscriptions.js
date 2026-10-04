@@ -5,6 +5,7 @@ const {
 
 const FICHIER_INSCRIPTIONS = "inscriptions.json";
 const { obtenirSaisonActuelle } = require("./saisons");
+const { lire: lireConfiguration, obtenirParametresSaison } = require("../core/configuration");
 
 function obtenirInscriptions() {
     const inscriptions = lireJson(FICHIER_INSCRIPTIONS);
@@ -86,6 +87,7 @@ function creerInscription(donnees) {
         season: donnees.season,
 
         category: donnees.category || "adulte",
+        tarif: donnees.tarif !== undefined ? Number(donnees.tarif) : undefined,
         frequency: donnees.frequency || "1",
         grade: donnees.grade || "Blanc",
         vip: Boolean(donnees.vip),
@@ -137,6 +139,12 @@ function creerInscription(donnees) {
         certificate:
             normaliserCertificat(
                 donnees.certificate
+            ),
+
+        parametresFinanciers:
+            normaliserParametresFinanciers(
+                donnees.parametresFinanciers,
+                donnees.season
             )
     };
 
@@ -243,6 +251,10 @@ function modifierInscription(
         personId: personneId,
         season: saison
     };
+
+    if (!nouvelleInscription.parametresFinanciers) {
+        nouvelleInscription.parametresFinanciers = normaliserParametresFinanciers(null, saison);
+    }
 
     if (donnees.aids) {
         nouvelleInscription.aids =
@@ -359,6 +371,38 @@ function supprimerInscriptionsPersonne(
     }
 
     return nombreSupprime;
+}
+
+function normaliserParametresFinanciers(parametres, saisonId) {
+    const configuration = lireConfiguration();
+    const source = parametres && typeof parametres === "object"
+        ? parametres
+        : obtenirParametresSaison(saisonId, configuration);
+
+    return {
+        tarifs: { ...(source.tarifs || {}) },
+        aides: { ...(source.aides || {}) },
+        reductionFamille: Number(source.reductionFamille) || 0,
+        parrainage: { ...(source.parrainage || {}) },
+        licenceFederale: Number(source.licenceFederale) || 0
+    };
+}
+
+function initialiserParametresFinanciers() {
+    const inscriptions = obtenirInscriptions();
+    let modifie = false;
+
+    for (const inscription of inscriptions) {
+        if (inscription.parametresFinanciers) continue;
+        inscription.parametresFinanciers = normaliserParametresFinanciers(null, inscription.season);
+        modifie = true;
+    }
+
+    if (modifie) {
+        ecrireJson(FICHIER_INSCRIPTIONS, inscriptions);
+    }
+
+    return inscriptions;
 }
 
 function obtenirSaisonActivePourEcriture() {
@@ -492,5 +536,6 @@ module.exports = {
     creerInscription,
     modifierInscription,
     supprimerInscription,
-    supprimerInscriptionsPersonne
+    supprimerInscriptionsPersonne,
+    initialiserParametresFinanciers
 };
