@@ -152,7 +152,7 @@ test("8. changement de saison et gel des paramètres", () => {
     const actuelle = configuration.lire();
 
     actuelle.tarifs.adult1 = 170;
-    actuelle.licenceFederale = 42;
+    actuelle.comptabilite.licenceFederale = 42;
     configuration.enregistrer(actuelle);
 
     saisons.definirSaisonActive(saison.id);
