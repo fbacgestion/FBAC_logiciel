@@ -100,3 +100,47 @@ test("fige le montant de parrainage présent dans l'inscription", () => {
     assert.equal(situation.remiseParrainage, 20);
     assert.equal(situation.montantAPayer, 135);
 });
+
+
+test("utilise les tarifs figes de la saison et ignore les nouveaux tarifs globaux", () => {
+    const situation = calculerSituationFinanciere(
+        {
+            category: "adulte",
+            frequency: "1",
+            parametresFinanciers: {
+                tarifs: { adult1: 155 },
+                aides: { kiosk: 50 },
+                reductionFamille: 20,
+                parrainage: { montantParFilleul: 20 }
+            },
+            paiements: []
+        },
+        {
+            tarifs: { adult1: 200 },
+            aides: { kiosk: 100 }
+        }
+    );
+
+    assert.equal(situation.tarif, 155);
+    assert.equal(situation.montantAPayer, 155);
+});
+
+test("un VIP reste adherent mais ne genere aucune dette financiere", () => {
+    const situation = calculerSituationFinanciere(
+        {
+            vip: true,
+            category: "adulte",
+            frequency: "4",
+            paiements: []
+        },
+        {
+            tarifs: { adult4: 255 }
+        }
+    );
+
+    assert.equal(situation.tarif, 0);
+    assert.equal(situation.montantAPayer, 0);
+    assert.equal(situation.reste, 0);
+    assert.equal(situation.surpaiement, 0);
+    assert.equal(situation.etat, "gratuit");
+});
