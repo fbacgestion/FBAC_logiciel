@@ -2,6 +2,7 @@ const { lireJson, ecrireJson } = require("./fichiers");
 
 const FICHIER_SAISONS = "saisons.json";
 const FICHIER_CONFIGURATION = "configuration.json";
+const { figerParametresSaison } = require("../core/configuration");
 
 function obtenirSaisons() {
     const saisons = lireJson(FICHIER_SAISONS);
@@ -42,7 +43,11 @@ function definirSaisonActive(id) {
     const configuration = lireJson(FICHIER_CONFIGURATION) || {};
     configuration.saisonActiveId = obtenirIdentifiantSaison(saison);
     configuration.saisonActive = obtenirNomSaison(saison);
-    ecrireJson(FICHIER_CONFIGURATION, configuration);
+    const configurationAvecSaison = figerParametresSaison(
+        obtenirIdentifiantSaison(saison),
+        configuration
+    );
+    ecrireJson(FICHIER_CONFIGURATION, configurationAvecSaison);
     return saison;
 }
 
