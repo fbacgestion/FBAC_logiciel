@@ -175,13 +175,8 @@ function modifierInscription(
     const inscriptionActuelle =
         inscriptions[index];
 
-    const saisonActuelle =
-        obtenirSaisonActuelle();
-
     const saisonActive =
-        saisonActuelle?.id ||
-        saisonActuelle?.nom ||
-        "";
+        obtenirSaisonActivePourEcriture();
 
     const estSaisonActive =
         inscriptionActuelle.season ===
@@ -316,13 +311,8 @@ function supprimerInscription(id) {
         );
     }
 
-    const saisonActuelle =
-        obtenirSaisonActuelle();
-
     const saisonActive =
-        saisonActuelle?.id ||
-        saisonActuelle?.nom ||
-        "";
+        obtenirSaisonActivePourEcriture();
 
     if (
         inscriptions[index].season !==
@@ -369,6 +359,16 @@ function supprimerInscriptionsPersonne(
     }
 
     return nombreSupprime;
+}
+
+function obtenirSaisonActivePourEcriture() {
+    const configuration = lireJson("configuration.json") || {};
+    if (configuration.saisonActiveId) {
+        return configuration.saisonActiveId;
+    }
+
+    const saisonActuelle = obtenirSaisonActuelle();
+    return saisonActuelle?.id || saisonActuelle?.nom || "";
 }
 
 function normaliserAides(aides) {
