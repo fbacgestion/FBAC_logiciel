@@ -5,14 +5,22 @@ const {
 
 const FICHIER_PERSONNES = "personnes.json";
 
-function obtenirPersonnes() {
+function obtenirPersonnes(options = {}) {
     const personnes = lireJson(FICHIER_PERSONNES);
 
     if (!Array.isArray(personnes)) {
         return [];
     }
 
-    return personnes;
+    if (options.inclureArchives) {
+        return personnes;
+    }
+
+    return personnes.filter(personne => !personne.archivee);
+}
+
+function obtenirPersonnesToutes() {
+    return obtenirPersonnes({ inclureArchives: true });
 }
 
 function obtenirPersonne(id) {
@@ -96,17 +104,20 @@ function supprimerPersonne(id) {
         );
     }
 
-    const personneSupprimee =
-        personnes[index];
+    const personneArchivee = {
+        ...personnes[index],
+        archivee: true,
+        archiveeLe: new Date().toISOString()
+    };
 
-    personnes.splice(index, 1);
+    personnes[index] = personneArchivee;
 
     ecrireJson(
         FICHIER_PERSONNES,
         personnes
     );
 
-    return personneSupprimee;
+    return personneArchivee;
 }
 
 function genererId() {
@@ -125,5 +136,6 @@ module.exports = {
     obtenirPersonne,
     creerPersonne,
     modifierPersonne,
-    supprimerPersonne
+    supprimerPersonne,
+    obtenirPersonnesToutes
 };
