@@ -99,15 +99,17 @@ function afficherAdherents() {
         const certificatDocumentId = inscription.certificat?.documentId || inscription.certificate?.documentId;
         const certificat = certificatDocumentId
             ? "<button type=\"button\" class=\"btn btn-small\" data-action=\"voir-certificat\" data-id=\"" + echapperHtml(inscription.id) + "\">Visualiser</button>"
-            : "<span class=\"badge\">Absent</span>";
+            : "";
 
         const etatCertificat = obtenirEtatCertificat(inscription);
         const alerteCertificat =
             etatCertificat === "expire"
-                ? "<span class=\"member-warning-badge\">⚠ Certificat expiré</span>"
-                : etatCertificat === "manquant"
-                    ? "<span class=\"member-warning-badge\">⚠ Certificat manquant</span>"
-                    : "";
+                ? "<span class=\"member-warning-badge\">Certificat expiré</span>"
+                : etatCertificat === "bientot"
+                    ? "<span class=\"member-warning-badge\">Certificat bientôt expiré</span>"
+                    : etatCertificat === "manquant"
+                        ? "<span class=\"member-warning-badge\">Certificat manquant</span>"
+                        : "";
 
         const parrainagesValides = Math.min(
             3,
@@ -288,14 +290,45 @@ function obtenirEtatCertificat(inscription) {
     const dateExpiration =
         new Date(expiration + "T23:59:59");
 
-    if (
-        Number.isNaN(dateExpiration.getTime()) ||
-        dateExpiration < new Date()
-    ) {
+    if (Number.isNaN(dateExpiration.getTime())) {
+        return "manquant";
+    }
+
+    const maintenant = new Date();
+    if (dateExpiration < maintenant) {
         return "expire";
     }
 
+    const limiteBientot = new Date(maintenant);
+    limiteBientot.setDate(limiteBientot.getDate() + 30);
+
+    if (dateExpiration <= limiteBientot) {
+        return "bientot";
+    }
+
     return "valide";
+}
+
+function afficherBadgeCertificat(inscription) {
+    const etat = obtenirEtatCertificat(inscription);
+    const certificat = inscription?.certificat || inscription?.certificate || {};
+    const expiration = certificat.expiry || calculerExpirationCertificat(certificat.date);
+
+    if (etat === "manquant") {
+        return '<span class="badge danger">Manquant</span>';
+    }
+
+    if (etat === "expire") {
+        return '<span class="badge danger">Expiré</span>';
+    }
+
+    if (etat === "bientot") {
+        return '<span class="badge warning">Bientôt expiré</span>';
+    }
+
+    return '<span class="badge success">Valide' +
+        (expiration ? ' jusqu’au ' + echapperHtml(expiration) : '') +
+        '</span>';
 }
 
 function afficherBadgePaiement(
