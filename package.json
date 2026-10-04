@@ -7,7 +7,8 @@
         "start": "electron .",
         "build": "electron-builder",
         "build:dir": "electron-builder --dir",
-        "build:win": "electron-builder --win nsis"
+        "build:win": "electron-builder --win nsis",
+        "test": "node --test tests"
     },
     "author": "FBAC",
     "license": "UNLICENSED",
