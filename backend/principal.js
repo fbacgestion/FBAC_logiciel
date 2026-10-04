@@ -140,8 +140,6 @@ function initialiserDonnees() {
 
     initialiserFamilles();
     initialiserComptabilite();
-    initialiserParametresSaisons(obtenirSaisons(), lireConfigurationCentrale());
-    initialiserParametresFinanciers();
     initialiserFactures(dossierDonnees, path.join(dossierFichiers, "factures"));
 
     fs.mkdirSync(
@@ -956,6 +954,8 @@ app.whenReady().then(() => {
     initialiserDonnees();
 
     initialiserSaisonsSansChangement();
+    initialiserParametresSaisons(obtenirSaisons(), lireConfigurationCentrale());
+    initialiserParametresFinanciers();
 
     enregistrerHandlersIpc();
     initialiserMenuApplication();
