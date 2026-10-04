@@ -42,7 +42,8 @@ const {
     obtenirInscriptionPersonneSaison,
     creerInscription,
     modifierInscription,
-    supprimerInscription
+    supprimerInscription,
+    initialiserParametresFinanciers
 } = require("./gestion/inscriptions");
 
 const {
