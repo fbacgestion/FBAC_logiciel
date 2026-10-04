@@ -446,13 +446,27 @@ function enregistrerHandlersIpc() {
             );
             const synthese = obtenirSyntheseComptable(saisonId, configuration);
             const saison = obtenirSaison(saisonId);
+            const inscriptions = obtenirInscriptions().filter(inscription => inscription.season === saisonId && !inscription.vip);
+            const saisons = obtenirSaisons();
+            const saisonPrecedente = saisons.filter(element => Number(element.anneeFin || 0) < Number(saison?.anneeFin || 0)).sort((a, b) => Number(b.anneeFin || 0) - Number(a.anneeFin || 0))[0] || null;
+            const inscriptionsPrecedentes = saisonPrecedente ? obtenirInscriptions().filter(inscription => inscription.season === saisonPrecedente.id && !inscription.vip) : [];
+            const personnesPrecedentes = new Set(inscriptionsPrecedentes.map(inscription => inscription.personId));
+            const enfants = inscriptions.filter(inscription => String(inscription.category || "").toLowerCase() === "enfant").length;
+            const adultes = inscriptions.length - enfants;
+            const formule1 = inscriptions.filter(inscription => String(inscription.frequency || "1") === "1").length;
+            const formule4 = inscriptions.filter(inscription => String(inscription.frequency || "1") === "4").length;
+            const nouveauxAdherents = inscriptions.filter(inscription => !personnesPrecedentes.has(inscription.personId)).length;
+            const grades = {};
+            inscriptions.forEach(inscription => { const grade = String(inscription.grade || "Blanc").trim() || "Blanc"; grades[grade] = (grades[grade] || 0) + 1; });
+            const ordreGrades = ["Blanc", "Jaune", "Orange", "Verte", "Bleue", "Marron", "Noire"];
+            const gradesOrdonnes = [...ordreGrades.filter(grade => grades[grade]), ...Object.keys(grades).filter(grade => !ordreGrades.includes(grade)).sort()];
             const resultat = await dialog.showSaveDialog({
                 title: "Enregistrer le rapport financier",
                 defaultPath: path.join(app.getPath("documents"), "FBAC-Rapport-financier-" + (saison?.nom || saisonId || "saison") + ".pdf"),
                 filters: [{ name: "Document PDF", extensions: ["pdf"] }]
             });
             if (resultat.canceled || !resultat.filePath) return false;
-            const html = creerHtmlRapportFinancier(synthese, saison);
+            const html = creerHtmlRapportFinancier(synthese, saison, { total: inscriptions.length, enfants, adultes, formule1, formule4, nouveauxAdherents, precedent: inscriptionsPrecedentes.length, grades: gradesOrdonnes.map(grade => ({ grade, nombre: grades[grade] })), noires: grades.Noire || 0, marron: grades.Marron || 0 });
             const fenetre = new BrowserWindow({
                 show: false,
                 width: 1200,
@@ -842,7 +856,7 @@ function echapperRapport(valeur) {
     }[caractere]));
 }
 
-function creerHtmlRapportFinancier(synthese, saison) {
+function creerHtmlRapportFinancier(synthese, saison, statsAdherents = {}) {
     const euro = valeur => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(Number(valeur) || 0);
     const mois = Object.entries(synthese?.mois || {}).sort((a, b) => a[0].localeCompare(b[0])).slice(-12);
     const maximum = Math.max(1, ...mois.flatMap(([, valeur]) => [valeur.recettes || 0, valeur.depenses || 0]));
@@ -863,6 +877,16 @@ function creerHtmlRapportFinancier(synthese, saison) {
     if (nonAffectees > 0) alertes.push(nonAffectees + " opération(s) ne permettent pas d’identifier clairement le compte de trésorerie.");
     if (!alertes.length) alertes.push("Aucun point financier critique détecté dans les données comptables.");
     const resumeCategories = Object.entries(synthese?.categories || {}).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([categorie, montant]) => '<div class="mini-row"><span>' + echapperRapport(categorie) + '</span><strong>' + euro(montant) + '</strong></div>').join("");
+    const totalAdherents = Number(statsAdherents.total) || 0;
+    const enfants = Number(statsAdherents.enfants) || 0;
+    const adultes = Number(statsAdherents.adultes) || 0;
+    const formule1 = Number(statsAdherents.formule1) || 0;
+    const formule4 = Number(statsAdherents.formule4) || 0;
+    const nouveauxAdherents = Number(statsAdherents.nouveauxAdherents) || 0;
+    const precedentAdherents = Number(statsAdherents.precedent) || 0;
+    const evolutionAdherents = totalAdherents - precedentAdherents;
+    const evolutionAdherentsPct = precedentAdherents ? evolutionAdherents / precedentAdherents * 100 : 0;
+    const gradesRapport = (statsAdherents.grades || []).map(element => '<tr><td>' + echapperRapport(element.grade) + '</td><td class="right">' + element.nombre + '</td></tr>').join("");
     return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>
 body{font-family:Arial,sans-serif;color:#20242b;margin:0;padding:34px;font-size:11px}h1{font-size:26px;margin:0 0 4px;color:#111}h2{font-size:15px;margin:24px 0 10px;border-bottom:2px solid #e30613;padding-bottom:6px}.head{display:flex;justify-content:space-between;border-bottom:3px solid #e30613;padding-bottom:18px}.brand{font-size:12px;color:#e30613;font-weight:700}.muted{color:#68707d}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:18px 0}.kpi{border:1px solid #e0e3e8;border-radius:8px;padding:12px}.kpi span{display:block;color:#68707d;font-size:10px}.kpi strong{display:block;font-size:17px;margin-top:5px}.kpi.accent{border-top:3px solid #e30613}.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 18px}.summary-card{background:#f7f8fa;border:1px solid #e3e6ea;border-radius:7px;padding:9px}.summary-card span{display:block;color:#68707d;font-size:9px}.summary-card strong{display:block;font-size:13px;margin-top:3px}.report-two-columns{display:grid;grid-template-columns:1fr 1fr;gap:18px}.mini-row{display:flex;justify-content:space-between;border-bottom:1px solid #e7e9ed;padding:6px}.attention{border-left:4px solid #e30613;background:#f7f8fa;padding:8px;margin:5px 0}.muted{color:#68707d}.positive{color:#16844d}.negative{color:#c0392b}.chart{height:190px;display:flex;align-items:flex-end;gap:9px;border-bottom:1px solid #dfe3e8;padding:10px}.month{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px}.bars{height:100%;width:100%;display:flex;align-items:flex-end;justify-content:center;gap:2px}.bars i{display:block;width:8px;border-radius:4px 4px 0 0}.income{background:#e30613}.expense{background:#606875}.legend{margin:7px 0;color:#68707d}.legend b{color:#e30613}.legend i{display:inline-block;width:7px;height:7px;background:#606875;border-radius:50%;margin-left:12px}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:7px 6px;border-bottom:1px solid #e7e9ed}th{font-size:10px;color:#68707d;text-transform:uppercase}.right{text-align:right}.footer{margin-top:28px;color:#68707d;font-size:9px;text-align:center}
 </style></head><body>
@@ -870,8 +894,7 @@ body{font-family:Arial,sans-serif;color:#20242b;margin:0;padding:34px;font-size:
 <div class="kpis"><div class="kpi accent"><span>RECETTES</span><strong>${euro(recettes)}</strong></div><div class="kpi"><span>DÉPENSES</span><strong>${euro(depenses)}</strong></div><div class="kpi"><span>RÉSULTAT</span><strong class="${resultat >= 0 ? "positive" : "negative"}">${euro(resultat)}</strong></div><div class="kpi"><span>TRÉSORERIE</span><strong>${euro(tresorerie)}</strong></div></div>
 <div class="summary-grid"><div class="summary-card"><span>Solde bancaire</span><strong>${euro(synthese?.compteBancaire)}</strong></div><div class="summary-card"><span>Caisse</span><strong>${euro(synthese?.caisse)}</strong></div><div class="summary-card"><span>Opérations</span><strong>${(synthese?.operations || []).length}</strong></div><div class="summary-card"><span>Opérations non affectées</span><strong>${nonAffectees}</strong></div></div>
 <h2>Évolution mensuelle</h2><div class="chart">${graphique}</div><div class="legend"><b>■ Recettes</b><i></i> Dépenses</div>
-<h2>Ventilation des cotisations</h2><table><tr><th>Élément</th><th class="right">Montant</th></tr><tr><td>Licences encaissées</td><td class="right">${euro(synthese?.licenceEncaissee)}</td></tr><tr><td>Part club</td><td class="right">${euro(synthese?.clubEncaisse)}</td></tr><tr><td>Licence paramétrée pour la saison</td><td class="right">${euro(synthese?.licenceParametree)}</td></tr></table>
-<h2>Répartition par catégorie</h2><table><tr><th>Catégorie</th><th class="right">Montant</th><th class="right">Part des recettes</th></tr>${categories || '<tr><td colspan="3">Aucune opération</td></tr>'}</table>
+<h2>1. Bilan des adhérents</h2><div class="summary-grid"><div class="summary-card"><span>Nombre total d’adhérents</span><strong>${totalAdherents}</strong></div><div class="summary-card"><span>Enfants</span><strong>${enfants}</strong></div><div class="summary-card"><span>Adultes</span><strong>${adultes}</strong></div><div class="summary-card"><span>Nouveaux adhérents</span><strong>${nouveauxAdherents}</strong></div></div><table><tr><th>Formule</th><th class="right">Nombre</th><th class="right">Part</th></tr><tr><td>1 cours</td><td class="right">${formule1}</td><td class="right">${totalAdherents ? (formule1 / totalAdherents * 100).toFixed(1) : "0.0"} %</td></tr><tr><td>4 cours</td><td class="right">${formule4}</td><td class="right">${totalAdherents ? (formule4 / totalAdherents * 100).toFixed(1) : "0.0"} %</td></tr></table><div class="attention">Saison précédente : ${precedentAdherents} adhérent(s) → cette saison : ${totalAdherents} — évolution : ${evolutionAdherents >= 0 ? "+" : ""}${evolutionAdherents} (${evolutionAdherents >= 0 ? "+" : ""}${evolutionAdherentsPct.toFixed(1)} %).</div><h2>2. Cotisations et licences</h2><table><tr><th>Élément</th><th class="right">Montant</th></tr><tr><td>Cotisations encaissées</td><td class="right">${euro((Number(synthese?.licenceEncaissee)||0)+(Number(synthese?.clubEncaisse)||0))}</td></tr><tr><td>Part licence</td><td class="right">${euro(synthese?.licenceEncaissee)}</td></tr><tr><td>Part club</td><td class="right">${euro(synthese?.clubEncaisse)}</td></tr><tr><td>Licences fédérales payées</td><td class="right">${euro(synthese?.categories?.["licences-federales"])}</td></tr></table><h2>3. Bilan sportif</h2><table><tr><th>Grade</th><th class="right">Nombre</th></tr>${gradesRapport || '<tr><td colspan="2">Aucun grade renseigné</td></tr>'}</table><div class="summary-grid"><div class="summary-card"><span>Ceintures noires</span><strong>${Number(statsAdherents.noires) || 0}</strong></div><div class="summary-card"><span>Ceintures marron</span><strong>${Number(statsAdherents.marron) || 0}</strong></div></div><h2>Répartition par catégorie</h2><table><tr><th>Catégorie</th><th class="right">Montant</th><th class="right">Part des recettes</th></tr>${categories || '<tr><td colspan="3">Aucune opération</td></tr>'}</table>
 <div class="report-two-columns"><div><h2>Principales catégories</h2><div class="mini-list">${resumeCategories || '<div class="muted">Aucune opération</div>'}</div></div><div><h2>Points de contrôle</h2>${alertes.map(alerte => '<div class="attention">' + echapperRapport(alerte) + '</div>').join("")}</div></div>
 <h2>Journal des opérations</h2><table><tr><th>Date</th><th>Libellé</th><th>Catégorie</th><th>Mode</th><th class="right">Montant</th></tr>${operations || '<tr><td colspan="5">Aucune opération</td></tr>'}</table>
 <div class="footer">FBAC Gestion — Rapport généré automatiquement à partir des données comptables de la saison.</div>
