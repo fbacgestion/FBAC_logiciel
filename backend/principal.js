@@ -18,6 +18,7 @@ const {
 
 const {
     initialiserSaisonActuelle,
+    initialiserSaisonsSansChangement,
     obtenirSaisons,
     obtenirSaisonActuelle,
     obtenirSaison,
