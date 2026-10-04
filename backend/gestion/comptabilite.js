@@ -87,8 +87,9 @@ function supprimerOperation(id) {
 function obtenirParametres(saisonId, configuration = {}) {
     const global = configuration.comptabilite || {};
     const saison = obtenirDonnees().parametres?.[saisonId] || {};
+    const snapshot = configuration.parametresSaisons?.[saisonId] || {};
     return {
-        licence: Number(saison.licence ?? global.licenceFederale ?? 39),
+        licence: Number(saison.licence ?? snapshot.licenceFederale ?? global.licenceFederale ?? 39),
         compteBancaire: Number(saison.compteBancaire ?? global.soldeBancaireInitial ?? 0),
         caisse: Number(saison.caisse ?? global.soldeCaisseInitial ?? 0)
     };
@@ -105,7 +106,7 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
         if (inscription.vip) continue;
         const paiements = Array.isArray(inscription.paiements) ? inscription.paiements.slice().sort((a, b) => String(a.date || "").localeCompare(String(b.date || ""))) : [];
         const personne = (personnes || []).find(element => element.id === inscription.personId);
-        const licence = Math.max(0, Number(saisonParametres[inscription.season]?.licence) || 0);
+        const licence = Math.max(0, Number(inscription.parametresFinanciers?.licenceFederale ?? saisonParametres[inscription.season]?.licence) || 0);
         let licenceDejaAffectee = 0;
         for (const paiement of paiements) {
             const montant = Math.max(0, Number(paiement.amount) || 0);
