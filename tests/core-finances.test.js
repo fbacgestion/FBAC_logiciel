@@ -144,3 +144,75 @@ test("un VIP reste adherent mais ne genere aucune dette financiere", () => {
     assert.equal(situation.surpaiement, 0);
     assert.equal(situation.etat, "gratuit");
 });
+
+
+test("calcule le tarif enfant 1 cours", () => {
+    const situation = calculerSituationFinanciere(
+        { category: "enfant", frequency: "1", paiements: [] },
+        configuration
+    );
+    assert.equal(situation.tarif, 110);
+    assert.equal(situation.montantAPayer, 110);
+});
+
+test("calcule le tarif adulte 4 cours", () => {
+    const situation = calculerSituationFinanciere(
+        { category: "adulte", frequency: "4", paiements: [] },
+        configuration
+    );
+    assert.equal(situation.tarif, 255);
+    assert.equal(situation.montantAPayer, 255);
+});
+
+test("cumule famille, parrainage et aides dans le bon ordre", () => {
+    const situation = calculerSituationFinanciere(
+        {
+            category: "adulte",
+            frequency: "1",
+            reductionFamille: 20,
+            parrainageAcquis: 20,
+            aides: {
+                kiosk: { enabled: true, amount: 50 }
+            },
+            paiements: []
+        },
+        configuration
+    );
+    assert.equal(situation.remiseFamille, 20);
+    assert.equal(situation.remiseParrainage, 20);
+    assert.equal(situation.aides, 50);
+    assert.equal(situation.montantAPayer, 65);
+});
+
+test("signale un paiement partiel", () => {
+    const situation = calculerSituationFinanciere(
+        {
+            category: "adulte",
+            frequency: "1",
+            paiements: [{ amount: 100, method: "Chèque" }]
+        },
+        configuration
+    );
+    assert.equal(situation.montantAPayer, 155);
+    assert.equal(situation.montantPaye, 100);
+    assert.equal(situation.reste, 55);
+    assert.equal(situation.etat, "partiel");
+});
+
+test("une aide supérieure au reste ne crée jamais de montant négatif", () => {
+    const situation = calculerSituationFinanciere(
+        {
+            category: "adulte",
+            frequency: "1",
+            aides: {
+                kiosk: { enabled: true, amount: 200 },
+                spot50: { enabled: true, amount: 200 }
+            },
+            paiements: []
+        },
+        configuration
+    );
+    assert.equal(situation.aides, 155);
+    assert.equal(situation.montantAPayer, 0);
+    assert.equal(situation.reste, 0);
+});
