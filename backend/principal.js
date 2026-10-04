@@ -788,6 +788,7 @@ function construireApercuFacture(donnees, configuration) {
         },
         lignes: donnees.lignes || [],
         total: (donnees.lignes || []).reduce((s, l) => s + Math.max(0, (Number(l.quantite) || 0) * (Number(l.prixUnitaire) || 0) - (Number(l.remise) || 0)), 0),
+        remiseTotale: (donnees.lignes || []).reduce((s, l) => s + Math.max(0, Number(l.remise) || 0), 0),
         mentionTva: facturation.mentionTva || "TVA non applicable (article 293 B du CGI)",
         mentions: facturation.mentions || ""
     };
