@@ -583,6 +583,20 @@ function enregistrerHandlersIpc() {
         }
     );
 
+    ipcMain.handle(
+        "creer-saison",
+        (_, anneeDebut) => {
+            return creerSaison(anneeDebut);
+        }
+    );
+
+    ipcMain.handle(
+        "definir-saison-actuelle",
+        (_, idSaison) => {
+            return definirSaisonActive(idSaison);
+        }
+    );
+
 
 
     ipcMain.handle(
