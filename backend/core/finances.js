@@ -69,6 +69,15 @@
         return Math.max(0, nombre(aide));
     }
 
+    function calculerTotalAides(aides = {}) {
+        return [
+            aides.atoutNormandie ?? aides.atout,
+            aides.passSport,
+            aides.kiosk,
+            aides.spot50
+        ].reduce((total, aide) => total + obtenirMontantAide(aide), 0);
+    }
+
     function obtenirAidesEffectives(inscription, tarif, configuration = {}) {
         const aides = inscription?.aides || inscription?.aids || {};
         let reste = Math.max(0, tarif);
@@ -187,6 +196,7 @@
     return {
         obtenirTarif,
         obtenirMontantAide,
+        calculerTotalAides,
         obtenirAidesEffectives,
         obtenirPaiements,
         totalPaiements,
