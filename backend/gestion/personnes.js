@@ -92,7 +92,7 @@ function modifierPersonne(id, donnees) {
 }
 
 function supprimerPersonne(id) {
-    const personnes = obtenirPersonnes();
+    const personnes = obtenirPersonnesToutes();
 
     const index = personnes.findIndex(
         personne => personne.id === id
