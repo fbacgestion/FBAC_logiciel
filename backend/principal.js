@@ -91,7 +91,8 @@ const {
 const { initialiserFactures, obtenirFactures, obtenirFacture, creerFacture, modifierFacture, supprimerFacture, enregistrerPdf, obtenirCheminPdf, genererHtmlFacture, prochain, numero } = require("./gestion/factures");
 const {
     lire: lireConfigurationCentrale,
-    enregistrer: enregistrerConfigurationCentrale
+    enregistrer: enregistrerConfigurationCentrale,
+    initialiserParametresSaisons
 } = require("./core/configuration");
 
 function initialiserDonnees() {
@@ -138,6 +139,8 @@ function initialiserDonnees() {
 
     initialiserFamilles();
     initialiserComptabilite();
+    initialiserParametresSaisons(obtenirSaisons(), lireConfigurationCentrale());
+    initialiserParametresFinanciers();
     initialiserFactures(dossierDonnees, path.join(dossierFichiers, "factures"));
 
     fs.mkdirSync(
@@ -251,12 +254,6 @@ function enregistrerHandlersIpc() {
                         id
                 );
 
-            if (inscriptions.length > 0) {
-                throw new Error(
-                    "Cette personne possède encore des inscriptions. Supprimez uniquement les inscriptions nécessaires afin de conserver l'historique."
-                );
-            }
-
             const personneArchivee =
                 supprimerPersonne(
                     id
@@ -264,8 +261,9 @@ function enregistrerHandlersIpc() {
 
             return {
                 personne: personneArchivee,
-                nombreInscriptions: 0,
+                nombreInscriptions: inscriptions.length,
                 archivee: true,
+                historiqueConserve: true,
                 photoSupprimee: false
             };
         }
