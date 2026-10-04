@@ -217,138 +217,77 @@ function normaliserEtat(
     };
 }
 
-function normaliserConfiguration(
-    configuration,
-    saisons
-) {
-    const source =
-        configuration &&
-        typeof configuration ===
-            "object"
-            ? configuration
-            : {};
+function normaliserConfiguration(configuration, saisons) {
+    const source = configuration && typeof configuration === "object"
+        ? configuration
+        : {};
 
-    let saisonActiveId =
-        source.saisonActiveId ||
-        "";
+    const saisonActiveId = source.saisonActiveId || "";
+    const saisonActiveExiste = saisons.some(saison => saison.id === saisonActiveId);
+    const saisonActive = saisons.find(saison => saison.id === saisonActiveId);
 
-    if (saisons.length) {
-        const date = new Date();
-        const annee = date.getMonth() >= 8
-            ? date.getFullYear()
-            : date.getFullYear() - 1;
-
-        const saisonDate =
-            saisons.find(saison =>
-                Number(saison.anneeDebut) === annee ||
-                saison.nom === `${annee}-${annee + 1}`
-            );
-
-        if (saisonDate) {
-            saisonActiveId = saisonDate.id;
-        }
-    }
-
-    const tarifs =
-        source.tarifs ||
-        source.prices ||
-        {};
-
-    const aides =
-        source.aides ||
-        source.aidDefaults ||
-        {};
+    const tarifsSource = source.tarifs || source.prices || {};
+    const aidesSource = source.aides || source.aidDefaults || {};
+    const facturationSource = source.facturation || {};
+    const associationSource = facturationSource.association || {};
+    const numerotationSource = facturationSource.numerotation || {};
+    const parrainageSource = source.parrainage || {};
 
     return {
         ...source,
-
-        saisonActiveId,
-
-        saisonActive:
-            source.saisonActive ||
-            saisons.find(
-                saison =>
-                    saison.id ===
-                    saisonActiveId
-            )?.nom ||
-            "",
-
+        saisonActiveId: saisonActiveExiste ? saisonActiveId : "",
+        saisonActive: saisonActiveExiste
+            ? saisonActive.nom
+            : "",
         tarifs: {
-            child1:
-                Number(
-                    tarifs.child1 ??
-                    tarifs.enfant1Cours ??
-                    110
-                ),
-
-            adult1:
-                Number(
-                    tarifs.adult1 ??
-                    tarifs.adulte1Cours ??
-                    155
-                ),
-
-            adult4:
-                Number(
-                    tarifs.adult4 ??
-                    tarifs.adulte4Cours ??
-                    255
-                )
+            child1: Number(tarifsSource.child1 ?? tarifsSource.enfant1Cours ?? 110),
+            adult1: Number(tarifsSource.adult1 ?? tarifsSource.adulte1Cours ?? 155),
+            adult4: Number(tarifsSource.adult4 ?? tarifsSource.adulte4Cours ?? 255)
         },
-
         aides: {
-            atout:
-                Number(
-                    aides.atout ??
-                    aides.atoutNormandie ??
-                    50
-                ),
-
-            passSport:
-                Number(
-                    aides.passSport ??
-                    50
-                ),
-
-            kiosk:
-                Number(
-                    aides.kiosk ??
-                    50
-                ),
-
-            spot50:
-                Number(
-                    aides.spot50 ??
-                    50
-                )
+            atout: Number(aidesSource.atout ?? aidesSource.atoutNormandie ?? 50),
+            passSport: Number(aidesSource.passSport ?? 50),
+            kiosk: Number(aidesSource.kiosk ?? 50),
+            spot50: Number(aidesSource.spot50 ?? 50)
         },
-
-        reductionFamille:
-            Number(
-                source.reductionFamille ??
-                source.familyDiscount ??
+        reductionFamille: Number(
+            source.reductionFamille ??
+            source.familyDiscount ??
+            20
+        ),
+        facturation: {
+            ...facturationSource,
+            association: {
+                nom: associationSource.nom || "FBAC - Full Boxe Américaine Club",
+                adresse: associationSource.adresse || "24 le Haut du Bingard",
+                codePostal: associationSource.codePostal || "50490",
+                ville: associationSource.ville || "Muneville-le-Bingard",
+                siret: associationSource.siret || "",
+                email: associationSource.email || "",
+                telephone: associationSource.telephone || "",
+                site: associationSource.site || ""
+            },
+            numerotation: {
+                ...numerotationSource,
+                prefixe: numerotationSource.prefixe || "",
+                inclureAnnee: numerotationSource.inclureAnnee !== false,
+                remplissage: Number(numerotationSource.remplissage) || 2,
+                prochainNumero: Number(numerotationSource.prochainNumero) || 1
+            },
+            mentionTva: facturationSource.mentionTva || "TVA non applicable (article 293 B du CGI)",
+            mentions: facturationSource.mentions || ""
+        },
+        parrainage: {
+            ...parrainageSource,
+            montantParFilleul: Number(
+                parrainageSource.montantParFilleul ??
+                parrainageSource.montant ??
                 20
             ),
-
-        facturation: { ...(source.facturation||{}), association: { nom: source.facturation?.association?.nom||"FBAC - Full Boxe Américaine Club", adresse: source.facturation?.association?.adresse||"24 le Haut du Bingard", codePostal: source.facturation?.association?.codePostal||"50490", ville: source.facturation?.association?.ville||"Muneville-le-Bingard", siret: source.facturation?.association?.siret||"", email: source.facturation?.association?.email||"", telephone: source.facturation?.association?.telephone||"", site: source.facturation?.association?.site||"" }, numerotation: { ...(source.facturation?.numerotation||{}), prefixe: source.facturation?.numerotation?.prefixe||"", inclureAnnee: source.facturation?.numerotation?.inclureAnnee!==false, remplissage: Number(source.facturation?.numerotation?.remplissage)||2, prochainNumero: Number(source.facturation?.numerotation?.prochainNumero)||9 }, mentionTva: source.facturation?.mentionTva||"TVA non applicable (article 293 B du CGI)", mentions: source.facturation?.mentions||"" },
-
-        parrainage: {
-            ...(source.parrainage || {}),
-            montantParFilleul:
-                Number(
-                    source.parrainage?.montantParFilleul ??
-                    source.parrainage?.montant ??
-                    20
-                ),
-            plafond:
-                Number(
-                    source.parrainage?.plafond ??
-                    3
-                )
+            plafond: Number(parrainageSource.plafond ?? 3)
         }
     };
 }
-
 function normaliserFamille(famille) {
     return {
         ...famille,
