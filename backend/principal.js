@@ -446,10 +446,10 @@ function enregistrerHandlersIpc() {
             );
             const synthese = obtenirSyntheseComptable(saisonId, configuration);
             const saison = obtenirSaison(saisonId);
-            const inscriptions = obtenirInscriptions().filter(inscription => inscription.season === saisonId && !inscription.vip);
+            const inscriptions = obtenirInscriptions().filter(inscription => inscription.season === saisonId);
             const saisons = obtenirSaisons();
             const saisonPrecedente = saisons.filter(element => Number(element.anneeFin || 0) < Number(saison?.anneeFin || 0)).sort((a, b) => Number(b.anneeFin || 0) - Number(a.anneeFin || 0))[0] || null;
-            const inscriptionsPrecedentes = saisonPrecedente ? obtenirInscriptions().filter(inscription => inscription.season === saisonPrecedente.id && !inscription.vip) : [];
+            const inscriptionsPrecedentes = saisonPrecedente ? obtenirInscriptions().filter(inscription => inscription.season === saisonPrecedente.id) : [];
             const personnesPrecedentes = new Set(inscriptionsPrecedentes.map(inscription => inscription.personId));
             const enfants = inscriptions.filter(inscription => String(inscription.category || "").toLowerCase() === "enfant").length;
             const adultes = inscriptions.length - enfants;
