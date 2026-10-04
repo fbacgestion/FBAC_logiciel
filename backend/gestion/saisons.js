@@ -14,17 +14,17 @@ function obtenirSaisonActuelle(date = new Date()) {
 }
 
 function obtenirSaisonParNom(nom) {
-    return obterSaisonParNomInterne(nom);
+    return obtenirSaisonParNomInterne(nom);
 }
 
-function obterSaisonParNomInterne(nom) {
+function obtenirSaisonParNomInterne(nom) {
     const saisons = obtenirSaisons();
-    return saisons.find(saison => obterNomSaison(saison) === nom) || null;
+    return saisons.find(saison => obtenirNomSaison(saison) === nom) || null;
 }
 
 function obtenirSaison(id) {
     const saisons = obtenirSaisons();
-    return saisons.find(saison => obterIdentifiantSaison(saison) === id) || null;
+    return saisons.find(saison => obtenirIdentifiantSaison(saison) === id) || null;
 }
 
 function obtenirSaisonActive() {
@@ -40,8 +40,8 @@ function definirSaisonActive(id) {
     }
 
     const configuration = lireJson(FICHIER_CONFIGURATION) || {};
-    configuration.saisonActiveId = obterIdentifiantSaison(saison);
-    configuration.saisonActive = obterNomSaison(saison);
+    configuration.saisonActiveId = obtenirIdentifiantSaison(saison);
+    configuration.saisonActive = obtenirNomSaison(saison);
     ecrireJson(FICHIER_CONFIGURATION, configuration);
     return saison;
 }
@@ -55,10 +55,10 @@ function creerSaison(anneeDebut) {
 
     const nom = `${annee}-${annee + 1}`;
     const saisons = obtenirSaisons();
-    const existe = saisons.some(saison => obterNomSaison(saison) === nom);
+    const existe = saisons.some(saison => obtenirNomSaison(saison) === nom);
 
     if (existe) {
-        return obterSaisonParNomInterne(nom);
+        return obtenirSaisonParNomInterne(nom);
     }
 
     const saison = {
@@ -84,14 +84,14 @@ function initialiserSaisonsSansChangement() {
             ? new Date().getFullYear()
             : new Date().getFullYear() - 1;
 
-        saisonActive = obterSaisonParNomInterne(`${annee}-${annee + 1}`);
+        saisonActive = obtenirSaisonParNomInterne(`${annee}-${annee + 1}`);
 
         if (!saisonActive) {
             saisonActive = creerSaison(annee);
             saisons = obterSaisons();
         }
 
-        definirSaisonActive(obterIdentifiantSaison(saisonActive));
+        definirSaisonActive(obtenirIdentifiantSaison(saisonActive));
     }
 
     return saisonActive;
@@ -105,12 +105,12 @@ function initialiserSaisonActuelle() {
     return initialiserSaisonsSansChangement();
 }
 
-function obterIdentifiantSaison(saison) {
+function obtenirIdentifiantSaison(saison) {
     if (typeof saison === "string") return saison;
     return saison?.id || saison?.nom || "";
 }
 
-function obterNomSaison(saison) {
+function obtenirNomSaison(saison) {
     if (typeof saison === "string") return saison;
     return saison?.nom || saison?.id || "";
 }
