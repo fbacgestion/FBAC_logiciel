@@ -257,19 +257,16 @@ function enregistrerHandlersIpc() {
                 );
             }
 
-            const photoSupprimee =
-                supprimerPhoto(
+            const personneArchivee =
+                supprimerPersonne(
                     id
                 );
 
-            supprimerPersonne(
-                id
-            );
-
             return {
-                personne,
+                personne: personneArchivee,
                 nombreInscriptions: 0,
-                photoSupprimee
+                archivee: true,
+                photoSupprimee: false
             };
         }
     );
