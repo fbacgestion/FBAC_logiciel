@@ -910,7 +910,7 @@ function creerFenetre() {
 app.whenReady().then(() => {
     initialiserDonnees();
 
-    initialiserSaisonActuelle();
+    initialiserSaisonsSansChangement();
 
     enregistrerHandlersIpc();
     initialiserMenuApplication();
