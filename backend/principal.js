@@ -171,9 +171,7 @@ function enregistrerHandlersIpc() {
     ipcMain.handle(
         "lire-configuration",
         () => {
-            return lireJson(
-                "configuration.json"
-            );
+            return lireConfigurationCentrale();
         }
     );
 
@@ -186,12 +184,7 @@ function enregistrerHandlersIpc() {
                     ? configuration
                     : {};
 
-            ecrireJson(
-                "configuration.json",
-                donnees
-            );
-
-            return donnees;
+            return enregistrerConfigurationCentrale(donnees);
         }
     );
 
@@ -951,4 +944,10 @@ app.on(
             app.quit();
         }
     }
-);
+)const {
+    lire: lireConfigurationCentrale,
+    enregistrer: enregistrerConfigurationCentrale,
+    normaliser: normaliserConfiguration
+} = require("./core/configuration");
+
+;
