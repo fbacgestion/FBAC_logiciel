@@ -21,6 +21,8 @@ const {
     obtenirSaisons,
     obtenirSaisonActuelle,
     obtenirSaison,
+    creerSaison,
+    definirSaisonActive,
 } = require("./gestion/saisons");
 
 const {
@@ -86,6 +88,10 @@ const {
     obtenirSynthese: obtenirSyntheseComptable
 } = require("./gestion/comptabilite");
 const { initialiserFactures, obtenirFactures, obtenirFacture, creerFacture, modifierFacture, supprimerFacture, enregistrerPdf, obtenirCheminPdf, genererHtmlFacture, prochain, numero } = require("./gestion/factures");
+const {
+    lire: lireConfigurationCentrale,
+    enregistrer: enregistrerConfigurationCentrale
+} = require("./core/configuration");
 
 function initialiserDonnees() {
     const dossierDonnees =
