@@ -2288,9 +2288,15 @@ function mettreAJourResumeAdherent() {
         montantPaye
     };
 
+    const baseAvantAides = Math.max(
+        0,
+        tarifFormulaire - reductionFamille - parrainageAcquis
+    );
+
     const aidesEffectives =
         obtenirAidesEffectives(
-            inscription
+            inscription,
+            baseAvantAides
         );
 
     const nomsAides = [
