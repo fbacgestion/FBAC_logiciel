@@ -1301,6 +1301,27 @@ async function enregistrerAdherentDepuisFormulaire(
             );
         }
 
+        const tarifDefaut =
+            categorie
+                ? calculerTarif(
+                    categorie,
+                    frequence
+                )
+                : 0;
+        const valeurTarif =
+            Number(
+                obtenirValeur("memberTariff")
+            );
+        const tarif =
+            vip
+                ? 0
+                : Number.isFinite(valeurTarif)
+                    ? Math.max(0, valeurTarif)
+                    : tarifDefaut;
+        const tarifPersonnalise =
+            !vip &&
+            Math.abs(tarif - tarifDefaut) > 0.001;
+
         let inscription = inscriptionId
             ? state.inscriptions.find(
                 element =>
@@ -1322,6 +1343,10 @@ async function enregistrerAdherentDepuisFormulaire(
                     categorie,
                 frequency:
                     frequence,
+                tarif:
+                    tarif,
+                tarifPersonnalise:
+                    tarifPersonnalise,
                 grade,
                 vip:
                     obtenirCase(
@@ -1402,6 +1427,12 @@ async function enregistrerAdherentDepuisFormulaire(
 
             inscription.frequency =
                 frequence;
+
+            inscription.tarif =
+                tarif;
+
+            inscription.tarifPersonnalise =
+                tarifPersonnalise;
 
             inscription.grade =
                 grade;
@@ -2056,6 +2087,38 @@ function mettreAJourResumeAdherent() {
     const vip =
         obtenirCase("memberVip");
 
+    const champTarifResume =
+        document.getElementById("memberTariff");
+    const tarifDefautResume =
+        categorie
+            ? calculerTarif(
+                categorie,
+                frequence
+            )
+            : 0;
+
+    if (champTarifResume) {
+        const tarifPersonnalise =
+            champTarifResume.dataset.tarifPersonnalise === "true";
+
+        if (vip) {
+            champTarifResume.value = "0";
+            champTarifResume.disabled = true;
+        } else {
+            champTarifResume.disabled = false;
+
+            if (
+                !tarifPersonnalise ||
+                champTarifResume.value === ""
+            ) {
+                champTarifResume.value =
+                    tarifDefautResume;
+                champTarifResume.dataset.tarifPersonnalise =
+                    "false";
+            }
+        }
+    }
+
     const aides = {
         atoutNormandie: {
             enabled:
@@ -2117,9 +2180,20 @@ function mettreAJourResumeAdherent() {
             ) || 0
         );
 
+    const tarifFormulaire =
+        vip
+            ? 0
+            : Math.max(
+                0,
+                Number(
+                    obtenirValeur("memberTariff")
+                ) || 0
+            );
+
     const inscription = {
         category: categorie,
         frequency: frequence,
+        tarif: tarifFormulaire,
         vip,
         aides,
         reductionFamille,
@@ -2128,19 +2202,6 @@ function mettreAJourResumeAdherent() {
             parrainageAcquis,
         montantPaye
     };
-
-    const tarif =
-        vip
-            ? 0
-            : categorie
-                ? calculerTarif(
-                    categorie,
-                    frequence
-                )
-                : 0;
-
-    inscription.tarif =
-        tarif;
 
     const aidesEffectives =
         obtenirAidesEffectives(
@@ -3313,6 +3374,14 @@ function convertirInscriptionPourBackend(
                 inscription.frequency ||
                 "1"
             ),
+        tarif:
+            inscription.tarif !== undefined &&
+            inscription.tarif !== null &&
+            inscription.tarif !== ""
+                ? Math.max(0, Number(inscription.tarif) || 0)
+                : undefined,
+        tarifPersonnalise:
+            Boolean(inscription.tarifPersonnalise),
         grade:
             inscription.grade ||
             "Blanc",
@@ -3996,6 +4065,25 @@ function initialiserEvenementsAdherents() {
             mettreAJourResumeAdherent();
         });
         selectGrade.dataset.apercuInitialise = "true";
+    }
+
+    const champTarif =
+        document.getElementById("memberTariff");
+
+    if (
+        champTarif &&
+        !champTarif.dataset.tarifInitialise
+    ) {
+        champTarif.addEventListener(
+            "input",
+            () => {
+                champTarif.dataset.tarifPersonnalise = "true";
+                mettreAJourResumeAdherent();
+            }
+        );
+
+        champTarif.dataset.tarifInitialise =
+            "true";
     }
 
     [
