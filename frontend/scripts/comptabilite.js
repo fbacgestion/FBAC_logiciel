@@ -45,7 +45,8 @@ function afficherComptabilite() {
     if (club) club.textContent = euroCompta(synthese.clubEncaisse);
     const table = document.getElementById("comptaOperations");
     if (table) {
-        table.innerHTML = comptabilite.operations.slice(0, 30).map(operation => {
+        const operationsVisibles = comptabilite.operations.filter(operation => operation.source !== "licence-vip");
+        table.innerHTML = operationsVisibles.slice(0, 30).map(operation => {
             const classe = operation.type === "recette" ? "amount-positive" : "amount-negative";
             return `<tr>
                 <td>${escapeHtmlCompta(operation.date)}</td>
