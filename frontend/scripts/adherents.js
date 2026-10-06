@@ -1361,13 +1361,19 @@ async function enregistrerAdherentDepuisFormulaire(
             );
         }
 
-        const tarifDefaut =
+        const tarifDefautBrut =
             categorie
                 ? calculerTarif(
                     categorie,
                     frequence
                 )
                 : 0;
+        const licenceFederale =
+            Number(state.configuration?.comptabilite?.licenceFederale || 0);
+        const tarifDefaut =
+            licenceFederaleIncluse
+                ? tarifDefautBrut
+                : Math.max(0, tarifDefautBrut - licenceFederale);
         const valeurTarif =
             Number(
                 obtenirValeur("memberTariff")
