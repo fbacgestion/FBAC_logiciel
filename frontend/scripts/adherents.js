@@ -509,6 +509,37 @@ function ouvrirModificationAdherent(
         inscription.frequency
     );
 
+    const tarifDefaut =
+        calculerTarif(
+            inscription.category,
+            inscription.frequency
+        );
+    const tarifEnregistre =
+        Number(inscription.tarif);
+    const tarifPersonnalise =
+        inscription.tarifPersonnalise === true ||
+        (
+            Number.isFinite(tarifEnregistre) &&
+            Math.abs(tarifEnregistre - tarifDefaut) > 0.001
+        );
+
+    definirValeur(
+        "memberTariff",
+        inscription.vip
+            ? 0
+            : Number.isFinite(tarifEnregistre)
+                ? tarifEnregistre
+                : tarifDefaut
+    );
+
+    const champTarifEdition =
+        document.getElementById("memberTariff");
+
+    if (champTarifEdition) {
+        champTarifEdition.dataset.tarifPersonnalise =
+            tarifPersonnalise ? "true" : "false";
+    }
+
     definirCase(
         "memberVip",
         Boolean(
@@ -870,6 +901,19 @@ function reinitialiserFormulaireAdherent() {
         "memberCategory",
         ""
     );
+
+    definirValeur(
+        "memberTariff",
+        ""
+    );
+
+    const champTarif =
+        document.getElementById("memberTariff");
+
+    if (champTarif) {
+        champTarif.dataset.tarifPersonnalise = "false";
+        champTarif.disabled = false;
+    }
 
     definirCase(
         "memberVip",
