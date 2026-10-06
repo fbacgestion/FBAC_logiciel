@@ -137,9 +137,13 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
             if (!montant) continue;
             const id = "cotisation_" + inscription.id + "_" + paiement.id;
             const ancienne = data.operations.find(operation => operation.id === id && operation.source === "cotisation");
-            const partLicence = ancienne
-                ? Math.min(Math.max(0, Number(ancienne.licenceMontant) || 0), montant)
-                : Math.min(Math.max(0, licence - licenceDejaAffectee), montant);
+            const licenceIncluse =
+                inscription.licenceFederaleIncluse !== false;
+            const partLicence = !licenceIncluse
+                ? 0
+                : ancienne
+                    ? Math.min(Math.max(0, Number(ancienne.licenceMontant) || 0), montant)
+                    : Math.min(Math.max(0, licence - licenceDejaAffectee), montant);
             const partClub = Math.max(0, montant - partLicence);
             licenceDejaAffectee += partLicence;
             automatiques.push({
