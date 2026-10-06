@@ -103,7 +103,33 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
     const data = obtenirDonnees(); const automatiques = []; const saisonParametres = {};
     for (const saison of saisons || []) saisonParametres[saison.id] = obtenirParametres(saison.id, configuration);
     for (const inscription of inscriptions || []) {
-        if (inscription.vip) continue;
+        const personne = (personnes || []).find(element => element.id === inscription.personId);
+        const saisonId = inscription.season || inscription.saisonId || "";
+        const licence = Math.max(0, Number(inscription.parametresFinanciers?.licenceFederale ?? saisonParametres[saisonId]?.licence) || 0);
+
+        if (inscription.vip) {
+            if (licence > 0) {
+                automatiques.push({
+                    id: "licence_vip_" + inscription.id,
+                    date: new Date().toISOString().slice(0, 10),
+                    type: "depense",
+                    libelle: "Licence fédérale VIP — " + (personne ? (personne.firstName + " " + personne.lastName).trim() : "Adhérent"),
+                    categorie: "licences-federales",
+                    montant: licence,
+                    modePaiement: "",
+                    saisonId,
+                    source: "licence-vip",
+                    inscriptionId: inscription.id,
+                    personneId: inscription.personId || null,
+                    paiementId: null,
+                    licenceMontant: 0,
+                    clubMontant: 0,
+                    note: "Licence fédérale prise en charge par le club pour un adhérent VIP."
+                });
+            }
+            continue;
+        }
+
         const paiements = Array.isArray(inscription.paiements) ? inscription.paiements.slice().sort((a, b) => String(a.date || "").localeCompare(String(b.date || ""))) : [];
         const personne = (personnes || []).find(element => element.id === inscription.personId);
         const licence = Math.max(0, Number(inscription.parametresFinanciers?.licenceFederale ?? saisonParametres[inscription.season]?.licence) || 0);
@@ -137,7 +163,7 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
             });
         }
     }
-    data.operations = data.operations.filter(operation => operation.source !== "cotisation").concat(automatiques); sauvegarder(data); return automatiques;
+    data.operations = data.operations.filter(operation => operation.source !== "cotisation" && operation.source !== "licence-vip").concat(automatiques); sauvegarder(data); return automatiques;
 }
 function obtenirSynthese(saisonId, configuration = {}) {
     const operations = obtenirOperations({ saisonId });
