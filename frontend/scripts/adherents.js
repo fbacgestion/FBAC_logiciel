@@ -532,6 +532,11 @@ function ouvrirModificationAdherent(
                 : tarifDefaut
     );
 
+    definirCase(
+        "memberLicenceIncluded",
+        inscription.licenceFederaleIncluse !== false
+    );
+
     const champTarifEdition =
         document.getElementById("memberTariff");
 
@@ -1481,6 +1486,9 @@ async function enregistrerAdherentDepuisFormulaire(
             inscription.tarifPersonnalise =
                 tarifPersonnalise;
 
+            inscription.licenceFederaleIncluse =
+                licenceFederaleIncluse;
+
             inscription.grade =
                 grade;
 
@@ -2134,6 +2142,9 @@ function mettreAJourResumeAdherent() {
     const vip =
         obtenirCase("memberVip");
 
+    const licenceFederaleIncluse =
+        obtenirCase("memberLicenceIncluded");
+
     const champTarifResume =
         document.getElementById("memberTariff");
     const tarifDefautResume =
@@ -2241,6 +2252,8 @@ function mettreAJourResumeAdherent() {
         category: categorie,
         frequency: frequence,
         tarif: tarifFormulaire,
+        tarifPersonnalise: false,
+        licenceFederaleIncluse,
         vip,
         aides,
         reductionFamille,
@@ -3429,6 +3442,8 @@ function convertirInscriptionPourBackend(
                 : undefined,
         tarifPersonnalise:
             Boolean(inscription.tarifPersonnalise),
+        licenceFederaleIncluse:
+            inscription.licenceFederaleIncluse !== false,
         grade:
             inscription.grade ||
             "Blanc",
