@@ -865,7 +865,7 @@ function creerHtmlRapportFinancier(synthese, saison, statsAdherents = {}) {
     }).join("");
     const recettes = Number(synthese?.totalRecettes) || 0;
     const depenses = Number(synthese?.totalDepenses) || 0;
-    const operations = (synthese?.operations || []).map(operation => '<tr><td>' + echapperRapport(operation.date) + '</td><td>' + echapperRapport(operation.libelle) + '</td><td>' + echapperRapport(operation.categorie) + '</td><td>' + echapperRapport(operation.modePaiement || "—") + '</td><td class="' + (operation.type === "recette" ? "positive" : "negative") + '">' + (operation.type === "depense" ? "−" : "+") + euro(operation.montant) + '</td></tr>').join("");
+    const operations = (synthese?.operations || []).filter(operation => operation.source !== "licence-vip").map(operation => '<tr><td>' + echapperRapport(operation.date) + '</td><td>' + echapperRapport(operation.libelle) + '</td><td>' + echapperRapport(operation.categorie) + '</td><td>' + echapperRapport(operation.modePaiement || "—") + '</td><td class="' + (operation.type === "recette" ? "positive" : "negative") + '">' + (operation.type === "depense" ? "−" : "+") + euro(operation.montant) + '</td></tr>').join("");
     const categories = Object.entries(synthese?.categories || {}).sort((a, b) => b[1] - a[1]).map(([categorie, montant]) => { const part = recettes > 0 ? Number(montant) / recettes * 100 : 0; return '<tr><td>' + echapperRapport(categorie) + '</td><td class="right">' + euro(montant) + '</td><td class="right">' + part.toFixed(1) + ' %</td></tr>'; }).join("");
     const resultat = Number(synthese?.resultat) || recettes - depenses;
     const tresorerie = (Number(synthese?.compteBancaire) || 0) + (Number(synthese?.caisse) || 0);
