@@ -87,7 +87,8 @@ function creerInscription(donnees) {
         season: donnees.season,
 
         category: donnees.category || "adulte",
-        tarif: donnees.tarif !== undefined ? Number(donnees.tarif) : undefined,
+        tarif: donnees.tarif !== undefined ? Math.max(0, Number(donnees.tarif) || 0) : undefined,
+        tarifPersonnalise: Boolean(donnees.tarifPersonnalise),
         frequency: donnees.frequency || "1",
         grade: donnees.grade || "Blanc",
         vip: Boolean(donnees.vip),
