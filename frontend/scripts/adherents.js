@@ -355,6 +355,14 @@ function afficherBadgePaiement(
         `;
     }
 
+    if (etat === "gratuit" || inscription?.vip) {
+        return `
+            <span class="badge success">
+                Gratuit
+            </span>
+        `;
+    }
+
     return `
         <span class="badge danger">
             Impayé
