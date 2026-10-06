@@ -225,8 +225,10 @@ function afficherAlertesTableauDeBord(inscriptions) {
     const alertes = [];
 
     const paiementsEnAttente = inscriptions.filter(
-        inscription =>
-            calculerEtatPaiement(inscription) !== "paye"
+        inscription => {
+            const etat = calculerEtatPaiement(inscription);
+            return etat === "impaye" || etat === "partiel";
+        }
     );
 
     if (paiementsEnAttente.length > 0) {
