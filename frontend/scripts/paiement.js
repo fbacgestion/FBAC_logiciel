@@ -183,7 +183,7 @@ function afficherResumePaiements() {
         totalSurpaiement +=
             donnees.surpaiement;
 
-        if (donnees.etat !== "paye") {
+        if (donnees.etat === "impaye" || donnees.etat === "partiel") {
             nombreImpayes++;
         }
     });
@@ -246,6 +246,10 @@ function afficherEtatPaiement(
 
     if (etat === "partiel") {
         return '<span class="badge warning">Partiel</span>';
+    }
+
+    if (etat === "gratuit") {
+        return '<span class="badge success">Gratuit</span>';
     }
 
     return '<span class="badge danger">Impayé</span>';
