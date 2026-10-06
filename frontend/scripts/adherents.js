@@ -509,11 +509,17 @@ function ouvrirModificationAdherent(
         inscription.frequency
     );
 
-    const tarifDefaut =
+    const tarifDefautBrut =
         calculerTarif(
             inscription.category,
             inscription.frequency
         );
+    const licenceFederale =
+        Number(state.configuration?.comptabilite?.licenceFederale || 0);
+    const tarifDefaut =
+        inscription.licenceFederaleIncluse === false
+            ? Math.max(0, tarifDefautBrut - licenceFederale)
+            : tarifDefautBrut;
     const tarifEnregistre =
         Number(inscription.tarif);
     const tarifPersonnalise =
@@ -919,6 +925,11 @@ function reinitialiserFormulaireAdherent() {
         champTarif.dataset.tarifPersonnalise = "false";
         champTarif.disabled = false;
     }
+
+    definirCase(
+        "memberLicenceIncluded",
+        true
+    );
 
     definirCase(
         "memberVip",
@@ -2147,13 +2158,19 @@ function mettreAJourResumeAdherent() {
 
     const champTarifResume =
         document.getElementById("memberTariff");
-    const tarifDefautResume =
+    const tarifDefautBrutResume =
         categorie
             ? calculerTarif(
                 categorie,
                 frequence
             )
             : 0;
+    const licenceFederaleResume =
+        Number(state.configuration?.comptabilite?.licenceFederale || 0);
+    const tarifDefautResume =
+        licenceFederaleIncluse
+            ? tarifDefautBrutResume
+            : Math.max(0, tarifDefautBrutResume - licenceFederaleResume);
 
     if (champTarifResume) {
         const tarifPersonnalise =
@@ -4152,6 +4169,7 @@ function initialiserEvenementsAdherents() {
         "memberBirthDate",
         "memberFrequency",
         "memberGrade",
+        "memberLicenceIncluded",
         "memberVip",
         "aidAtoutEnabled",
         "aidAtoutAmount",
