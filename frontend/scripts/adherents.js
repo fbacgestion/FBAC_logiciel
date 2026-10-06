@@ -1370,6 +1370,8 @@ async function enregistrerAdherentDepuisFormulaire(
                 : 0;
         const licenceFederale =
             Number(state.configuration?.comptabilite?.licenceFederale || 0);
+        const licenceFederaleIncluse =
+            obtenirCase("memberLicenceIncluded");
         const tarifDefaut =
             licenceFederaleIncluse
                 ? tarifDefautBrut
