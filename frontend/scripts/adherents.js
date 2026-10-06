@@ -1356,6 +1356,9 @@ async function enregistrerAdherentDepuisFormulaire(
             Number(
                 obtenirValeur("memberTariff")
             );
+        const vip =
+            obtenirCase("memberVip");
+
         const tarif =
             vip
                 ? 0
