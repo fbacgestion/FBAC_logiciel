@@ -131,8 +131,6 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
         }
 
         const paiements = Array.isArray(inscription.paiements) ? inscription.paiements.slice().sort((a, b) => String(a.date || "").localeCompare(String(b.date || ""))) : [];
-        const personne = (personnes || []).find(element => element.id === inscription.personId);
-        const licence = Math.max(0, Number(inscription.parametresFinanciers?.licenceFederale ?? saisonParametres[inscription.season]?.licence) || 0);
         let licenceDejaAffectee = 0;
         for (const paiement of paiements) {
             const montant = Math.max(0, Number(paiement.amount) || 0);
