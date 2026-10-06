@@ -2303,7 +2303,7 @@ function mettreAJourResumeAdherent() {
         )
         ?.replaceChildren(
             document.createTextNode(
-                `${tarif.toFixed(2)} €`
+                `${tarifFormulaire.toFixed(2)} €`
             )
         );
 
