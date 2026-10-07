@@ -113,28 +113,30 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
         const saisonId = inscription.season || inscription.saisonId || "";
         const licence = Math.max(0, Number(inscription.parametresFinanciers?.licenceFederale ?? saisonParametres[saisonId]?.licence) || 0);
 
-        if (inscription.vip) {
-            if (licence > 0) {
-                automatiques.push({
-                    id: "licence_vip_" + inscription.id,
-                    date: new Date().toISOString().slice(0, 10),
-                    type: "depense",
-                    libelle: "Licence fédérale VIP — " + (personne ? (personne.firstName + " " + personne.lastName).trim() : "Adhérent"),
-                    categorie: "licences-federales",
-                    montant: licence,
-                    modePaiement: "",
-                    saisonId,
-                    source: "licence-vip",
-                    inscriptionId: inscription.id,
-                    personneId: inscription.personId || null,
-                    paiementId: null,
-                    licenceMontant: 0,
-                    clubMontant: 0,
-                    note: "Licence fédérale prise en charge par le club pour un adhérent VIP."
-                });
-            }
-            continue;
+        const licenceIncluse = inscription.licenceFederaleIncluse !== false;
+        if (licenceIncluse && licence > 0) {
+            automatiques.push({
+                id: "licence_adherent_" + inscription.id,
+                date: inscription.dateInscription || inscription.date || new Date().toISOString().slice(0, 10),
+                type: "depense",
+                libelle: "Licence fédérale — " + (personne ? (personne.firstName + " " + personne.lastName).trim() : "Adhérent"),
+                categorie: "licences-federales",
+                montant: licence,
+                modePaiement: "",
+                saisonId,
+                source: inscription.vip ? "licence-vip" : "licence-adherent",
+                inscriptionId: inscription.id,
+                personneId: inscription.personId || null,
+                paiementId: null,
+                licenceMontant: 0,
+                clubMontant: 0,
+                note: inscription.vip
+                    ? "Licence fédérale prise en charge par le club pour un adhérent VIP."
+                    : "Licence fédérale prise en charge par le club pour cet adhérent."
+            });
         }
+
+        if (inscription.vip) continue;
 
         const paiements = Array.isArray(inscription.paiements) ? inscription.paiements.slice().sort((a, b) => String(a.date || "").localeCompare(String(b.date || ""))) : [];
         const situation = calculerSituationFinanciere(inscription, configuration);
@@ -201,7 +203,7 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
             });
         }
     }
-    data.operations = data.operations.filter(operation => operation.source !== "cotisation" && operation.source !== "licence-vip" && operation.source !== "aide").concat(automatiques); sauvegarder(data); return automatiques;
+    data.operations = data.operations.filter(operation => operation.source !== "cotisation" && operation.source !== "licence-vip" && operation.source !== "licence-adherent" && operation.source !== "aide").concat(automatiques); sauvegarder(data); return automatiques;
 }
 function obtenirSynthese(saisonId, configuration = {}) {
     const operations = obtenirOperations({ saisonId });
@@ -229,7 +231,7 @@ function obtenirSynthese(saisonId, configuration = {}) {
     const compteBancaire = calculerSolde(parametres.compteBancaire, modesBanque);
     const caisse = calculerSolde(parametres.caisse, modesCaisse);
     const operationsNonAffectees = operations.filter(operation => {
-        if (operation.source === "aide" || operation.source === "licence-vip") return false;
+        if (operation.source === "aide" || operation.source === "licence-vip" || operation.source === "licence-adherent") return false;
         const mode = String(operation.modePaiement || "").trim().toLowerCase();
         return !modesBanque.has(mode) && !modesCaisse.has(mode);
     });
