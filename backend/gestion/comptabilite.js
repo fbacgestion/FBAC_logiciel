@@ -228,7 +228,7 @@ function obtenirSynthese(saisonId, configuration = {}) {
     }, Number(initial) || 0);
     const compteBancaire = calculerSolde(parametres.compteBancaire, modesBanque);
     const caisse = calculerSolde(parametres.caisse, modesCaisse);
-    const operationsNonAffectees = operations.filter(operation => {
+    const operationsNonAffectees = operations.filter(operation => operation.source !== "aide" && operation.source !== "licence-vip" && {
         const mode = String(operation.modePaiement || "").trim().toLowerCase();
         return !modesBanque.has(mode) && !modesCaisse.has(mode);
     });
