@@ -138,7 +138,7 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
 
         const paiements = Array.isArray(inscription.paiements) ? inscription.paiements.slice().sort((a, b) => String(a.date || "").localeCompare(String(b.date || ""))) : [];
         const situation = calculerSituationFinanciere(inscription, configuration);
-        const dateAide = paiements[0]?.date || inscription.dateInscription || inscription.createdAt || new Date().toISOString().slice(0, 10);
+        const dateAide = paiements[0]?.date || inscription.dateInscription || inscription.date || inscription.createdAt || new Date().toISOString().slice(0, 10);
         const aides = [
             ["atoutNormandie", "aide-atout", "Atout Normandie"],
             ["passSport", "aide-passsport", "Pass'Sport"],
