@@ -914,9 +914,9 @@ function creerHtmlRapportFinancier(synthese, saison, statsAdherents = {}) {
     const nonAffectees = Array.isArray(synthese?.operationsNonAffectees) ? synthese.operationsNonAffectees.length : 0;
     const alertes = [];
     if (resultat < 0) alertes.push("Le résultat de la saison est déficitaire.");
-    if (nonAffectees > 0) alertes.push(nonAffectees + " opération(s) ne permettent pas d’identifier clairement le compte de trésorerie.");
+    if (nonAffectees > 0) alertes.push(nonAffectees + " opération(s) n’ont pas de mode de paiement renseigné.");
     if (!alertes.length) alertes.push("Aucun point financier critique détecté dans les données comptables.");
-    const resumeCategories = Object.entries(synthese?.categories || {}).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([categorie, montant]) => '<div class="mini-row"><span>' + echapperRapport(categorie) + '</span><strong>' + euro(montant) + '</strong></div>').join("");
+    const resumeCategories = Object.entries(synthese?.categories || {}).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([categorie, montant]) => '<div class="mini-row"><span>' + echapperRapport(nomsCategories[categorie] || categorie) + '</span><strong>' + euro(montant) + '</strong></div>').join("");
     const totalAdherents = Number(statsAdherents.total) || 0;
     const enfants = Number(statsAdherents.enfants) || 0;
     const adultes = Number(statsAdherents.adultes) || 0;
