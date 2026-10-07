@@ -96,6 +96,7 @@ const {
     enregistrer: enregistrerConfigurationCentrale,
     initialiserParametresSaisons
 } = require("./core/configuration");
+const { calculerSituationFinanciere } = require("./core/finances");
 
 function initialiserDonnees() {
     const dossierDonnees =
@@ -454,6 +455,31 @@ function enregistrerHandlersIpc() {
             const formule1 = inscriptions.filter(inscription => String(inscription.frequency || "1") === "1").length;
             const formule4 = inscriptions.filter(inscription => String(inscription.frequency || "1") === "4").length;
             const nouveauxAdherents = inscriptions.filter(inscription => !personnesPrecedentes.has(inscription.personId)).length;
+            const aidesRapport = [
+                ["atoutNormandie", "Atout Normandie"],
+                ["passSport", "Pass'Sport"],
+                ["kiosk", "Kiosk"],
+                ["spot50", "Spot50"]
+            ].map(([id, nom]) => {
+                const adherents = inscriptions.filter(inscription =>
+                    (Number(calculerSituationFinanciere(inscription, configuration).aidesEffectives?.[id]) || 0) > 0
+                ).length;
+                const montant = inscriptions.reduce(
+                    (total, inscription) =>
+                        total + (Number(calculerSituationFinanciere(inscription, configuration).aidesEffectives?.[id]) || 0),
+                    0
+                );
+                return {
+                    id,
+                    nom,
+                    adherents,
+                    montant,
+                    pourcentage: inscriptions.length ? adherents / inscriptions.length * 100 : 0
+                };
+            });
+            const adherentsAvecAide = inscriptions.filter(inscription =>
+                (Number(calculerSituationFinanciere(inscription, configuration).aides) || 0) > 0
+            ).length;
             const grades = {};
             inscriptions.forEach(inscription => { const grade = String(inscription.grade || "Blanc").trim() || "Blanc"; grades[grade] = (grades[grade] || 0) + 1; });
             const ordreGrades = ["Blanc", "Jaune", "Orange", "Verte", "Bleue", "Marron", "Noire"];
@@ -464,7 +490,7 @@ function enregistrerHandlersIpc() {
                 filters: [{ name: "Document PDF", extensions: ["pdf"] }]
             });
             if (resultat.canceled || !resultat.filePath) return false;
-            const html = creerHtmlRapportFinancier(synthese, saison, { total: inscriptions.length, enfants, adultes, formule1, formule4, nouveauxAdherents, precedent: inscriptionsPrecedentes.length, grades: gradesOrdonnes.map(grade => ({ grade, nombre: grades[grade] })), noires: grades.Noire || 0, marron: grades.Marron || 0 });
+            const html = creerHtmlRapportFinancier(synthese, saison, { total: inscriptions.length, enfants, adultes, formule1, formule4, nouveauxAdherents, precedent: inscriptionsPrecedentes.length, grades: gradesOrdonnes.map(grade => ({ grade, nombre: grades[grade] })), noires: grades.Noire || 0, marron: grades.Marron || 0, aides: aidesRapport, adherentsAvecAide });
             const fenetre = new BrowserWindow({
                 show: false,
                 width: 1200,
