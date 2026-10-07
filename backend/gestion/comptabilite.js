@@ -1,4 +1,5 @@
 const { lireJson, ecrireJson } = require("./fichiers");
+const { calculerSituationFinanciere } = require("../core/finances");
 
 const FICHIER = "comptabilite.json";
 const CATEGORIES_RECETTES = [
@@ -10,6 +11,10 @@ const CATEGORIES_RECETTES = [
     { id: "dons", nom: "Dons" },
     { id: "subventions", nom: "Subventions" },
     { id: "evenements", nom: "Événements" },
+    { id: "aide-atout", nom: "Atout Normandie" },
+    { id: "aide-passsport", nom: "Pass'Sport" },
+    { id: "aide-kiosk", nom: "Kiosk" },
+    { id: "aide-spot50", nom: "Spot50" },
     { id: "autres-recettes", nom: "Autres recettes" }
 ];
 const CATEGORIES_DEPENSES = [
@@ -52,6 +57,7 @@ function normaliserOperation(operation) {
         licenceMontant: Math.max(0, Number(operation.licenceMontant) || 0),
         clubMontant: Math.max(0, Number(operation.clubMontant) || 0),
         note: operation.note || "",
+        aideType: operation.aideType || "",
         document: operation.document || null
     };
 }
@@ -131,6 +137,36 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
         }
 
         const paiements = Array.isArray(inscription.paiements) ? inscription.paiements.slice().sort((a, b) => String(a.date || "").localeCompare(String(b.date || ""))) : [];
+        const situation = calculerSituationFinanciere(inscription, configuration);
+        const dateAide = paiements[0]?.date || inscription.dateInscription || inscription.createdAt || new Date().toISOString().slice(0, 10);
+        const aides = [
+            ["atoutNormandie", "aide-atout", "Atout Normandie"],
+            ["passSport", "aide-passsport", "Pass'Sport"],
+            ["kiosk", "aide-kiosk", "Kiosk"],
+            ["spot50", "aide-spot50", "Spot50"]
+        ];
+        for (const [aideType, categorie, nom] of aides) {
+            const montant = Math.max(0, Number(situation.aidesEffectives?.[aideType]) || 0);
+            if (!montant) continue;
+            automatiques.push({
+                id: "aide_" + inscription.id + "_" + aideType,
+                date: dateAide,
+                type: "recette",
+                libelle: nom + " — " + (personne ? (personne.firstName + " " + personne.lastName).trim() : "Adhérent"),
+                categorie,
+                montant,
+                modePaiement: "",
+                saisonId,
+                source: "aide",
+                inscriptionId: inscription.id,
+                personneId: inscription.personId || null,
+                paiementId: null,
+                licenceMontant: 0,
+                clubMontant: 0,
+                aideType,
+                note: "Prise en charge de la cotisation par " + nom + "."
+            });
+        }
         let licenceDejaAffectee = 0;
         for (const paiement of paiements) {
             const montant = Math.max(0, Number(paiement.amount) || 0);
@@ -165,7 +201,7 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
             });
         }
     }
-    data.operations = data.operations.filter(operation => operation.source !== "cotisation" && operation.source !== "licence-vip").concat(automatiques); sauvegarder(data); return automatiques;
+    data.operations = data.operations.filter(operation => operation.source !== "cotisation" && operation.source !== "licence-vip" && operation.source !== "aide").concat(automatiques); sauvegarder(data); return automatiques;
 }
 function obtenirSynthese(saisonId, configuration = {}) {
     const operations = obtenirOperations({ saisonId });
