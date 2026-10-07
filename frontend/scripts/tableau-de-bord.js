@@ -40,9 +40,56 @@ async function afficherTableauDeBord() {
 
     const totalEncaisse = inscriptions.reduce(
         (total, inscription) =>
-            total + (Number(inscription.montantPaye) || 0),
+            total + calculerDonneesPaiement(inscription).montantPaye,
         0
     );
+
+    let syntheseComptable = null;
+    try {
+        syntheseComptable =
+            typeof window.fbac?.obtenirSyntheseComptable === "function"
+                ? await window.fbac.obtenirSyntheseComptable(saison?.id || "")
+                : null;
+    } catch (error) {
+        console.error("Erreur synthèse recettes dashboard :", error);
+    }
+
+    const totalRecettes =
+        Number(syntheseComptable?.totalRecettes) ||
+        totalEncaisse +
+        totalAides;
+
+    const aidesParType = [
+        { id: "atoutNormandie", label: "Atout Normandie", categorie: "aide-atout" },
+        { id: "passSport", label: "Pass'Sport", categorie: "aide-passsport" },
+        { id: "kiosk", label: "Kiosk", categorie: "aide-kiosk" },
+        { id: "spot50", label: "Spot50", categorie: "aide-spot50" }
+    ].map(aide => {
+        const utilisateurs = inscriptions.filter(inscription => {
+            const montant = Number(
+                calculerDonneesPaiement(inscription).aidesEffectives?.[aide.id]
+            ) || 0;
+            return montant > 0;
+        }).length;
+        const montant = inscriptions.reduce(
+            (total, inscription) =>
+                total +
+                (Number(
+                    calculerDonneesPaiement(inscription).aidesEffectives?.[aide.id]
+                ) || 0),
+            0
+        );
+        return {
+            ...aide,
+            utilisateurs,
+            montant,
+            pourcentage: totalAdherents ? utilisateurs / totalAdherents * 100 : 0
+        };
+    });
+
+    const adherentsAvecAide = inscriptions.filter(inscription =>
+        (Number(calculerDonneesPaiement(inscription).totalAides) || 0) > 0
+    ).length;
 
     const totalAttendu = inscriptions.reduce(
         (total, inscription) =>
@@ -124,7 +171,7 @@ async function afficherTableauDeBord() {
 
     if (elementEncaisse) {
         elementEncaisse.textContent =
-            `${totalEncaisse.toFixed(2)} €`;
+            new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(totalRecettes);
     }
 
     const extraPaiements =
@@ -140,6 +187,36 @@ async function afficherTableauDeBord() {
     if (elementReste) {
         elementReste.textContent =
             `${resteAEncaisser.toFixed(2)} €`;
+    }
+
+    const aidesTotalElement = document.getElementById("dashboardAidsTotal");
+    const aidesGridElement = document.getElementById("dashboardAidsGrid");
+    const aidesSummaryElement = document.getElementById("dashboardAidsSummary");
+    const euro = valeur =>
+        new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(Number(valeur) || 0);
+
+    if (aidesTotalElement) aidesTotalElement.textContent = euro(totalAides);
+
+    if (aidesGridElement) {
+        aidesGridElement.innerHTML = aidesParType.map(aide => `
+            <div class="dashboard-aid-item">
+                <div class="dashboard-aid-top">
+                    <div>
+                        <strong>${aide.label}</strong>
+                        <span>${aide.utilisateurs} adhérent${aide.utilisateurs > 1 ? "s" : ""} • ${aide.pourcentage.toFixed(1)} %</span>
+                    </div>
+                    <strong>${euro(aide.montant)}</strong>
+                </div>
+                <div class="dashboard-aid-track"><i style="width:${Math.min(100, totalAides ? aide.montant / totalAides * 100 : 0)}%"></i></div>
+            </div>
+        `).join("");
+    }
+
+    if (aidesSummaryElement) {
+        aidesSummaryElement.innerHTML =
+            "<strong>" + adherentsAvecAide + "</strong> adhérent" + (adherentsAvecAide > 1 ? "s" : "") +
+            " sur " + totalAdherents + " utilisent au moins une aide <span>" +
+            (totalAdherents ? (adherentsAvecAide / totalAdherents * 100).toFixed(1) : "0.0") + " % des adhérents</span>";
     }
 
     if (elementCertificats) {
