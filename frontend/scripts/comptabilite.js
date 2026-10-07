@@ -125,6 +125,11 @@ function ouvrirOperationComptable(type) {
     }
     const modal = document.getElementById("comptaOperationModal");
     if (!modal) return;
+    const formulaire = document.getElementById("comptaOperationForm");
+    if (formulaire) {
+        formulaire.reset();
+    }
+
     document.getElementById("comptaOperationType").value = type;
     document.getElementById("comptaOperationTitle").textContent = type === "depense" ? "Nouvelle dépense" : "Nouvelle recette";
     const select = document.getElementById("comptaCategorie");
@@ -138,7 +143,7 @@ function ouvrirOperationComptable(type) {
     if (depenseLibelle) depenseLibelle.value = "";
     actualiserLibelleOperation(type);
     const date = document.getElementById("comptaDate");
-    if (date && !date.value) date.value = new Date().toISOString().slice(0, 10);
+    if (date) date.value = new Date().toISOString().slice(0, 10);
     modal.classList.add("active", "open");
 }
 
