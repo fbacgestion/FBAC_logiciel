@@ -721,6 +721,9 @@ function ouvrirModificationAdherent(
             certificat.documentId
                 ? inscription.id
                 : null;
+
+        ui.certificateDeletePending =
+            false;
     }
 
     afficherEtatCertificat(
@@ -1117,6 +1120,9 @@ function reinitialiserFormulaireAdherent() {
 
         ui.currentCertificateId =
             null;
+
+        ui.certificateDeletePending =
+            false;
     }
 }
 
@@ -1643,6 +1649,15 @@ async function enregistrerAdherentDepuisFormulaire(
         );
 
         if (
+            typeof ui !== "undefined" &&
+            ui?.certificateDeletePending
+        ) {
+            await supprimerCertificatDepuisFormulaire(
+                inscription
+            );
+        }
+
+        if (
             inscription.certificat
         ) {
             await window.fbac.modifierInscription(
@@ -1787,6 +1802,53 @@ async function enregistrerPhotoDepuisFormulaire(
         convertirPersonnePourBackend(
             personne
         )
+    );
+}
+
+async function supprimerCertificatDepuisFormulaire(
+    inscription
+) {
+    if (!inscription?.id) {
+        return;
+    }
+
+    await window.fbac.supprimerCertificat(
+        inscription.id
+    );
+
+    inscription.certificat = {
+        date: "",
+        expiry: "",
+        fileName: "",
+        documentId: null,
+        mimeType: ""
+    };
+
+    if (typeof ui !== "undefined" && ui) {
+        ui.currentCertificateId = null;
+        ui.certificateDeletePending = false;
+    }
+
+    definirValeur("certificateDate", "");
+    definirValeur("certificateExpiry", "");
+
+    const champ =
+        document.getElementById("certificateFile");
+
+    if (champ) {
+        champ.value = "";
+    }
+
+    const nom =
+        document.getElementById("certificateFileName");
+
+    if (nom) {
+        nom.textContent =
+            "Aucun fichier sélectionné.";
+    }
+
+    afficherEtatCertificat(
+        inscription.certificat
     );
 }
 
@@ -3075,6 +3137,11 @@ function afficherEtatCertificat(
             "viewCertificateButton"
         );
 
+    const boutonSuppression =
+        document.getElementById(
+            "removeCertificateButton"
+        );
+
     if (
         certificat &&
         certificat.documentId
@@ -3096,6 +3163,12 @@ function afficherEtatCertificat(
             );
         }
 
+        if (boutonSuppression) {
+            boutonSuppression.classList.remove(
+                "hidden"
+            );
+        }
+
         return;
     }
 
@@ -3111,6 +3184,12 @@ function afficherEtatCertificat(
 
     if (bouton) {
         bouton.classList.add(
+            "hidden"
+        );
+    }
+
+    if (boutonSuppression) {
+        boutonSuppression.classList.add(
             "hidden"
         );
     }
@@ -4093,6 +4172,10 @@ function gererChangementCertificat(
         return;
     }
 
+    if (typeof ui !== "undefined" && ui) {
+        ui.certificateDeletePending = false;
+    }
+
     nom.textContent =
         fichier
             ? fichier.name
@@ -4275,6 +4358,55 @@ function initialiserEvenementsAdherents() {
         );
 
         certificat.dataset.initialise =
+            "true";
+    }
+
+    const boutonSupprimerCertificat =
+        document.getElementById(
+            "removeCertificateButton"
+        );
+
+    if (
+        boutonSupprimerCertificat &&
+        !boutonSupprimerCertificat.dataset.initialise
+    ) {
+        boutonSupprimerCertificat.addEventListener(
+            "click",
+            () => {
+                if (
+                    typeof ui !== "undefined" &&
+                    ui?.editingEnrollmentId
+                ) {
+                    ui.certificateDeletePending = true;
+
+                    definirValeur("certificateDate", "");
+                    definirValeur("certificateExpiry", "");
+
+                    const champ =
+                        document.getElementById(
+                            "certificateFile"
+                        );
+
+                    if (champ) {
+                        champ.value = "";
+                    }
+
+                    const nom =
+                        document.getElementById(
+                            "certificateFileName"
+                        );
+
+                    if (nom) {
+                        nom.textContent =
+                            "Le certificat sera supprimé à l'enregistrement.";
+                    }
+
+                    afficherEtatCertificat({});
+                }
+            }
+        );
+
+        boutonSupprimerCertificat.dataset.initialise =
             "true";
     }
 
