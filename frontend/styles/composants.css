@@ -400,6 +400,99 @@ tr:hover td{
     padding:12px;
 }
 
+.referral-card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:10px;
+    margin-bottom:12px;
+    overflow:hidden;
+    box-shadow:0 2px 8px rgba(0,0,0,.04);
+}
+
+.referral-card:last-child{
+    margin-bottom:0;
+}
+
+.referral-card-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding:15px 18px;
+    background:#fafafa;
+    border-bottom:1px solid var(--border);
+}
+
+.referral-card-header h3{
+    margin:0;
+    font-size:14px;
+    font-weight:700;
+    color:var(--text);
+}
+
+.referral-card-header span{
+    display:block;
+    margin-top:4px;
+    color:var(--muted);
+    font-size:11px;
+}
+
+.referral-card-header > strong{
+    flex:0 0 auto;
+    padding:7px 10px;
+    border-radius:6px;
+    background:#f1f1f1;
+    color:var(--text);
+    font-size:13px;
+    white-space:nowrap;
+}
+
+.referral-card-content{
+    padding:2px 18px;
+}
+
+.referral-card .referral-person{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    min-height:42px;
+    padding:9px 0;
+    border-bottom:1px solid var(--border);
+}
+
+.referral-card .referral-person:last-child{
+    border-bottom:0;
+}
+
+.referral-card .referral-person span:first-child{
+    color:var(--text);
+    font-size:12px;
+    font-weight:600;
+}
+
+.referral-card .referral-person span:last-child{
+    color:var(--muted);
+    font-size:11px;
+    font-weight:600;
+    white-space:nowrap;
+}
+
+@media(max-width:600px){
+    .referral-card-header{
+        align-items:flex-start;
+        padding:13px 14px;
+    }
+
+    .referral-card-content{
+        padding:2px 14px;
+    }
+
+    .referral-card-header > strong{
+        font-size:12px;
+    }
+}
+
 .referral-row{
     display:flex;
     align-items:center;
