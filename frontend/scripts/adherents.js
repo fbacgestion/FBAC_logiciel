@@ -757,6 +757,18 @@ function ouvrirModificationAdherent(
                 image
             );
         }
+
+        const boutonSupprimerPhoto =
+            document.getElementById(
+                "removeMemberPhotoButton"
+            );
+
+        if (boutonSupprimerPhoto) {
+            boutonSupprimerPhoto.classList.toggle(
+                "hidden",
+                !personne.photo
+            );
+        }
     }
 
     if (
@@ -1055,6 +1067,15 @@ function reinitialiserFormulaireAdherent() {
     if (photo) {
         photo.textContent =
             "PHOTO";
+    }
+
+    const boutonSupprimerPhoto =
+        document.getElementById(
+            "removeMemberPhotoButton"
+        );
+
+    if (boutonSupprimerPhoto) {
+        boutonSupprimerPhoto.classList.add("hidden");
     }
 
     const champPhoto =
@@ -1634,6 +1655,74 @@ async function enregistrerAdherentDepuisFormulaire(
         notificationErreur(
             error.message ||
             "Impossible d'enregistrer l'adhérent."
+        );
+    }
+}
+
+async function supprimerPhotoDepuisFormulaire() {
+    const personneId =
+        obtenirValeur("memberPersonId");
+
+    if (!personneId) {
+        return;
+    }
+
+    const personne =
+        state.personnes.find(
+            element => element.id === personneId
+        );
+
+    if (!personne?.photo) {
+        return;
+    }
+
+    if (!window.confirm("Supprimer définitivement la photo de cet adhérent ?")) {
+        return;
+    }
+
+    try {
+        await window.fbac.supprimerPhoto(personneId);
+
+        personne.photo = null;
+
+        const apercu =
+            document.getElementById("photoPreview");
+
+        if (apercu) {
+            apercu.innerHTML = "";
+            apercu.textContent = "PHOTO";
+        }
+
+        const bouton =
+            document.getElementById("removeMemberPhotoButton");
+
+        if (bouton) {
+            bouton.classList.add("hidden");
+        }
+
+        const champ =
+            document.getElementById("memberPhoto");
+
+        if (champ) {
+            champ.value = "";
+        }
+
+        if (typeof ui !== "undefined" && ui) {
+            ui.memberPhotoData = null;
+        }
+
+        await window.fbac.modifierPersonne(
+            personne.id,
+            convertirPersonnePourBackend(personne)
+        );
+
+        await sauvegarderEtat();
+        notificationSucces("Photo supprimée avec succès.");
+    } catch (error) {
+        console.error("Erreur lors de la suppression de la photo :", error);
+        notificationErreur(
+            error.message ||
+            "Impossible de supprimer la photo."
         );
     }
 }
@@ -4308,6 +4397,10 @@ function initialiserEvenementsAdherents() {
 
             if (action === "voir-photo") {
                 afficherPhotoEnGrand(bouton.dataset.personId);
+            }
+
+            if (action === "supprimer-photo-adherent") {
+                supprimerPhotoDepuisFormulaire();
             }
 
             if (action === "voir-famille") {
