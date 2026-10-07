@@ -3439,6 +3439,10 @@ function fermerModalParId(
     }
 
     modal.classList.remove("open");
+
+    if (id === "memberModal") {
+        reinitialiserFormulaireAdherent();
+    }
 }
 
 function definirValeur(
