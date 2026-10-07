@@ -1057,6 +1057,15 @@ function reinitialiserFormulaireAdherent() {
             "PHOTO";
     }
 
+    const champPhoto =
+        document.getElementById(
+            "memberPhoto"
+        );
+
+    if (champPhoto) {
+        champPhoto.value = "";
+    }
+
     if (
         typeof ui !== "undefined" &&
         ui
@@ -1580,6 +1589,15 @@ async function enregistrerAdherentDepuisFormulaire(
         await enregistrerPhotoDepuisFormulaire(
             personne
         );
+
+        const champPhoto =
+            document.getElementById(
+                "memberPhoto"
+            );
+
+        if (champPhoto) {
+            champPhoto.value = "";
+        }
 
         await enregistrerCertificatDepuisFormulaire(
             inscription
