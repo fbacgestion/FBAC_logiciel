@@ -212,9 +212,13 @@ function obtenirSynthese(saisonId, configuration = {}) {
     const totalRecettes = recettes.reduce((total, operation) => total + operation.montant, 0);
     const totalDepenses = depenses.reduce((total, operation) => total + operation.montant, 0);
     const categories = {};
+    const categoriesRecettes = {};
+    const categoriesDepenses = {};
     const mois = {};
     for (const operation of operations) {
         categories[operation.categorie] = (categories[operation.categorie] || 0) + operation.montant;
+        const categoriesCible = operation.type === "recette" ? categoriesRecettes : categoriesDepenses;
+        categoriesCible[operation.categorie] = (categoriesCible[operation.categorie] || 0) + operation.montant;
         const cle = String(operation.date || "").slice(0, 7) || "inconnu";
         if (!mois[cle]) mois[cle] = { recettes: 0, depenses: 0 };
         mois[cle][operation.type === "recette" ? "recettes" : "depenses"] += operation.montant;
@@ -248,6 +252,8 @@ function obtenirSynthese(saisonId, configuration = {}) {
         tresorerie: compteBancaire + caisse,
         operationsNonAffectees: operationsNonAffectees.slice(0, 100),
         categories,
+        categoriesRecettes,
+        categoriesDepenses,
         mois,
         operations: operations.slice(0, 100)
     };
