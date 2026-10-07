@@ -1018,6 +1018,24 @@ function reinitialiserFormulaireAdherent() {
         false
     );
 
+    const certificatDate =
+        document.getElementById(
+            "certificateDate"
+        );
+
+    if (certificatDate) {
+        certificatDate.value = "";
+    }
+
+    const certificatFichier =
+        document.getElementById(
+            "certificateFile"
+        );
+
+    if (certificatFichier) {
+        certificatFichier.value = "";
+    }
+
     const certificatNom =
         document.getElementById(
             "certificateFileName"
