@@ -717,6 +717,9 @@ function ouvrirModificationAdherent(
     }
 
     if (typeof ui !== "undefined" && ui) {
+        ui.editingEnrollmentId =
+            inscription.id;
+
         ui.currentCertificateId =
             certificat.documentId
                 ? inscription.id
@@ -4377,6 +4380,10 @@ function initialiserEvenementsAdherents() {
                     typeof ui !== "undefined" &&
                     ui?.editingEnrollmentId
                 ) {
+                    if (!window.confirm("Supprimer le certificat médical de cet adhérent ? La suppression sera appliquée à l'enregistrement.")) {
+                        return;
+                    }
+
                     ui.certificateDeletePending = true;
 
                     definirValeur("certificateDate", "");
