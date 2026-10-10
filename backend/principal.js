@@ -90,7 +90,7 @@ const {
     synchroniserCotisations,
     obtenirSynthese: obtenirSyntheseComptable
 } = require("./gestion/comptabilite");
-const { initialiserFactures, obtenirFactures, obtenirFacture, creerFacture, modifierFacture, supprimerFacture, enregistrerPdf, obtenirCheminPdf, genererHtmlFacture } = require("./gestion/factures");
+const { initialiserFactures, obtenirFactures, obtenirFacture, creerFacture, modifierFacture, supprimerFacture, enregistrerPdf, obtenirCheminPdf, genererHtmlFacture, nomFichierFacture } = require("./gestion/factures");
 const {
     lire: lireConfigurationCentrale,
     enregistrer: enregistrerConfigurationCentrale,
@@ -374,7 +374,7 @@ function enregistrerHandlersIpc() {
         if (!chemin || !fs.existsSync(chemin)) throw new Error("Fichier PDF introuvable.");
         const resultat = await dialog.showSaveDialog({
             title: "Enregistrer la facture",
-            defaultPath: path.join(app.getPath("documents"), facture.pdfNom),
+            defaultPath: path.join(app.getPath("documents"), nomFichierFacture(facture)),
             filters: [{ name: "Document PDF", extensions: ["pdf"] }]
         });
         if (resultat.canceled || !resultat.filePath) return false;
