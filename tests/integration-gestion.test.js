@@ -206,12 +206,6 @@ test("10. facturation : création, numéro, total et HTML", () => {
 
     const configuration = {
         facturation: {
-            numerotation: {
-                prochainNumero: 12,
-                prefixe: "",
-                inclureAnnee: true,
-                remplissage: 2
-            },
             association: {
                 nom: "FBAC - Full Boxe Américaine Club"
             },
@@ -220,6 +214,7 @@ test("10. facturation : création, numéro, total et HTML", () => {
     };
 
     const facture = factures.creerFacture({
+        numero: "FBAC-2026-012",
         date: "2026-10-03",
         saisonId: "saison_2026_2027",
         saisonNom: "2026-2027",
@@ -235,7 +230,9 @@ test("10. facturation : création, numéro, total et HTML", () => {
         }]
     }, configuration);
 
-    assert.equal(facture.numero, "2026-12");
+    assert.equal(facture.numero, "FBAC-2026-012");
+    assert.equal(facture.pdfNom, "2026-DUPONT-JEAN-FBAC-2026-012.pdf");
+    assert.match(factures.genererHtmlFacture(facture), /84536859600035/);
     assert.equal(facture.total, 155);
     assert.ok(facture.pdfNom.endsWith(".pdf"));
     assert.match(factures.genererHtmlFacture(facture), /155/);
