@@ -90,7 +90,7 @@ const {
     synchroniserCotisations,
     obtenirSynthese: obtenirSyntheseComptable
 } = require("./gestion/comptabilite");
-const { initialiserFactures, obtenirFactures, obtenirFacture, creerFacture, modifierFacture, supprimerFacture, enregistrerPdf, obtenirCheminPdf, genererHtmlFacture, prochain, numero } = require("./gestion/factures");
+const { initialiserFactures, obtenirFactures, obtenirFacture, creerFacture, modifierFacture, supprimerFacture, enregistrerPdf, obtenirCheminPdf, genererHtmlFacture } = require("./gestion/factures");
 const {
     lire: lireConfigurationCentrale,
     enregistrer: enregistrerConfigurationCentrale,
@@ -358,7 +358,6 @@ function enregistrerHandlersIpc() {
         const configuration = lireJson("configuration.json") || {};
         const facture = creerFacture(donnees, configuration);
         await genererPdfFacture(facture);
-        incrementerNumerotationFacture(configuration);
         return facture;
     });
     ipcMain.handle("modifier-facture", async (_, id, donnees) => {
@@ -817,20 +816,21 @@ function enregistrerHandlersIpc() {
 }
 
 function construireApercuFacture(donnees, configuration) {
+    if (!String(donnees.numero || "").trim()) throw new Error("Le numéro de facture est obligatoire.");
     const facturation = configuration.facturation || {};
     const association = facturation.association || {};
     const saison = obtenirSaison(donnees.saisonId);
     return {
         ...donnees,
         id: "apercu",
-        numero: numero(configuration, donnees.date || new Date().toISOString().slice(0, 10), prochain(configuration)),
+        numero: String(donnees.numero).trim(),
         saisonNom: donnees.saisonNom || saison?.nom || "",
         association: {
             nom: association.nom || "FBAC - Full Boxe Américaine Club",
             adresse: association.adresse || "24 le Haut du Bingard",
             codePostal: association.codePostal || "50490",
             ville: association.ville || "Muneville-le-Bingard",
-            siret: association.siret || "",
+            siret: association.siret || "84536859600035",
             email: association.email || "",
             telephone: association.telephone || "",
             site: association.site || ""
@@ -861,13 +861,6 @@ async function genererPdfFacture(facture) {
     } finally {
         if (!fenetre.isDestroyed()) fenetre.close();
     }
-}
-
-function incrementerNumerotationFacture(configuration) {
-    configuration.facturation = configuration.facturation || {};
-    configuration.facturation.numerotation = configuration.facturation.numerotation || {};
-    configuration.facturation.numerotation.prochainNumero = (Number(configuration.facturation.numerotation.prochainNumero) || 1) + 1;
-    ecrireJson("configuration.json", configuration);
 }
 
 function echapperRapport(valeur) {
