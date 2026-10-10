@@ -92,19 +92,14 @@ function afficherParametres() {
 
     const facturation=configuration.facturation||{};
     const association=facturation.association||{};
-    const numerotation=facturation.numerotation||{};
     definirValeur("facturationNomAssociation",association.nom||"FBAC - Full Boxe Américaine Club");
     definirValeur("facturationAdresseAssociation",association.adresse||"24 le Haut du Bingard");
     definirValeur("facturationCodePostalAssociation",association.codePostal||"50490");
     definirValeur("facturationVilleAssociation",association.ville||"Muneville-le-Bingard");
-    definirValeur("facturationSiret",association.siret||"");
+    definirValeur("facturationSiret",association.siret||"84536859600035");
     definirValeur("facturationEmail",association.email||"");
     definirValeur("facturationTelephone",association.telephone||"");
     definirValeur("facturationSite",association.site||"");
-    definirValeur("facturationPrefixe",numerotation.prefixe||"");
-    definirValeur("facturationRemplissage",numerotation.remplissage||2);
-    definirValeur("facturationProchainNumero",numerotation.prochainNumero||9);
-    const inclureAnnee=document.getElementById("facturationInclureAnnee");if(inclureAnnee)inclureAnnee.checked=numerotation.inclureAnnee!==false;
     definirValeur("facturationMentionTva",facturation.mentionTva||"TVA non applicable (article 293 B du CGI)");
     definirValeur("facturationMentions",facturation.mentions||"");
 
@@ -190,7 +185,8 @@ async function enregistrerParametres() {
 
     const facturationExistante=state.configuration?.facturation||{};
     const associationExistante=facturationExistante.association||{};
-    const numerotationExistante=facturationExistante.numerotation||{};
+    const facturationSansNumerotation={...facturationExistante};
+    delete facturationSansNumerotation.numerotation;
     const configuration = {
         ...(state.configuration || {}),
         tarifs: {
@@ -282,7 +278,7 @@ async function enregistrerParametres() {
                     state.configuration?.parrainage?.plafond
                 ) || 60
         },
-        facturation: { ...facturationExistante, association: { ...associationExistante, nom: document.getElementById("facturationNomAssociation")?.value.trim()||"FBAC - Full Boxe Américaine Club", adresse: document.getElementById("facturationAdresseAssociation")?.value.trim()||"", codePostal: document.getElementById("facturationCodePostalAssociation")?.value.trim()||"", ville: document.getElementById("facturationVilleAssociation")?.value.trim()||"", siret: document.getElementById("facturationSiret")?.value.trim()||"", email: document.getElementById("facturationEmail")?.value.trim()||"", telephone: document.getElementById("facturationTelephone")?.value.trim()||"", site: document.getElementById("facturationSite")?.value.trim()||"" }, numerotation: { ...numerotationExistante, prefixe: document.getElementById("facturationPrefixe")?.value||"", inclureAnnee: document.getElementById("facturationInclureAnnee")?.checked!==false, remplissage: Number(document.getElementById("facturationRemplissage")?.value)||2, prochainNumero: Number(document.getElementById("facturationProchainNumero")?.value)||1 }, mentionTva: document.getElementById("facturationMentionTva")?.value.trim()||"TVA non applicable (article 293 B du CGI)", mentions: document.getElementById("facturationMentions")?.value.trim()||"" },
+        facturation: { ...facturationSansNumerotation, association: { ...associationExistante, nom: document.getElementById("facturationNomAssociation")?.value.trim()||"FBAC - Full Boxe Américaine Club", adresse: document.getElementById("facturationAdresseAssociation")?.value.trim()||"", codePostal: document.getElementById("facturationCodePostalAssociation")?.value.trim()||"", ville: document.getElementById("facturationVilleAssociation")?.value.trim()||"", siret: document.getElementById("facturationSiret")?.value.trim()||"84536859600035", email: document.getElementById("facturationEmail")?.value.trim()||"", telephone: document.getElementById("facturationTelephone")?.value.trim()||"", site: document.getElementById("facturationSite")?.value.trim()||"" }, mentionTva: document.getElementById("facturationMentionTva")?.value.trim()||"TVA non applicable (article 293 B du CGI)", mentions: document.getElementById("facturationMentions")?.value.trim()||"" },
         comptabilite: {
             ...(state.configuration?.comptabilite || {}),
             licenceFederale:
