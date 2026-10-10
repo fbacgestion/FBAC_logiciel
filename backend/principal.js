@@ -830,7 +830,7 @@ function construireApercuFacture(donnees, configuration) {
             adresse: association.adresse || "24 le Haut du Bingard",
             codePostal: association.codePostal || "50490",
             ville: association.ville || "Muneville-le-Bingard",
-            siret: association.siret || "84536859600035",
+            siret: "84536859600035",
             email: association.email || "",
             telephone: association.telephone || "",
             site: association.site || ""
