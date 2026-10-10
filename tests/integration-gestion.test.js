@@ -231,7 +231,7 @@ test("10. facturation : création, numéro, total et HTML", () => {
     }, configuration);
 
     assert.equal(facture.numero, "FBAC-2026-012");
-    assert.equal(facture.pdfNom, "2026-DUPONT-JEAN-FBAC-2026-012.pdf");
+    assert.equal(facture.pdfNom, "FBAC-2026-012-DUPONT-JEAN.pdf");
     assert.match(factures.genererHtmlFacture(facture), /84536859600035/);
     assert.equal(facture.total, 155);
     assert.ok(facture.pdfNom.endsWith(".pdf"));
