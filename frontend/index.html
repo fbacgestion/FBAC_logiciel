@@ -468,12 +468,8 @@
                             <div class="field"><label>Email</label><input type="email" id="facturationEmail"></div>
                             <div class="field"><label>Téléphone</label><input type="text" id="facturationTelephone"></div>
                             <div class="field"><label>Site internet</label><input type="text" id="facturationSite"></div>
-                            <div class="field"><label>Préfixe</label><input type="text" id="facturationPrefixe" placeholder="Ex. FAC-"></div>
-                            <div class="field"><label>Chiffres du numéro</label><input type="number" id="facturationRemplissage" min="1" max="6"></div>
-                            <div class="field"><label>Prochain numéro</label><input type="number" id="facturationProchainNumero" min="1"></div>
-                            <div class="field"><label>Mention TVA</label><input type="text" id="facturationMentionTva"></div>
+                                        <div class="field"><label>Mention TVA</label><input type="text" id="facturationMentionTva"></div>
                         </div>
-                        <label class="checkbox-field"><input type="checkbox" id="facturationInclureAnnee"> Inclure l'année dans le numéro</label>
                         <div class="field"><label>Mentions complémentaires</label><textarea id="facturationMentions" rows="3"></textarea></div>
                         <p>Ces paramètres sont utilisés uniquement par Facturation et n'altèrent pas les paiements ni la comptabilité.</p>
                     </div>
@@ -949,6 +945,7 @@
             <div class="form-grid">
                 <div class="field"><label>Adhérent</label><select id="factureClient"></select></div>
                 <div class="field"><label>Date</label><input type="date" id="factureDate" required></div>
+                <div class="field"><label>Numéro de facture</label><input type="text" id="factureNumero" required placeholder="Ex. 2026-001"></div>
                 <div class="field"><label>Nom</label><input type="text" id="factureNom" required></div>
                 <div class="field"><label>Prénom</label><input type="text" id="facturePrenom" required></div>
                 <div class="field"><label>Adresse</label><input type="text" id="factureAdresse"></div>
