@@ -96,7 +96,7 @@ function afficherParametres() {
     definirValeur("facturationAdresseAssociation",association.adresse||"24 le Haut du Bingard");
     definirValeur("facturationCodePostalAssociation",association.codePostal||"50490");
     definirValeur("facturationVilleAssociation",association.ville||"Muneville-le-Bingard");
-    definirValeur("facturationSiret",association.siret||"84536859600035");
+    definirValeur("facturationSiret","84536859600035");
     definirValeur("facturationEmail",association.email||"");
     definirValeur("facturationTelephone",association.telephone||"");
     definirValeur("facturationSite",association.site||"");
