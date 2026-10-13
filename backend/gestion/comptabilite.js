@@ -157,7 +157,7 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
                 libelle: nom + " — " + (personne ? (personne.firstName + " " + personne.lastName).trim() : "Adhérent"),
                 categorie,
                 montant,
-                modePaiement: "",
+                modePaiement: "virement",
                 saisonId,
                 source: "aide",
                 inscriptionId: inscription.id,
@@ -192,7 +192,7 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
                 categorie: "cotisations",
                 montant,
                 modePaiement: paiement.method || "",
-                saisonId: inscription.season || "",
+                saisonId,
                 source: "cotisation",
                 inscriptionId: inscription.id,
                 personneId: inscription.personId || null,
@@ -250,12 +250,15 @@ function obtenirSynthese(saisonId, configuration = {}) {
         compteBancaire,
         caisse,
         tresorerie: compteBancaire + caisse,
+        nombreOperations: operations.length,
+        nombreOperationsNonAffectees: operationsNonAffectees.length,
         operationsNonAffectees: operationsNonAffectees.slice(0, 100),
         categories,
         categoriesRecettes,
         categoriesDepenses,
         mois,
-        operations: operations.slice(0, 100)
+        operations: operations.slice(0, 100),
+        operationsCompletes: operations
     };
 }
 function initialiser() { sauvegarder(obtenirDonnees()); }
