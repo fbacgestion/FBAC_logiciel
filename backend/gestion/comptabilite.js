@@ -1,5 +1,5 @@
 const { lireJson, ecrireJson } = require("./fichiers");
-const { calculerSituationFinanciere } = require("../core/finances");
+const { calculerSituationFinanciere, obtenirPaiements } = require("../core/finances");
 
 const FICHIER = "comptabilite.json";
 const CATEGORIES_RECETTES = [
@@ -138,7 +138,7 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
 
         if (inscription.vip) continue;
 
-        const paiements = Array.isArray(inscription.paiements) ? inscription.paiements.slice().sort((a, b) => String(a.date || "").localeCompare(String(b.date || ""))) : [];
+        const paiements = obtenirPaiements(inscription).slice().sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")));
         const situation = calculerSituationFinanciere(inscription, configuration);
         const dateAide = paiements[0]?.date || inscription.dateInscription || inscription.date || inscription.createdAt || new Date().toISOString().slice(0, 10);
         const aides = [
@@ -224,7 +224,7 @@ function obtenirSynthese(saisonId, configuration = {}) {
         mois[cle][operation.type === "recette" ? "recettes" : "depenses"] += operation.montant;
     }
     const parametres = obtenirParametres(saisonId, configuration);
-    const modesBanque = new Set(["cheque", "virement", "carte", "cb", "prélèvement", "prelevement"]);
+    const modesBanque = new Set(["cheque", "chèque", "virement", "carte", "cb", "prélèvement", "prelevement"]);
     const modesCaisse = new Set(["espèces", "especes"]);
     const calculerSolde = (initial, modes) => operations.reduce((solde, operation) => {
         const mode = String(operation.modePaiement || "").trim().toLowerCase();
