@@ -220,9 +220,11 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
             const ancienne = data.operations.find(operation => operation.id === id && operation.source === "cotisation");
             const licenceIncluse =
                 licenceInclusePourInscription(inscription, saisonId, licence, configuration);
+            const saisonActiveId = configuration.saisonActiveId || "";
+            const recalculerVentilation = saisonId && saisonId === saisonActiveId;
             const partLicence = !licenceIncluse
                 ? 0
-                : ancienne && Number(ancienne.licenceMontant) > 0
+                : !recalculerVentilation && ancienne && Number(ancienne.licenceMontant) > 0
                     ? Math.min(Math.max(0, Number(ancienne.licenceMontant) || 0), montant)
                     : Math.min(Math.max(0, licence - licenceDejaAffectee), montant);
             const partClub = Math.max(0, montant - partLicence);
