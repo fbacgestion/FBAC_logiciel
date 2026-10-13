@@ -3697,7 +3697,9 @@ function convertirInscriptionPourBackend(
         tarifPersonnalise:
             Boolean(inscription.tarifPersonnalise),
         licenceFederaleIncluse:
-            inscription.licenceFederaleIncluse !== false,
+            typeof inscription.licenceFederaleIncluse === "boolean"
+                ? inscription.licenceFederaleIncluse
+                : undefined,
         grade:
             inscription.grade ||
             "Blanc",
