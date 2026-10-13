@@ -314,14 +314,28 @@
                         </div>
                     </div>
                 </div>
-                <div class="table-card">
-                    <div class="table-toolbar"><div><strong>Journal des opérations</strong><span class="toolbar-note">Les paiements adhérents sont synchronisés automatiquement.</span></div></div>
-                    <div class="table-wrap">
-                        <table>
-                            <thead><tr><th>Date</th><th>Libellé</th><th>Catégorie</th><th>Mode</th><th>Montant</th><th></th></tr></thead>
+                <div class="table-card journal-card">
+                    <div class="table-toolbar journal-toolbar">
+                        <div><strong>Journal des opérations</strong><span class="toolbar-note">Recherche, filtres et historique complet des mouvements comptables. Les licences fédérales prises en charge par le club restent dans les totaux, sans ligne négative par adhérent.</span></div>
+                        <button class="btn btn-small" data-action="rafraichir-comptabilite">↻ Actualiser</button>
+                    </div>
+                    <div class="journal-filters">
+                        <label class="journal-search"><span>Rechercher</span><input class="search" id="comptaRechercheJournal" type="search" placeholder="Libellé, catégorie, moyen de paiement…"></label>
+                        <label><span>Type d’opération</span><select id="comptaFiltreType" class="search"><option value="tous">Recettes et dépenses</option><option value="recette">Recettes uniquement</option><option value="depense">Dépenses uniquement</option></select></label>
+                        <label><span>Catégorie</span><select id="comptaFiltreCategorie" class="search"><option value="toutes">Toutes les catégories</option></select></label>
+                        <label><span>Moyen de paiement</span><select id="comptaFiltreMode" class="search"><option value="tous">Tous les moyens</option></select></label>
+                        <label><span>Du</span><input class="search" id="comptaFiltreDebut" type="date"></label>
+                        <label><span>Au</span><input class="search" id="comptaFiltreFin" type="date"></label>
+                        <button class="btn journal-reset" data-action="reinitialiser-filtres-journal">Effacer les filtres</button>
+                    </div>
+                    <div class="journal-resume" id="comptaJournalCompteur"></div>
+                    <div class="table-wrap journal-table-wrap">
+                        <table class="journal-table">
+                            <thead><tr><th>Date</th><th>Opération</th><th>Catégorie</th><th>Moyen de paiement</th><th class="journal-montant-head">Montant</th><th>Action</th></tr></thead>
                             <tbody id="comptaOperations"></tbody>
                         </table>
                     </div>
+                    <div class="journal-pagination" id="comptaPagination"></div>
                 </div>
             </section>
 
