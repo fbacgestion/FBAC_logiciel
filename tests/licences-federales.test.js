@@ -92,6 +92,23 @@ test("une inscription VIP avec licence incluse génère la dépense, sans cotisa
     assert.equal(comptabilite.obtenirOperations({ saisonId: SAISON }).some(item => item.source === "cotisation"), false);
 });
 
+test("la ventilation inclut les licences VIP dans la part licences sans les compter deux fois", () => {
+    reinitialiser();
+    synchroniser([
+        inscription("payant", {
+            licenceFederaleIncluse: true,
+            paiements: [{ id: "p1", date: "2026-10-10", amount: 155, method: "virement" }]
+        }),
+        inscription("vip_ventilation", { vip: true, licenceFederaleIncluse: true })
+    ]);
+    const synthese = comptabilite.obtenirSynthese(SAISON, CONFIG);
+    assert.equal(synthese.totalRecettes, 155);
+    assert.equal(synthese.totalDepenses, 78);
+    assert.equal(synthese.licenceEncaissee, 78);
+    assert.equal(synthese.clubEncaisse, 77);
+    assert.equal(synthese.resultat, 77);
+});
+
 test("une inscription VIP sans licence incluse ne génère aucune dépense", () => {
     reinitialiser();
     synchroniser([inscription("vip_sans", { vip: true, licenceFederaleIncluse: false })]);
