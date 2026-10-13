@@ -76,8 +76,8 @@ function creerOperation(donnees) {
     const operation = normaliserOperation(donnees || {});
     if (!operation.libelle) throw new Error("Le libellé de l’opération est obligatoire.");
     if (operation.montant <= 0) throw new Error("Le montant doit être supérieur à 0.");
-    if (operation.type === "recette" && CATEGORIES_AIDES.has(operation.categorie)) {
-        throw new Error("Les aides des adhérents sont générées automatiquement depuis les inscriptions. Ne saisissez pas une seconde recette manuelle.");
+    if (CATEGORIES_AIDES.has(operation.categorie)) {
+        throw new Error("Les aides des adhérents sont générées automatiquement depuis les inscriptions et ne peuvent pas être saisies manuellement.");
     }
     const data = obtenirDonnees(); data.operations.push(operation); sauvegarder(data); return operation;
 }
@@ -87,8 +87,8 @@ function modifierOperation(id, donnees) {
     const actuelle = normaliserOperation(data.operations[index]);
     if (SOURCES_AUTOMATIQUES.has(actuelle.source)) throw new Error("Cette opération est générée automatiquement depuis les inscriptions et ne peut pas être modifiée ici.");
     const modifiee = normaliserOperation({ ...actuelle, ...(donnees || {}), id });
-    if (modifiee.type === "recette" && CATEGORIES_AIDES.has(modifiee.categorie)) {
-        throw new Error("Les aides des adhérents sont générées automatiquement depuis les inscriptions.");
+    if (CATEGORIES_AIDES.has(modifiee.categorie)) {
+        throw new Error("Les aides des adhérents sont générées automatiquement depuis les inscriptions et ne peuvent pas être saisies manuellement.");
     }
     data.operations[index] = modifiee;
     sauvegarder(data); return data.operations[index];

@@ -152,6 +152,29 @@ test("empêche la saisie manuelle d'une aide déjà générée depuis l'inscript
     );
 });
 
+test("une aide ne peut jamais être créée ou modifiée comme dépense manuelle", () => {
+    reinitialiserComptabilite();
+    assert.throws(() => comptabilite.creerOperation({
+        type: "depense",
+        libelle: "Aide Pass'Sport",
+        categorie: "aide-passsport",
+        montant: 50,
+        saisonId: "saison_2026_2027"
+    }), /ne peuvent pas être saisies manuellement/);
+
+    const operation = comptabilite.creerOperation({
+        type: "depense",
+        libelle: "Frais divers",
+        categorie: "autres-depenses",
+        montant: 10,
+        saisonId: "saison_2026_2027"
+    });
+    assert.throws(() => comptabilite.modifierOperation(operation.id, {
+        categorie: "aide-passsport"
+    }), /ne peuvent pas être saisies manuellement/);
+    assert.equal(comptabilite.obtenirOperation(operation.id).categorie, "autres-depenses");
+});
+
 test("empêche la suppression d'une aide générée automatiquement", () => {
     reinitialiserComptabilite();
     fichiers.ecrireJson("comptabilite.json", {
