@@ -303,3 +303,136 @@ input[type="file"]::file-selector-button:hover{background:#334156}
 @media(prefers-reduced-motion:reduce){
     *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
 }
+
+/* Vue financière — hiérarchie visuelle et lecture comptable */
+#page-accounting{--finance-line:rgba(137,157,184,.14)}
+#page-accounting .page-header{
+    position:relative;
+    padding:23px 25px;
+    margin:0 0 21px;
+    border:1px solid #30394a;
+    border-radius:16px;
+    background:linear-gradient(112deg,rgba(237,41,57,.105),rgba(24,33,46,.96) 42%,rgba(17,23,33,.98));
+    box-shadow:0 10px 30px rgba(0,0,0,.16);
+    overflow:hidden;
+}
+#page-accounting .page-header:after{
+    content:"";
+    position:absolute;
+    width:230px;height:230px;
+    right:-90px;top:-140px;
+    border:1px solid rgba(237,41,57,.13);
+    border-radius:50%;
+    box-shadow:0 0 0 24px rgba(237,41,57,.025),0 0 0 50px rgba(237,41,57,.02);
+    pointer-events:none;
+}
+#page-accounting .page-header>div{position:relative;z-index:1}
+#page-accounting .page-header h1{font-size:28px;letter-spacing:-1px}
+#page-accounting .page-header p{max-width:650px}
+#page-accounting .actions{position:relative;z-index:1}
+#page-accounting .actions .btn{white-space:nowrap}
+#page-accounting .actions [data-action="generer-rapport-financier"]{border-color:rgba(103,165,255,.32);background:rgba(103,165,255,.09);color:#9bc5ff}
+#page-accounting .actions [data-action="generer-rapport-financier"]:hover{background:rgba(103,165,255,.17);border-color:rgba(103,165,255,.55)}
+#page-accounting .actions [data-action="nouvelle-recette"]{border-color:rgba(57,217,138,.3);background:rgba(57,217,138,.08);color:#75e8aa}
+#page-accounting .actions [data-action="nouvelle-recette"]:hover{background:rgba(57,217,138,.15)}
+#page-accounting .actions [data-action="nouvelle-depense"]{background:linear-gradient(135deg,#f63848,#c91628)}
+#page-accounting .compta-kpis{gap:13px}
+#page-accounting .compta-kpis .kpi{padding:20px 19px 18px;min-height:132px}
+#page-accounting .compta-kpis .kpi:nth-child(1){background:linear-gradient(145deg,rgba(22,46,43,.97),rgba(19,27,36,.98));border-color:rgba(57,217,138,.2)}
+#page-accounting .compta-kpis .kpi:nth-child(1):before{background:var(--green)}
+#page-accounting .compta-kpis .kpi:nth-child(1) .kpi-value{color:#69e5a3}
+#page-accounting .compta-kpis .kpi:nth-child(2){background:linear-gradient(145deg,rgba(50,31,38,.96),rgba(19,27,36,.98));border-color:rgba(255,102,114,.19)}
+#page-accounting .compta-kpis .kpi:nth-child(2):before{background:var(--danger)}
+#page-accounting .compta-kpis .kpi:nth-child(2) .kpi-value{color:#ff8790}
+#page-accounting .compta-kpis .kpi:nth-child(3){background:linear-gradient(145deg,rgba(28,39,57,.98),rgba(19,27,36,.98));border-color:rgba(103,165,255,.2)}
+#page-accounting .compta-kpis .kpi:nth-child(3):before{background:var(--blue)}
+#page-accounting .compta-kpis .kpi:nth-child(3) .kpi-value{color:#9bc5ff}
+#page-accounting .compta-kpis .kpi:nth-child(4){background:linear-gradient(145deg,rgba(46,39,29,.97),rgba(19,27,36,.98));border-color:rgba(255,180,84,.2)}
+#page-accounting .compta-kpis .kpi:nth-child(4):before{background:var(--orange)}
+#page-accounting .compta-kpis .kpi:nth-child(4) .kpi-value{color:#ffd08b}
+#page-accounting .compta-kpis .kpi-label{font-size:10px;letter-spacing:1.1px}
+#page-accounting .compta-kpis .kpi-value{font-size:clamp(22px,2vw,30px);letter-spacing:-.8px;overflow-wrap:anywhere}
+#page-accounting .compta-kpis .kpi-extra{margin-top:8px}
+#page-accounting .compta-layout{grid-template-columns:minmax(0,1.7fr) minmax(285px,1fr);gap:16px;margin-bottom:22px}
+#page-accounting .compta-layout>.card{min-width:0}
+#page-accounting .compta-layout .card-header{min-height:57px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+#page-accounting .compta-layout .card-header>strong{font-size:12px;letter-spacing:.1px}
+#page-accounting .compta-chart{
+    position:relative;
+    height:235px;
+    gap:clamp(5px,1.2vw,14px);
+    padding:18px 8px 5px;
+    border-bottom:1px solid #354153;
+    background:repeating-linear-gradient(to bottom,transparent 0,transparent 43px,rgba(137,157,184,.1) 44px,transparent 45px);
+}
+#page-accounting .compta-bar-group{min-width:0;gap:9px;position:relative}
+#page-accounting .compta-bars{align-items:flex-end;gap:4px;padding:0 2px}
+#page-accounting .compta-bar{width:clamp(8px,1.15vw,15px);min-height:4px;border-radius:5px 5px 2px 2px;filter:saturate(.92);transform-origin:bottom;animation:finance-bar-enter .55s var(--ease) both}
+#page-accounting .compta-bar-group:nth-child(2n) .compta-bar{animation-delay:.035s}
+#page-accounting .compta-bar.recette{background:linear-gradient(180deg,#58e2a0,#1a9f68);box-shadow:0 0 12px rgba(57,217,138,.08)}
+#page-accounting .compta-bar.depense{background:linear-gradient(180deg,#ff9a9f,#dc4653);box-shadow:0 0 12px rgba(255,102,114,.07)}
+#page-accounting .compta-bar-group small{color:#9ba8ba;font-size:10px;font-weight:700;font-variant-numeric:tabular-nums}
+#page-accounting .compta-bar-group:hover .compta-bar{filter:brightness(1.2);transform:scaleX(1.08)}
+#page-accounting .compta-legend{font-size:10px;font-weight:700;gap:7px;white-space:nowrap}
+#page-accounting .compta-legend i{width:8px;height:8px;flex:0 0 8px;background:var(--green)}
+#page-accounting .compta-legend i.depense{background:var(--danger)}
+#page-accounting .compta-layout>.card:nth-child(2) .card-body{padding:17px 20px}
+#page-accounting .compta-split{align-items:center;gap:12px;padding:15px 0;border-bottom:1px solid var(--finance-line)}
+#page-accounting .compta-split span{font-size:11px;color:#aeb9c8}
+#page-accounting .compta-split strong{font-size:20px;letter-spacing:-.4px;color:#f4f7fb;font-variant-numeric:tabular-nums;text-align:right}
+#page-accounting #comptaLicence{color:#9bc5ff}
+#page-accounting #comptaClub{color:#69e5a3}
+#page-accounting .compta-note{font-size:10px;color:#8190a4;line-height:1.6;margin-top:16px;padding:11px 12px;border:1px solid #2c3849;background:rgba(7,12,18,.28);border-radius:8px}
+#page-accounting .journal-card{border-color:#303b4d;box-shadow:0 10px 30px rgba(0,0,0,.16)}
+#page-accounting .journal-toolbar{align-items:center;background:linear-gradient(110deg,rgba(32,42,57,.95),rgba(20,27,38,.98));padding:18px 20px}
+#page-accounting .journal-toolbar>div{gap:7px}
+#page-accounting .journal-toolbar>div>strong{font-size:14px;font-weight:850;color:#f4f6fa}
+#page-accounting .journal-toolbar .toolbar-note{font-size:10px;color:#93a1b4;max-width:780px}
+#page-accounting .journal-filters{padding:17px 19px;background:rgba(9,14,21,.45);border-bottom:1px solid #2d394a;gap:12px}
+#page-accounting .journal-filters label>span{font-size:10px;letter-spacing:.15px;color:#a9b5c5}
+#page-accounting .journal-filters .search{min-height:38px;font-size:11px}
+#page-accounting .journal-reset{background:transparent;border-color:#3b485b;color:#aebbd0}
+#page-accounting .journal-reset:hover{background:#222d3d;color:#fff}
+#page-accounting .journal-resume{padding:13px 19px;background:rgba(255,255,255,.018);font-size:11px}
+#page-accounting .journal-totaux{gap:9px}
+#page-accounting .journal-recettes,#page-accounting .journal-depenses{padding:6px 9px;border-radius:7px;font-size:10px;font-variant-numeric:tabular-nums}
+#page-accounting .journal-recettes{background:rgba(57,217,138,.1);border:1px solid rgba(57,217,138,.18)}
+#page-accounting .journal-depenses{background:rgba(255,102,114,.1);border:1px solid rgba(255,102,114,.18)}
+#page-accounting .journal-table{min-width:860px}
+#page-accounting .journal-table th{background:#1c2634;color:#a6b3c5;padding:14px 15px;font-size:9px;letter-spacing:.8px;border-bottom-color:#3a485b}
+#page-accounting .journal-table td{padding:14px 15px;border-bottom-color:rgba(137,157,184,.12)}
+#page-accounting .journal-table tbody tr:hover{background:rgba(103,165,255,.045)}
+#page-accounting .journal-libelle strong{font-size:12px;line-height:1.45;color:#f0f4fa}
+#page-accounting .journal-origine{font-size:10px;color:#8292a7}
+#page-accounting .journal-categorie{border-radius:6px;background:#202a38;border-color:#354458;color:#c1ccda;padding:5px 8px;font-size:10px}
+#page-accounting .journal-mode{font-size:11px;color:#a8b5c6}
+#page-accounting .journal-montant strong{font-size:12px;font-weight:850;letter-spacing:.1px}
+#page-accounting .journal-montant .amount-positive{color:#61e5a0!important}
+#page-accounting .journal-montant .amount-negative{color:#ff7b86!important}
+#page-accounting .journal-action .btn{border-radius:7px}
+#page-accounting .journal-pagination{background:rgba(9,14,21,.32);padding:14px 19px}
+#page-accounting .journal-pagination-actions .btn{min-width:92px}
+#page-accounting .journal-empty{padding:26px}
+#page-accounting .journal-empty strong{font-size:14px}
+@keyframes finance-bar-enter{from{opacity:.35;transform:scaleY(.35)}to{opacity:1;transform:scaleY(1)}}
+@media(max-width:1100px){
+    #page-accounting .page-header{align-items:flex-start}
+    #page-accounting .page-header .actions{justify-content:flex-start}
+    #page-accounting .compta-layout{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:700px){
+    #page-accounting .page-header{padding:18px}
+    #page-accounting .page-header h1{font-size:23px}
+    #page-accounting .page-header .actions{width:100%}
+    #page-accounting .page-header .actions .btn{flex:1 1 42%;white-space:normal}
+    #page-accounting .compta-kpis .kpi{min-height:112px}
+    #page-accounting .compta-layout .card-header{align-items:flex-start;flex-direction:column}
+    #page-accounting .compta-chart{height:195px;gap:5px;padding-left:2px;padding-right:2px}
+    #page-accounting .compta-bar{width:8px}
+    #page-accounting .journal-filters{gap:9px}
+    #page-accounting .journal-filters label{min-width:0}
+    #page-accounting .journal-toolbar{align-items:flex-start}
+}
+@media(prefers-reduced-motion:reduce){
+    #page-accounting .compta-bar{animation:none}
+}
