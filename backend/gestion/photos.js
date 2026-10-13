@@ -136,6 +136,7 @@ function enregistrerPhoto(
         .filter(nom => path.basename(nom, path.extname(nom)) === personneId)
         .map(nom => path.join(dossier, nom));
     const sauvegardes = [];
+    let nouvellePhotoInstallee = false;
     try {
         for (const ancien of anciens) {
             const sauvegarde = `${ancien}.${suffixe}.bak`;
@@ -143,8 +144,9 @@ function enregistrerPhoto(
             sauvegardes.push({ ancien, sauvegarde });
         }
         fs.renameSync(temporaire, destination);
+        nouvellePhotoInstallee = true;
     } catch (error) {
-        if (fs.existsSync(destination)) {
+        if (nouvellePhotoInstallee && fs.existsSync(destination)) {
             try { fs.unlinkSync(destination); } catch {}
         }
         for (const entree of sauvegardes.reverse()) {
