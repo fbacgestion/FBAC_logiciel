@@ -181,7 +181,7 @@ async function afficherTableauDeBord() {
 
     if (extraPaiements) {
         extraPaiements.textContent =
-            `Aides utilisées : -${totalAides.toFixed(2)} €`;
+            `Aides utilisées : ${totalAides.toFixed(2)} €`;
     }
 
     if (elementReste) {
