@@ -41,6 +41,19 @@ function obtenirDonnees() {
     };
 }
 function sauvegarder(donnees) { ecrireJson(FICHIER, donnees); return donnees; }
+function verifierSaisonModifiable(saisonId) {
+    if (!saisonId) return;
+    let configuration = {};
+    try {
+        configuration = lireJson("configuration.json") || {};
+    } catch {
+        return;
+    }
+    const saisonActiveId = configuration.saisonActiveId || "";
+    if (saisonActiveId && saisonActiveId !== saisonId) {
+        throw new Error("Cette saison historique est en lecture seule.");
+    }
+}
 function genererId(prefix = "operation") { return prefix + "_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 9); }
 function normaliserOperation(operation) {
     return {
@@ -74,6 +87,7 @@ function obtenirOperations(filtres = {}) {
 function obtenirOperation(id) { return obtenirDonnees().operations.find(operation => operation.id === id) || null; }
 function creerOperation(donnees) {
     const operation = normaliserOperation(donnees || {});
+    verifierSaisonModifiable(operation.saisonId);
     if (!operation.libelle) throw new Error("Le libellé de l’opération est obligatoire.");
     if (operation.montant <= 0) throw new Error("Le montant doit être supérieur à 0.");
     if (CATEGORIES_AIDES.has(operation.categorie)) {
@@ -85,6 +99,7 @@ function modifierOperation(id, donnees) {
     const data = obtenirDonnees(); const index = data.operations.findIndex(operation => operation.id === id);
     if (index === -1) throw new Error("Opération introuvable.");
     const actuelle = normaliserOperation(data.operations[index]);
+    verifierSaisonModifiable(actuelle.saisonId);
     if (SOURCES_AUTOMATIQUES.has(actuelle.source)) throw new Error("Cette opération est générée automatiquement depuis les inscriptions et ne peut pas être modifiée ici.");
     const modifiee = normaliserOperation({ ...actuelle, ...(donnees || {}), id });
     if (CATEGORIES_AIDES.has(modifiee.categorie)) {
@@ -96,6 +111,7 @@ function modifierOperation(id, donnees) {
 function supprimerOperation(id) {
     const data = obtenirDonnees(); const operation = data.operations.find(element => element.id === id);
     if (!operation) throw new Error("Opération introuvable.");
+    verifierSaisonModifiable(operation.saisonId);
     if (SOURCES_AUTOMATIQUES.has(operation.source)) throw new Error("Cette opération est générée automatiquement depuis les inscriptions et ne peut pas être supprimée ici.");
     data.operations = data.operations.filter(element => element.id !== id); sauvegarder(data); return operation;
 }
@@ -111,6 +127,7 @@ function obtenirParametres(saisonId, configuration = {}) {
 }
 function enregistrerParametres(saisonId, parametres) {
     if (!saisonId) throw new Error("La saison est obligatoire.");
+    verifierSaisonModifiable(saisonId);
     const data = obtenirDonnees(); data.parametres[saisonId] = { ...(data.parametres[saisonId] || {}), licence: Math.max(0, Number(parametres.licence) || 0), compteBancaire: Math.max(0, Number(parametres.compteBancaire) || 0), caisse: Math.max(0, Number(parametres.caisse) || 0) };
     sauvegarder(data); return data.parametres[saisonId];
 }

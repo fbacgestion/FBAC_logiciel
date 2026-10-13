@@ -11,6 +11,7 @@ const comptabilite = require("../backend/gestion/comptabilite");
 
 function reinitialiserComptabilite() {
     fichiers.ecrireJson("comptabilite.json", { operations: [], parametres: {} });
+    fichiers.ecrireJson("configuration.json", { saisonActiveId: "saison_2026_2027" });
 }
 
 test("une aide est comptée une seule fois en recette et dans la trésorerie", () => {
@@ -59,6 +60,34 @@ test("une aide est comptée une seule fois en recette et dans la trésorerie", (
     assert.equal(synthese.totalRecettes, 155);
     assert.equal(synthese.compteBancaire, 155);
     assert.equal(synthese.resultat, 155);
+});
+
+test("les opérations et paramètres d'une saison historique sont en lecture seule", () => {
+    reinitialiserComptabilite();
+    const historique = {
+        id: "operation_historique",
+        date: "2025-10-01",
+        type: "recette",
+        libelle: "Ancienne cotisation",
+        categorie: "cotisations",
+        montant: 100,
+        modePaiement: "virement",
+        saisonId: "saison_2025_2026",
+        source: "manuelle"
+    };
+    fichiers.ecrireJson("comptabilite.json", { operations: [historique], parametres: {} });
+
+    assert.throws(() => comptabilite.creerOperation({
+        type: "recette",
+        libelle: "Recette historique",
+        categorie: "autres-recettes",
+        montant: 10,
+        saisonId: "saison_2025_2026"
+    }), /saison historique est en lecture seule/);
+    assert.throws(() => comptabilite.modifierOperation("operation_historique", { libelle: "Modifiée" }), /saison historique est en lecture seule/);
+    assert.throws(() => comptabilite.supprimerOperation("operation_historique"), /saison historique est en lecture seule/);
+    assert.throws(() => comptabilite.enregistrerParametres("saison_2025_2026", { licence: 39 }), /saison historique est en lecture seule/);
+    assert.equal(comptabilite.obtenirOperation("operation_historique").libelle, "Ancienne cotisation");
 });
 
 test("la synthèse conserve le journal complet au-delà de 100 opérations", () => {
