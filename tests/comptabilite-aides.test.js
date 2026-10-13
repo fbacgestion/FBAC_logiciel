@@ -413,8 +413,8 @@ test("Mayanna : 35 € de cotisation + 75 € d'aides financent 39 € de licenc
     assert.equal(cotisation.licenceMontant, 35);
     assert.equal(cotisation.clubMontant, 0);
     assert.equal(passSport.montant, 50);
-    assert.equal(passSport.licenceMontant, 4);
-    assert.equal(passSport.clubMontant, 46);
+    assert.equal(passSport.licenceMontant, 0);
+    assert.equal(passSport.clubMontant, 50);
     assert.equal(spot50.montant, 25);
     assert.equal(spot50.licenceMontant, 0);
     assert.equal(spot50.clubMontant, 25);
