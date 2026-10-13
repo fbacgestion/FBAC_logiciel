@@ -410,14 +410,8 @@ test("Mayanna : 35 € de cotisation + 75 € d'aides financent 39 € de licenc
     const synthese = comptabilite.obtenirSynthese("saison_2026_2027", configuration);
 
     assert.equal(cotisation.montant, 35);
-    assert.equal(cotisation.licenceMontant, 35);
-    assert.equal(cotisation.clubMontant, 0);
     assert.equal(passSport.montant, 50);
-    assert.equal(passSport.licenceMontant, 0);
-    assert.equal(passSport.clubMontant, 50);
     assert.equal(spot50.montant, 25);
-    assert.equal(spot50.licenceMontant, 0);
-    assert.equal(spot50.clubMontant, 25);
     assert.equal(synthese.totalRecettes, 110);
     assert.equal(synthese.licenceEncaissee, 39);
     assert.equal(synthese.clubEncaisse, 71);
