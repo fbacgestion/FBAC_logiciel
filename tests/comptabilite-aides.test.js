@@ -174,6 +174,33 @@ test("empêche la suppression d'une aide générée automatiquement", () => {
     );
 });
 
+test("ne génère pas de dépense FFK pour une ancienne inscription dont le tarif prouve que la licence était exclue", () => {
+    reinitialiserComptabilite();
+    comptabilite.enregistrerParametres("saison_2026_2027", {
+        licence: 39,
+        compteBancaire: 500,
+        caisse: 0
+    });
+    const inscription = {
+        id: "inscription_ancienne_sans_licence",
+        personId: "personne_ancienne_sans_licence",
+        season: "saison_2026_2027",
+        category: "adulte",
+        frequency: "1",
+        tarif: 116,
+        tarifPersonnalise: false
+    };
+    comptabilite.synchroniserCotisations(
+        [inscription],
+        [{ id: "personne_ancienne_sans_licence", firstName: "Ancien", lastName: "Licencié" }],
+        [{ id: "saison_2026_2027" }],
+        { tarifs: { adult1: 155 } }
+    );
+    const operations = comptabilite.obtenirOperations({ saisonId: "saison_2026_2027" });
+    assert.equal(operations.filter(operation => operation.source === "licence-adherent").length, 0);
+    assert.equal(comptabilite.obtenirSynthese("saison_2026_2027", {}).totalDepenses, 0);
+});
+
 test("les licences FFK sont débitées de la trésorerie par prélèvement bancaire", () => {
     reinitialiserComptabilite();
     comptabilite.enregistrerParametres("saison_2026_2027", {

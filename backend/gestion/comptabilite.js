@@ -114,6 +114,20 @@ function enregistrerParametres(saisonId, parametres) {
     const data = obtenirDonnees(); data.parametres[saisonId] = { ...(data.parametres[saisonId] || {}), licence: Math.max(0, Number(parametres.licence) || 0), compteBancaire: Math.max(0, Number(parametres.compteBancaire) || 0), caisse: Math.max(0, Number(parametres.caisse) || 0) };
     sauvegarder(data); return data.parametres[saisonId];
 }
+function licenceInclusePourInscription(inscription, saisonId, licence, configuration = {}) {
+    if (typeof inscription.licenceFederaleIncluse === "boolean") return inscription.licenceFederaleIncluse;
+    if (inscription.tarifPersonnalise !== false || !(licence > 0)) return true;
+    const tarifs = inscription.parametresFinanciers?.tarifs || configuration.parametresSaisons?.[saisonId]?.tarifs || configuration.tarifs || {};
+    const categorie = inscription.category || inscription.typeAdherent || "";
+    const frequence = Number(inscription.frequency ?? inscription.coursParSemaine ?? 0);
+    let tarifBase;
+    if (categorie === "enfant" && frequence === 1) tarifBase = Number(tarifs.child1 ?? 110);
+    else if (categorie === "adulte" && frequence === 1) tarifBase = Number(tarifs.adult1 ?? 155);
+    else if (categorie === "adulte" && frequence === 4) tarifBase = Number(tarifs.adult4 ?? 255);
+    else return true;
+    const tarifEnregistre = Number(inscription.tarif);
+    return !(Number.isFinite(tarifEnregistre) && Math.abs(tarifEnregistre - Math.max(0, tarifBase - licence)) < 0.001);
+}
 function synchroniserCotisations(inscriptions, personnes, saisons, configuration = {}) {
     const data = obtenirDonnees(); const automatiques = []; const saisonParametres = {};
     for (const saison of saisons || []) saisonParametres[saison.id] = obtenirParametres(saison.id, configuration);
@@ -122,7 +136,7 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
         const saisonId = inscription.season || inscription.saisonId || "";
         const licence = Math.max(0, Number(inscription.parametresFinanciers?.licenceFederale ?? saisonParametres[saisonId]?.licence) || 0);
 
-        const licenceIncluse = inscription.licenceFederaleIncluse !== false;
+        const licenceIncluse = licenceInclusePourInscription(inscription, saisonId, licence, configuration);
         if (licenceIncluse && licence > 0) {
             automatiques.push({
                 id: "licence_adherent_" + inscription.id,

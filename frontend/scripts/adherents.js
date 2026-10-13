@@ -431,6 +431,15 @@ function ouvrirNouvelAdherent() {
     mettreAJourResumeAdherent();
 }
 
+function licenceInclusePourInscription(inscription) {
+    if (typeof inscription?.licenceFederaleIncluse === "boolean") return inscription.licenceFederaleIncluse;
+    if (inscription?.tarifPersonnalise !== false) return true;
+    const tarifBase = calculerTarif(inscription.category, inscription.frequency);
+    const licence = Number(state.configuration?.comptabilite?.licenceFederale || 0);
+    const tarifEnregistre = Number(inscription.tarif);
+    return !(licence > 0 && Number.isFinite(tarifEnregistre) && Math.abs(tarifEnregistre - Math.max(0, tarifBase - licence)) < 0.001);
+}
+
 function ouvrirModificationAdherent(
     inscriptionId,
     parrainageUniquement = false
@@ -516,10 +525,11 @@ function ouvrirModificationAdherent(
         );
     const licenceFederale =
         Number(state.configuration?.comptabilite?.licenceFederale || 0);
+    const licenceIncluseEnregistree = licenceInclusePourInscription(inscription);
     const tarifDefaut =
-        inscription.licenceFederaleIncluse === false
-            ? Math.max(0, tarifDefautBrut - licenceFederale)
-            : tarifDefautBrut;
+        licenceIncluseEnregistree
+            ? tarifDefautBrut
+            : Math.max(0, tarifDefautBrut - licenceFederale);
     const tarifEnregistre =
         Number(inscription.tarif);
     const tarifPersonnalise =
@@ -540,7 +550,7 @@ function ouvrirModificationAdherent(
 
     definirCase(
         "memberLicenceIncluded",
-        inscription.licenceFederaleIncluse !== false
+        licenceIncluseEnregistree
     );
 
     const champTarifEdition =
