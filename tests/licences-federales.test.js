@@ -21,7 +21,7 @@ function reinitialiser(solde = 1000) {
     });
 }
 
-function synchroniser(inscriptions) {
+function synchroniser(inscriptions, configuration = CONFIG) {
     const personnes = inscriptions.map((inscription, index) => ({
         id: inscription.personId,
         firstName: "Test" + index,
@@ -31,7 +31,7 @@ function synchroniser(inscriptions) {
         inscriptions,
         personnes,
         [{ id: SAISON }],
-        CONFIG
+        configuration
     );
 }
 
@@ -142,6 +142,36 @@ test("le choix explicite prévaut sur une déduction à partir du tarif", () => 
         licenceFederaleIncluse: true
     })]);
     assert.equal(operationsLicence().length, 1);
+});
+
+test("la saison active corrige une ancienne part licence erronée de 35 € vers 39 €", () => {
+    reinitialiser();
+    const entree = inscription("ventilation_erronee", {
+        licenceFederaleIncluse: true,
+        paiements: [{ id: "paiement_1", date: "2026-10-10", amount: 155, method: "virement" }]
+    });
+    fichiers.ecrireJson("comptabilite.json", {
+        operations: [{
+            id: "cotisation_ventilation_erronee_paiement_1",
+            date: "2026-10-10",
+            type: "recette",
+            libelle: "Cotisation — Test",
+            categorie: "cotisations",
+            montant: 155,
+            modePaiement: "virement",
+            saisonId: SAISON,
+            source: "cotisation",
+            inscriptionId: "ventilation_erronee",
+            paiementId: "paiement_1",
+            licenceMontant: 35,
+            clubMontant: 120
+        }],
+        parametres: { [SAISON]: { licence: 39, compteBancaire: 1000, caisse: 0 } }
+    });
+    synchroniser([entree], { ...CONFIG, saisonActiveId: SAISON });
+    const operation = comptabilite.obtenirOperations({ saisonId: SAISON }).find(item => item.source === "cotisation");
+    assert.equal(operation.licenceMontant, 39);
+    assert.equal(operation.clubMontant, 116);
 });
 
 test("le tarif enfant sans licence permet de reconnaître une ancienne inscription", () => {
