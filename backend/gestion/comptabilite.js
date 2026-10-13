@@ -131,7 +131,7 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
                 libelle: "Licence fédérale — " + (personne ? (personne.firstName + " " + personne.lastName).trim() : "Adhérent"),
                 categorie: "licences-federales",
                 montant: licence,
-                modePaiement: "",
+                modePaiement: "prélèvement",
                 saisonId,
                 source: inscription.vip ? "licence-vip" : "licence-adherent",
                 inscriptionId: inscription.id,
