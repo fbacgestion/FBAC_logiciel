@@ -30,6 +30,8 @@ const CATEGORIES_DEPENSES = [
     { id: "formations", nom: "Formations" },
     { id: "autres-depenses", nom: "Autres dépenses" }
 ];
+const CATEGORIES_AIDES = new Set(["aide-atout", "aide-passsport", "aide-kiosk", "aide-spot50"]);
+const SOURCES_AUTOMATIQUES = new Set(["cotisation", "aide", "licence-vip", "licence-adherent"]);
 function obtenirDonnees() {
     const donnees = lireJson(FICHIER);
     if (!donnees || typeof donnees !== "object") return { operations: [], parametres: {} };
@@ -74,20 +76,27 @@ function creerOperation(donnees) {
     const operation = normaliserOperation(donnees || {});
     if (!operation.libelle) throw new Error("Le libellé de l’opération est obligatoire.");
     if (operation.montant <= 0) throw new Error("Le montant doit être supérieur à 0.");
+    if (operation.type === "recette" && CATEGORIES_AIDES.has(operation.categorie)) {
+        throw new Error("Les aides des adhérents sont générées automatiquement depuis les inscriptions. Ne saisissez pas une seconde recette manuelle.");
+    }
     const data = obtenirDonnees(); data.operations.push(operation); sauvegarder(data); return operation;
 }
 function modifierOperation(id, donnees) {
     const data = obtenirDonnees(); const index = data.operations.findIndex(operation => operation.id === id);
     if (index === -1) throw new Error("Opération introuvable.");
     const actuelle = normaliserOperation(data.operations[index]);
-    if (actuelle.source === "cotisation") throw new Error("Les opérations issues des paiements sont gérées automatiquement depuis les inscriptions.");
-    data.operations[index] = normaliserOperation({ ...actuelle, ...(donnees || {}), id });
+    if (SOURCES_AUTOMATIQUES.has(actuelle.source)) throw new Error("Cette opération est générée automatiquement depuis les inscriptions et ne peut pas être modifiée ici.");
+    const modifiee = normaliserOperation({ ...actuelle, ...(donnees || {}), id });
+    if (modifiee.type === "recette" && CATEGORIES_AIDES.has(modifiee.categorie)) {
+        throw new Error("Les aides des adhérents sont générées automatiquement depuis les inscriptions.");
+    }
+    data.operations[index] = modifiee;
     sauvegarder(data); return data.operations[index];
 }
 function supprimerOperation(id) {
     const data = obtenirDonnees(); const operation = data.operations.find(element => element.id === id);
     if (!operation) throw new Error("Opération introuvable.");
-    if (operation.source === "cotisation") throw new Error("Une recette issue d’un paiement ne peut pas être supprimée depuis la comptabilité.");
+    if (SOURCES_AUTOMATIQUES.has(operation.source)) throw new Error("Cette opération est générée automatiquement depuis les inscriptions et ne peut pas être supprimée ici.");
     data.operations = data.operations.filter(element => element.id !== id); sauvegarder(data); return operation;
 }
 function obtenirParametres(saisonId, configuration = {}) {
@@ -262,4 +271,4 @@ function obtenirSynthese(saisonId, configuration = {}) {
     };
 }
 function initialiser() { sauvegarder(obtenirDonnees()); }
-module.exports = { CATEGORIES_RECETTES, CATEGORIES_DEPENSES, initialiser, obtenirOperations, obtenirOperation, creerOperation, modifierOperation, supprimerOperation, obtenirParametres, enregistrerParametres, synchroniserCotisations, obtenirSynthese };
+module.exports = { CATEGORIES_RECETTES, CATEGORIES_DEPENSES, CATEGORIES_AIDES, initialiser, obtenirOperations, obtenirOperation, creerOperation, modifierOperation, supprimerOperation, obtenirParametres, enregistrerParametres, synchroniserCotisations, obtenirSynthese };

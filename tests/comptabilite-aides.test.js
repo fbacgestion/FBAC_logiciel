@@ -135,3 +135,41 @@ test("reconnaît le libellé accentué Chèque dans la trésorerie", () => {
 
     assert.equal(synthese.compteBancaire, 75);
 });
+
+test("empêche la saisie manuelle d'une aide déjà générée depuis l'inscription", () => {
+    reinitialiserComptabilite();
+    assert.throws(
+        () => comptabilite.creerOperation({
+            date: "2026-10-10",
+            type: "recette",
+            libelle: "Kiosk — Test",
+            categorie: "aide-kiosk",
+            montant: 50,
+            modePaiement: "virement",
+            saisonId: "saison_2026_2027"
+        }),
+        /générées automatiquement/
+    );
+});
+
+test("empêche la suppression d'une aide générée automatiquement", () => {
+    reinitialiserComptabilite();
+    fichiers.ecrireJson("comptabilite.json", {
+        operations: [{
+            id: "aide_inscription_kiosk",
+            date: "2026-10-10",
+            type: "recette",
+            libelle: "Kiosk — Test",
+            categorie: "aide-kiosk",
+            montant: 50,
+            modePaiement: "virement",
+            saisonId: "saison_2026_2027",
+            source: "aide"
+        }],
+        parametres: {}
+    });
+    assert.throws(
+        () => comptabilite.supprimerOperation("aide_inscription_kiosk"),
+        /générée automatiquement/
+    );
+});
