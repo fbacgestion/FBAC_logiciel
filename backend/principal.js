@@ -55,6 +55,7 @@ const {
 } = require("./gestion/certificats");
 
 const {
+    definirDossierPhotos,
     enregistrerPhoto,
     obtenirPhoto,
     obtenirInformationsPhoto,
@@ -153,6 +154,7 @@ function initialiserDonnees() {
             recursive: true
         }
     );
+    definirDossierPhotos(path.join(dossierFichiers, "photos"));
 
     fs.mkdirSync(
         path.join(
