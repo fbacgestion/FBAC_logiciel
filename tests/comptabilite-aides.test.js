@@ -85,3 +85,55 @@ test("la synthèse conserve le journal complet au-delà de 100 opérations", () 
     assert.equal(synthese.totalRecettes, 101);
     assert.equal(synthese.nombreOperationsNonAffectees, 0);
 });
+
+test("reprend un ancien paiement stocké uniquement dans paidAmount", () => {
+    reinitialiserComptabilite();
+    comptabilite.enregistrerParametres("saison_2026_2027", {
+        licence: 39,
+        compteBancaire: 0,
+        caisse: 0
+    });
+
+    const inscription = {
+        id: "inscription_ancienne",
+        personId: "personne_ancienne",
+        season: "saison_2026_2027",
+        category: "adulte",
+        frequency: "1",
+        licenceFederaleIncluse: false,
+        paidAmount: 100,
+        paymentMethod: "cheque"
+    };
+
+    comptabilite.synchroniserCotisations(
+        [inscription],
+        [{ id: "personne_ancienne", firstName: "Ancien", lastName: "Adhérent" }],
+        [{ id: "saison_2026_2027" }],
+        { tarifs: { adult1: 155 } }
+    );
+
+    const operations = comptabilite.obtenirOperations({ saisonId: "saison_2026_2027" });
+    const synthese = comptabilite.obtenirSynthese("saison_2026_2027", {});
+
+    assert.equal(operations.filter(operation => operation.source === "cotisation").length, 1);
+    assert.equal(operations.find(operation => operation.source === "cotisation").montant, 100);
+    assert.equal(synthese.totalRecettes, 100);
+    assert.equal(synthese.compteBancaire, 100);
+});
+
+test("reconnaît le libellé accentué Chèque dans la trésorerie", () => {
+    reinitialiserComptabilite();
+    comptabilite.creerOperation({
+        date: "2026-10-10",
+        type: "recette",
+        libelle: "Paiement par chèque",
+        categorie: "cotisations",
+        montant: 75,
+        modePaiement: "Chèque",
+        saisonId: "saison_2026_2027"
+    });
+
+    const synthese = comptabilite.obtenirSynthese("saison_2026_2027", {});
+
+    assert.equal(synthese.compteBancaire, 75);
+});
