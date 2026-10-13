@@ -30,5 +30,13 @@ jobs:
       - name: Exécuter tous les tests automatisés
         run: npm test
 
-      - name: Construire l'installateur Windows
-        run: npm run build:win
+      - name: Construire l'installateur Windows sans publication
+        run: npx electron-builder --win nsis --publish never
+
+      - name: Conserver l'installateur en artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FBAC-Gestion-installateur-Windows
+          path: dist/*.exe
+          if-no-files-found: error
+          retention-days: 14
