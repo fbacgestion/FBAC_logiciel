@@ -166,7 +166,8 @@ function initialiserDonnees() {
 
     initialiserSauvegardes(
         dossierDonnees,
-        dossierSauvegardes
+        dossierSauvegardes,
+        dossierFichiers
     );
 
     try {
@@ -338,13 +339,9 @@ function enregistrerHandlersIpc() {
                 );
             }
 
-            supprimerCertificat(
-                id
-            );
-
-            return supprimerInscription(
-                id
-            );
+            const inscriptionSupprimee = supprimerInscription(id);
+            supprimerCertificat(id);
+            return inscriptionSupprimee;
         }
     );
 
@@ -833,7 +830,7 @@ function construireApercuFacture(donnees, configuration) {
             adresse: association.adresse || "24 le Haut du Bingard",
             codePostal: association.codePostal || "50490",
             ville: association.ville || "Muneville-le-Bingard",
-            siret: "84536859600035",
+            siret: association.siret || "84536859600035",
             email: association.email || "",
             telephone: association.telephone || "",
             site: association.site || ""

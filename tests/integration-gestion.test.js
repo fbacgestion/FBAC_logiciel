@@ -7,6 +7,7 @@ const path = require("path");
 const dossierTest = fs.mkdtempSync(path.join(os.tmpdir(), "fbac-gestion-"));
 const dossierDonnees = path.join(dossierTest, "donnees");
 const dossierSauvegardes = path.join(dossierTest, "sauvegardes");
+const dossierFichiers = path.join(dossierTest, "fichiers");
 fs.mkdirSync(dossierDonnees, { recursive: true });
 
 const fichiers = require("../backend/gestion/fichiers");
@@ -207,7 +208,8 @@ test("10. facturation : création, numéro, total et HTML", () => {
     const configuration = {
         facturation: {
             association: {
-                nom: "FBAC - Full Boxe Américaine Club"
+                nom: "FBAC - Full Boxe Américaine Club",
+                siret: "12345678901234"
             },
             mentionTva: "TVA non applicable (article 293 B du CGI)"
         }
@@ -232,7 +234,8 @@ test("10. facturation : création, numéro, total et HTML", () => {
 
     assert.equal(facture.numero, "FBAC-2026-012");
     assert.equal(facture.pdfNom, "FBAC-2026-012-DUPONT-JEAN.pdf");
-    assert.match(factures.genererHtmlFacture(facture), /84536859600035/);
+    assert.equal(facture.association.siret, "12345678901234");
+    assert.match(factures.genererHtmlFacture(facture), /12345678901234/);
     assert.equal(facture.total, 155);
     assert.ok(facture.pdfNom.endsWith(".pdf"));
     assert.match(factures.genererHtmlFacture(facture), /155/);
@@ -265,8 +268,14 @@ test("11. certificat : données de certificat conservées avec l'inscription", (
 test("12. sauvegarde et restauration", () => {
     sauvegardes.initialiserSauvegardes(
         dossierDonnees,
-        dossierSauvegardes
+        dossierSauvegardes,
+        dossierFichiers
     );
+
+    fs.mkdirSync(path.join(dossierFichiers, "certificats"), { recursive: true });
+    fs.mkdirSync(path.join(dossierFichiers, "photos"), { recursive: true });
+    fs.writeFileSync(path.join(dossierFichiers, "certificats", "certificat.pdf"), "certificat-avant");
+    fs.writeFileSync(path.join(dossierFichiers, "photos", "photo.png"), "photo-avant");
 
     initialiserFichier("test-restauration.json", {
         valeur: "avant"
@@ -278,9 +287,13 @@ test("12. sauvegarde et restauration", () => {
     initialiserFichier("test-restauration.json", {
         valeur: "apres"
     });
+    fs.writeFileSync(path.join(dossierFichiers, "certificats", "certificat.pdf"), "certificat-apres");
+    fs.unlinkSync(path.join(dossierFichiers, "photos", "photo.png"));
 
     sauvegardes.restaurerDerniereSauvegarde();
 
     const restaure = fichiers.lireJson("test-restauration.json");
     assert.equal(restaure.valeur, "avant");
+    assert.equal(fs.readFileSync(path.join(dossierFichiers, "certificats", "certificat.pdf"), "utf8"), "certificat-avant");
+    assert.equal(fs.readFileSync(path.join(dossierFichiers, "photos", "photo.png"), "utf8"), "photo-avant");
 });
