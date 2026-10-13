@@ -207,7 +207,7 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
                 personneId: inscription.personId || null,
                 paiementId: null,
                 licenceMontant: 0,
-                clubMontant: 0,
+                clubMontant: montant,
                 aideType,
                 note: "Prise en charge de la cotisation par " + nom + "."
             });
