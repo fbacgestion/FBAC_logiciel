@@ -43,6 +43,21 @@ jobs:
       - name: Construire l'installateur Windows sans publication
         run: npx electron-builder --win nsis --publish never
 
+      - name: Vérifier le démarrage de l'application empaquetée
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $env:FBAC_SMOKE_TEST = "1"
+          $application = (Resolve-Path "dist/win-unpacked/FBAC-Gestion.exe").Path
+          $process = Start-Process -FilePath $application -ArgumentList @("--no-sandbox", "--disable-gpu") -PassThru
+          if (-not $process.WaitForExit(30000)) {
+            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+            throw "L'application n'a pas terminé son test de démarrage en 30 secondes."
+          }
+          if ($process.ExitCode -ne 0) {
+            throw "Le test de démarrage de l'application a échoué avec le code $($process.ExitCode)."
+          }
+
       - name: Conserver l'installateur en artefact
         uses: actions/upload-artifact@v4
         with:

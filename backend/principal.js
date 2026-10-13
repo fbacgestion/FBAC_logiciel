@@ -996,6 +996,14 @@ function creerFenetre() {
         }
     });
 
+    if (process.env.FBAC_SMOKE_TEST === "1") {
+        fenetre.webContents.once("did-finish-load", () => app.quit());
+        fenetre.webContents.once("did-fail-load", (_, code, description) => {
+            console.error("Échec du chargement de l'interface FBAC Gestion :", code, description);
+            app.exit(1);
+        });
+    }
+
     fenetre.loadFile(
         path.join(
             __dirname,
