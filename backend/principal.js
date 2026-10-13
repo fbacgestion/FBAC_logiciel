@@ -939,7 +939,55 @@ function creerHtmlRapportFinancier(synthese, saison, statsAdherents = {}) {
     const adherentsAvecAide = Number(statsAdherents.adherentsAvecAide) || 0;
     const aidesRows = aidesRapport.map(aide => '<tr><td><strong>' + echapperRapport(aide.nom) + '</strong></td><td class="right">' + aide.adherents + '</td><td class="right">' + Number(aide.pourcentage || 0).toFixed(1) + ' %</td><td class="right">' + euro(aide.montant) + '</td></tr>').join("");
     return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>
-body{font-family:Arial,sans-serif;color:#20242b;margin:0;padding:34px;font-size:11px}h1{font-size:26px;margin:0 0 4px;color:#111}h2{font-size:15px;margin:24px 0 10px;border-bottom:2px solid #e30613;padding-bottom:6px}.head{display:flex;justify-content:space-between;border-bottom:3px solid #e30613;padding-bottom:18px}.brand{font-size:12px;color:#e30613;font-weight:700}.muted{color:#68707d}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:18px 0}.kpi{border:1px solid #e0e3e8;border-radius:8px;padding:12px}.kpi span{display:block;color:#68707d;font-size:10px}.kpi strong{display:block;font-size:17px;margin-top:5px}.kpi.accent{border-top:3px solid #e30613}.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 18px}.summary-card{background:#f7f8fa;border:1px solid #e3e6ea;border-radius:7px;padding:9px}.summary-card span{display:block;color:#68707d;font-size:9px}.summary-card strong{display:block;font-size:13px;margin-top:3px}.report-two-columns{display:grid;grid-template-columns:1fr 1fr;gap:18px}.mini-row{display:flex;justify-content:space-between;border-bottom:1px solid #e7e9ed;padding:6px}.attention{border-left:4px solid #e30613;background:#f7f8fa;padding:8px;margin:5px 0}.muted{color:#68707d}.positive{color:#16844d}.negative{color:#c0392b}.chart{height:190px;display:flex;align-items:flex-end;gap:9px;border-bottom:1px solid #dfe3e8;padding:10px}.month{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px}.bars{height:100%;width:100%;display:flex;align-items:flex-end;justify-content:center;gap:2px}.bars i{display:block;width:8px;border-radius:4px 4px 0 0}.income{background:#e30613}.expense{background:#606875}.legend{margin:7px 0;color:#68707d}.legend b{color:#e30613}.legend i{display:inline-block;width:7px;height:7px;background:#606875;border-radius:50%;margin-left:12px}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:7px 6px;border-bottom:1px solid #e7e9ed}th{font-size:10px;color:#68707d;text-transform:uppercase}.right{text-align:right}.aid-report-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 14px}.aid-report-total{border:1px solid #e0e3e8;border-radius:8px;padding:12px;background:#f7f8fa}.aid-report-total span{display:block;color:#68707d;font-size:9px;text-transform:uppercase}.aid-report-total strong{display:block;font-size:18px;margin-top:4px}.aid-report-total small{display:block;color:#68707d;font-size:9px;margin-top:4px}.footer{margin-top:28px;color:#68707d;font-size:9px;text-align:center}
+@page{size:A4;margin:14mm 13mm 16mm}
+:root{color-scheme:light}
+*{box-sizing:border-box}
+html{font-family:"Arial",sans-serif;color:#202632;background:#fff;font-size:9.5px}
+body{margin:0;padding:0;line-height:1.42;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+h1{font-size:27px;line-height:1.08;letter-spacing:-.6px;margin:7px 0 6px;color:#151922}
+h2{font-size:13px;line-height:1.2;margin:22px 0 9px;padding:0 0 7px;border-bottom:1.5px solid #e30613;color:#171b24;page-break-after:avoid;break-after:avoid}
+h2:first-child{margin-top:0}
+.head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:0 0 16px;border-bottom:3px solid #e30613;margin-bottom:15px;page-break-inside:avoid;break-inside:avoid}
+.brand{font-size:10px;font-weight:800;letter-spacing:1.2px;color:#e30613;text-transform:uppercase}
+.head .muted{font-size:9px;text-align:right;white-space:nowrap;padding-top:4px}
+.muted{color:#687180}
+.kpis{display:table;table-layout:fixed;width:100%;border-spacing:7px 0;margin:0 0 10px 0}
+.kpi{display:table-cell;width:25%;vertical-align:top;border:1px solid #e2e5ea;border-top:3px solid #b9c0ca;border-radius:5px;padding:10px 9px;background:#fff;page-break-inside:avoid;break-inside:avoid}
+.kpi:first-child{border-top-color:#198754}.kpi:nth-child(2){border-top-color:#dc3545}.kpi:nth-child(3){border-top-color:#e30613}.kpi:nth-child(4){border-top-color:#4263a5}
+.kpi span,.summary-card span{display:block;color:#687180;font-size:8px;font-weight:700;letter-spacing:.45px;text-transform:uppercase}
+.kpi strong{display:block;font-size:14px;line-height:1.2;margin-top:6px;overflow-wrap:anywhere}
+.kpi:nth-child(1) strong{color:#18794e}.kpi:nth-child(2) strong{color:#bd303b}.kpi .positive{color:#18794e}.kpi .negative{color:#bd303b}
+.summary-grid{display:table;table-layout:fixed;width:100%;border-spacing:5px 0;margin:9px 0 14px}
+.summary-card{display:table-cell;vertical-align:top;width:25%;background:#f5f6f8;border:1px solid #e5e7eb;border-radius:4px;padding:8px 9px;page-break-inside:avoid;break-inside:avoid}
+.summary-card strong{display:block;font-size:12px;line-height:1.25;margin-top:4px;color:#202632;overflow-wrap:anywhere}
+.report-two-columns{display:table;table-layout:fixed;width:100%;border-spacing:10px 0}
+.report-two-columns>div{display:table-cell;width:50%;vertical-align:top}
+.mini-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:7px 2px;border-bottom:1px solid #e7e9ed}
+.mini-row span{max-width:70%}.mini-row strong{white-space:nowrap}
+.attention{border-left:3px solid #e30613;background:#f5f6f8;padding:8px 10px;margin:7px 0;color:#414957;page-break-inside:avoid;break-inside:avoid}
+.positive{color:#18794e}.negative{color:#bd303b}
+.chart{height:125px;display:flex;align-items:stretch;gap:8px;border-bottom:1px solid #dfe3e8;padding:10px 5px 0;margin-top:4px;page-break-inside:avoid;break-inside:avoid}
+.month{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px}
+.month small{font-size:8px;color:#687180}
+.bars{height:100%;width:100%;display:flex;align-items:flex-end;justify-content:center;gap:3px}
+.bars i{display:block;width:7px;max-width:38%;border-radius:2px 2px 0 0;min-height:2px}
+.income{background:#e30613}.expense{background:#8b94a3}
+.legend{margin:7px 0 12px;color:#687180;font-size:8.5px}.legend b{color:#e30613}.legend i{display:inline-block;width:7px;height:7px;background:#8b94a3;border-radius:1px;margin:0 5px 0 12px}
+table{width:100%;border-collapse:collapse;margin:6px 0 12px;table-layout:auto}
+thead{display:table-header-group}
+tr{page-break-inside:avoid;break-inside:avoid}
+th,td{text-align:left;padding:6px 7px;border-bottom:1px solid #e5e7eb;vertical-align:top}
+th{background:#f1f3f6;color:#515b6b;font-size:7.5px;letter-spacing:.4px;text-transform:uppercase;font-weight:700;border-top:1px solid #e0e4e9}
+td{font-size:8.5px;overflow-wrap:anywhere}
+td.right,th.right{text-align:right;white-space:nowrap}
+.aid-report-grid{display:table;table-layout:fixed;width:100%;border-spacing:6px 0;margin:8px 0 12px}
+.aid-report-total{display:table-cell;width:50%;vertical-align:top;border:1px solid #e0e3e8;border-radius:5px;padding:10px 12px;background:#f7f8fa;page-break-inside:avoid;break-inside:avoid}
+.aid-report-total span{display:block;color:#687180;font-size:8px;font-weight:700;letter-spacing:.45px;text-transform:uppercase}
+.aid-report-total strong{display:block;font-size:16px;line-height:1.25;margin-top:5px}
+.aid-report-total small{display:block;color:#687180;font-size:8px;margin-top:4px}
+.footer{margin-top:22px;padding-top:8px;border-top:1px solid #e3e6ea;color:#687180;font-size:8px;text-align:center}
+h2,table,.chart,.aid-report-grid,.summary-grid,.kpis,.report-two-columns{max-width:100%}
+@media print{body{padding:0}h2{orphans:3;widows:3}.head,.kpi,.summary-card,.chart,.aid-report-total{break-inside:avoid;page-break-inside:avoid}table{break-inside:auto}tr{break-inside:avoid;page-break-inside:avoid}a{color:inherit;text-decoration:none}}
 </style></head><body>
 <div class="head"><div><div class="brand">FBAC — FULL BOXE AMÉRICAINE CLUB</div><h1>Rapport financier</h1><div class="muted">Saison ${echapperRapport(saison?.nom || synthese?.saisonId || "")}</div></div><div class="muted">Généré le ${new Date().toLocaleDateString("fr-FR")}</div></div>
 <div class="kpis"><div class="kpi accent"><span>RECETTES</span><strong>${euro(recettes)}</strong></div><div class="kpi"><span>DÉPENSES</span><strong>${euro(depenses)}</strong></div><div class="kpi"><span>RÉSULTAT</span><strong class="${resultat >= 0 ? "positive" : "negative"}">${euro(resultat)}</strong></div><div class="kpi"><span>TRÉSORERIE</span><strong>${euro(tresorerie)}</strong></div></div>
