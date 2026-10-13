@@ -196,11 +196,10 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
             ["kiosk", "aide-kiosk", "Kiosk"],
             ["spot50", "aide-spot50", "Spot50"]
         ];
-        const aidesGenerees = [];
         for (const [aideType, categorie, nom] of aides) {
             const montant = Math.max(0, Number(situation.aidesEffectives?.[aideType]) || 0);
             if (!montant) continue;
-            aidesGenerees.push({
+            automatiques.push({
                 id: "aide_" + inscription.id + "_" + aideType,
                 date: dateAide,
                 type: "recette",
@@ -253,19 +252,6 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
                 note: partLicence > 0 ? "Ventilation : " + partLicence.toFixed(2) + " € licence / " + partClub.toFixed(2) + " € club." : ""
             });
         }
-        let licenceRestante = estSaisonActive && licenceIncluse
-            ? Math.max(0, licence - licenceDejaAffectee)
-            : 0;
-        for (const aide of aidesGenerees) {
-            const partLicence = Math.min(licenceRestante, aide.montant);
-            aide.licenceMontant = partLicence;
-            aide.clubMontant = Math.max(0, aide.montant - partLicence);
-            if (partLicence > 0) {
-                aide.note = "Ventilation : " + partLicence.toFixed(2) + " € licence / " + aide.clubMontant.toFixed(2) + " € club.";
-                licenceRestante -= partLicence;
-            }
-            automatiques.push(aide);
-        }
     }
     data.operations = data.operations.filter(operation => operation.source !== "cotisation" && operation.source !== "licence-vip" && operation.source !== "licence-adherent" && operation.source !== "aide").concat(automatiques); sauvegarder(data); return automatiques;
 }
@@ -306,13 +292,30 @@ function obtenirSynthese(saisonId, configuration = {}) {
     const coutLicencesVip = depenses
         .filter(operation => operation.source === "licence-vip")
         .reduce((total, operation) => total + operation.montant, 0);
+    let licenceFinanceeParAides = 0;
+    if (saisonId && saisonId === (configuration.saisonActiveId || "")) {
+        const licencesAdherents = depenses.filter(operation => operation.source === "licence-adherent" && operation.inscriptionId);
+        for (const licenceOperation of licencesAdherents) {
+            const inscriptionId = licenceOperation.inscriptionId;
+            const licenceDejaAffectee = recettes
+                .filter(operation => operation.source === "cotisation" && operation.inscriptionId === inscriptionId)
+                .reduce((total, operation) => total + operation.licenceMontant, 0);
+            const aidesDisponibles = recettes
+                .filter(operation => operation.source === "aide" && operation.inscriptionId === inscriptionId)
+                .reduce((total, operation) => total + operation.montant, 0);
+            licenceFinanceeParAides += Math.min(
+                Math.max(0, licenceOperation.montant - licenceDejaAffectee),
+                aidesDisponibles
+            );
+        }
+    }
     return {
         saisonId,
         totalRecettes,
         totalDepenses,
         resultat: totalRecettes - totalDepenses,
-        licenceEncaissee: recettes.reduce((total, operation) => total + operation.licenceMontant, 0) + coutLicencesVip,
-        clubEncaisse: recettes.reduce((total, operation) => total + operation.clubMontant, 0) - coutLicencesVip,
+        licenceEncaissee: recettes.reduce((total, operation) => total + operation.licenceMontant, 0) + licenceFinanceeParAides + coutLicencesVip,
+        clubEncaisse: recettes.reduce((total, operation) => total + operation.clubMontant, 0) - licenceFinanceeParAides - coutLicencesVip,
         licenceParametee: parametres.licence,
         compteBancaire,
         caisse,
