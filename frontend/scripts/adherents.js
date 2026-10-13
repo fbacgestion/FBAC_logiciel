@@ -1471,6 +1471,8 @@ async function enregistrerAdherentDepuisFormulaire(
                     categorie,
                 frequency:
                     frequence,
+                licenceFederaleIncluse:
+                    licenceFederaleIncluse,
                 tarif:
                     tarif,
                 tarifPersonnalise:
