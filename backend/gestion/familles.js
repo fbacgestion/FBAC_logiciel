@@ -22,6 +22,10 @@ function enregistrerFamilles(familles) {
     ecrireJson("familles.json", familles.map(normaliserFamille));
 }
 
+function obtenirSaisonInscription(inscription) {
+    return inscription?.saisonId || inscription?.season || "";
+}
+
 function initialiserFamilles() {
     let familles = obtenirFamilles();
     let inscriptions = lireJson("inscriptions.json");
@@ -49,7 +53,7 @@ function initialiserFamilles() {
                 ...new Set(
                     inscriptions
                         .filter(inscription => inscription?.familyGroupId === groupeId)
-                        .map(inscription => inscription?.saisonId)
+                        .map(obtenirSaisonInscription)
                         .filter(Boolean)
                 )
             ];
@@ -82,7 +86,7 @@ function initialiserFamilles() {
                 for (const inscription of inscriptions) {
                     if (
                         inscription?.familyGroupId === groupeId &&
-                        inscription?.saisonId === saisonId
+                        obtenirSaisonInscription(inscription) === saisonId
                     ) {
                         inscription.familyGroupId = familleId;
                     }
@@ -159,7 +163,7 @@ function supprimerFamille(id) {
         for (const inscription of inscriptions) {
             if (
                 inscription?.familyGroupId === id &&
-                inscription?.saisonId === famille.saisonId
+                obtenirSaisonInscription(inscription) === famille.saisonId
             ) {
                 delete inscription.familyGroupId;
             }
@@ -184,6 +188,11 @@ function modifierFamille(id, donnees) {
 
     if (!nom) {
         throw new Error("Le nom de la famille est obligatoire.");
+    }
+
+    const configuration = lireJson("configuration.json");
+    if (configuration?.saisonActiveId && familles[index].saisonId !== configuration.saisonActiveId) {
+        throw new Error("Une famille historique ne peut pas être modifiée.");
     }
 
     familles[index].nom = nom;
