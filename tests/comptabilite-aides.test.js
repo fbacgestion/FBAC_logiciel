@@ -360,3 +360,66 @@ test("cotisation adulte de 155 € avec 50 € de Pass'Sport et licence prise en
     assert.equal(synthese.resultat, 116);
     assert.equal(synthese.compteBancaire, 116);
 });
+
+test("Mayanna : 35 € de cotisation + 75 € d'aides financent 39 € de licence et 71 € pour le club", () => {
+    reinitialiserComptabilite();
+    fichiers.ecrireJson("configuration.json", {
+        saisonActiveId: "saison_2026_2027",
+        comptabilite: { licenceFederale: 39 },
+        tarifs: { adult1: 155 }
+    });
+
+    const inscription = {
+        id: "inscription_mayanna",
+        personId: "personne_mayanna",
+        season: "saison_2026_2027",
+        category: "adulte",
+        frequency: "1",
+        tarif: 110,
+        tarifPersonnalise: true,
+        licenceFederaleIncluse: true,
+        vip: false,
+        aids: {
+            passSport: { enabled: true, amount: 50 },
+            spot50: { enabled: true, amount: 25 }
+        },
+        paiements: [{
+            id: "paiement_mayanna_35",
+            date: "2026-10-01",
+            amount: 35,
+            method: "virement"
+        }]
+    };
+    const configuration = {
+        saisonActiveId: "saison_2026_2027",
+        comptabilite: { licenceFederale: 39 },
+        tarifs: { adult1: 155 }
+    };
+
+    comptabilite.synchroniserCotisations(
+        [inscription],
+        [{ id: "personne_mayanna", firstName: "Mayanna", lastName: "Delafosse" }],
+        [{ id: "saison_2026_2027" }],
+        configuration
+    );
+
+    const operations = comptabilite.obtenirOperations({ saisonId: "saison_2026_2027" });
+    const cotisation = operations.find(operation => operation.source === "cotisation");
+    const passSport = operations.find(operation => operation.id === "aide_inscription_mayanna_passSport");
+    const spot50 = operations.find(operation => operation.id === "aide_inscription_mayanna_spot50");
+    const synthese = comptabilite.obtenirSynthese("saison_2026_2027", configuration);
+
+    assert.equal(cotisation.montant, 35);
+    assert.equal(cotisation.licenceMontant, 35);
+    assert.equal(cotisation.clubMontant, 0);
+    assert.equal(passSport.montant, 50);
+    assert.equal(passSport.licenceMontant, 4);
+    assert.equal(passSport.clubMontant, 46);
+    assert.equal(spot50.montant, 25);
+    assert.equal(spot50.licenceMontant, 0);
+    assert.equal(spot50.clubMontant, 25);
+    assert.equal(synthese.totalRecettes, 110);
+    assert.equal(synthese.licenceEncaissee, 39);
+    assert.equal(synthese.clubEncaisse, 71);
+    assert.equal(synthese.licenceEncaissee + synthese.clubEncaisse, synthese.totalRecettes);
+});
