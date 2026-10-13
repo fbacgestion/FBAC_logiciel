@@ -287,7 +287,7 @@ test("cotisation adulte de 155 € avec 50 € de Pass'Sport et licence prise en
     }];
     const saisons = [{ id: "saison_2026_2027" }];
 
-    comptabilite.synchroniserCotisations(inscription ? [inscription] : [], personnes, saisons, configuration);
+    comptabilite.synchroniserCotisations([inscription], personnes, saisons, configuration);
     comptabilite.synchroniserCotisations([inscription], personnes, saisons, configuration);
 
     const synthese = comptabilite.obtenirSynthese("saison_2026_2027", configuration);
