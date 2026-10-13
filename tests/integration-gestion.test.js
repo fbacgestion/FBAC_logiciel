@@ -265,6 +265,22 @@ test("11. certificat : données de certificat conservées avec l'inscription", (
     assert.equal(inscription.certificate.documentId, "doc_test");
 });
 
+test("les certificats des inscriptions historiques sont en lecture seule", () => {
+    const personne = personnes.creerPersonne({ firstName: "Test", lastName: "Certificat historique" });
+    const historique = inscriptions.creerInscription({
+        personId: personne.id,
+        season: "saison_2026_2027",
+        certificate: { fileName: "ancien.pdf" }
+    });
+    const active = inscriptions.creerInscription({
+        personId: personnes.creerPersonne({ firstName: "Test", lastName: "Certificat actif" }).id,
+        season: "saison_2027_2028",
+        certificate: { fileName: "actif.pdf" }
+    });
+    assert.throws(() => inscriptions.verifierInscriptionSaisonActive(historique.id), /saison historique/);
+    assert.equal(inscriptions.verifierInscriptionSaisonActive(active.id).id, active.id);
+});
+
 test("12. sauvegarde et restauration", () => {
     sauvegardes.initialiserSauvegardes(
         dossierDonnees,
