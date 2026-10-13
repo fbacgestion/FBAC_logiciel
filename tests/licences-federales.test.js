@@ -148,6 +148,7 @@ test("la saison active corrige une ancienne part licence erronée de 35 € vers
     reinitialiser();
     const entree = inscription("ventilation_erronee", {
         licenceFederaleIncluse: true,
+        parametresFinanciers: { licenceFederale: 35 },
         paiements: [{ id: "paiement_1", date: "2026-10-10", amount: 155, method: "virement" }]
     });
     fichiers.ecrireJson("comptabilite.json", {
@@ -172,6 +173,9 @@ test("la saison active corrige une ancienne part licence erronée de 35 € vers
     const operation = comptabilite.obtenirOperations({ saisonId: SAISON }).find(item => item.source === "cotisation");
     assert.equal(operation.licenceMontant, 39);
     assert.equal(operation.clubMontant, 116);
+    const depenseLicence = operationsLicence().find(item => item.inscriptionId === entree.id);
+    assert.ok(depenseLicence);
+    assert.equal(depenseLicence.montant, 39);
 });
 
 test("le tarif enfant sans licence permet de reconnaître une ancienne inscription", () => {
