@@ -54,9 +54,6 @@ function obtenirOperationsJournal() {
     const filtres = comptabilite.filtresJournal;
     const terme = filtres.recherche.trim().toLocaleLowerCase("fr-FR");
     return comptabilite.operations
-        // Les licences prises en charge par le club restent dans les totaux comptables,
-        // mais ne polluent pas le journal avec une ligne négative par adhérent.
-        .filter(operation => !["licence-vip", "licence-adherent"].includes(operation.source))
         .filter(operation => filtres.type === "tous" || operation.type === filtres.type)
         .filter(operation => filtres.categorie === "toutes" || operation.categorie === filtres.categorie)
         .filter(operation => filtres.mode === "tous" || (operation.modePaiement || "non-renseigne") === filtres.mode)
@@ -100,7 +97,6 @@ function afficherJournalComptable() {
     if (!table) return;
 
     const categories = [...new Set(comptabilite.operations
-        .filter(operation => !["licence-vip", "licence-adherent"].includes(operation.source))
         .map(operation => operation.categorie).filter(Boolean))].sort((a, b) => obtenirNomCategorie(a).localeCompare(obtenirNomCategorie(b), "fr"));
     if (filtreCategorie) {
         const valeur = comptabilite.filtresJournal.categorie;
@@ -111,7 +107,6 @@ function afficherJournalComptable() {
         comptabilite.filtresJournal.categorie = filtreCategorie.value;
     }
     const modes = [...new Set(comptabilite.operations
-        .filter(operation => !["licence-vip", "licence-adherent"].includes(operation.source))
         .map(operation => operation.modePaiement || "non-renseigne"))].sort((a, b) => a.localeCompare(b, "fr"));
     if (filtreMode) {
         const valeur = comptabilite.filtresJournal.mode;
@@ -142,7 +137,7 @@ function afficherJournalComptable() {
             const automatique = ["cotisation", "aide", "licence-adherent", "licence-vip"].includes(operation.source);
             const classeMontant = operation.type === "recette" ? "amount-positive" : "amount-negative";
             const signe = operation.type === "depense" ? "−" : "+";
-            const typeLabel = operation.type === "depense" ? "Dépense" : (operation.source === "aide" ? "Aide reçue" : "Encaissement");
+            const typeLabel = operation.type === "depense" ? (operation.source === "licence-vip" || operation.source === "licence-adherent" ? "Licence FFK" : "Dépense") : (operation.source === "aide" ? "Aide reçue" : "Encaissement");
             const action = automatique
                 ? '<span class="compta-badge">Auto</span>'
                 : (saisonConsulteeEstHistorique() ? '<span class="journal-indisponible">Lecture seule</span>' : '<button class="btn btn-small button-danger" data-compta-delete="' + escapeHtmlCompta(operation.id) + '" aria-label="Supprimer ' + escapeHtmlCompta(operation.libelle) + '" title="Supprimer cette opération">Supprimer</button>');
