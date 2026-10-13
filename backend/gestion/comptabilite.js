@@ -199,7 +199,7 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
             const id = "cotisation_" + inscription.id + "_" + paiement.id;
             const ancienne = data.operations.find(operation => operation.id === id && operation.source === "cotisation");
             const licenceIncluse =
-                inscription.licenceFederaleIncluse !== false;
+                licenceInclusePourInscription(inscription, saisonId, licence, configuration);
             const partLicence = !licenceIncluse
                 ? 0
                 : ancienne
