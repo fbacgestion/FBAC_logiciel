@@ -27,6 +27,16 @@ jobs:
       - name: Installer les dépendances verrouillées
         run: npm ci
 
+      - name: Vérifier la syntaxe de tous les fichiers JavaScript
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          Get-ChildItem -Path backend, frontend, tests -Recurse -Filter *.js -File | ForEach-Object {
+            Write-Host "Vérification : $($_.FullName)"
+            node --check $_.FullName
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+
       - name: Exécuter tous les tests automatisés
         run: npm test
 
