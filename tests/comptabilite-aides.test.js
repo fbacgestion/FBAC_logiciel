@@ -247,3 +247,57 @@ test("les licences FFK sont débitées de la trésorerie par prélèvement banca
     assert.equal(synthese.tresorerie, 922);
     assert.equal(synthese.nombreOperationsNonAffectees, 0);
 });
+
+test("cotisation adulte de 155 € avec 50 € de Pass'Sport et licence prise en charge : résultat de 116 €", () => {
+    reinitialiserComptabilite();
+    comptabilite.enregistrerParametres("saison_2026_2027", {
+        licence: 39,
+        compteBancaire: 0,
+        caisse: 0
+    });
+
+    const inscription = {
+        id: "inscription_passsport_licence",
+        personId: "personne_passsport_licence",
+        season: "saison_2026_2027",
+        category: "adulte",
+        frequency: "1",
+        tarif: 155,
+        tarifPersonnalise: false,
+        licenceFederaleIncluse: true,
+        aides: {
+            passSport: { enabled: true, amount: 50 }
+        },
+        paiements: [{
+            id: "paiement_famille",
+            date: "2026-10-13",
+            amount: 105,
+            method: "virement"
+        }]
+    };
+    const configuration = {
+        tarifs: { adult1: 155 },
+        aides: { passSport: 50 },
+        reductionFamille: 0
+    };
+    const personnes = [{
+        id: "personne_passsport_licence",
+        firstName: "Test",
+        lastName: "PassSport"
+    }];
+    const saisons = [{ id: "saison_2026_2027" }];
+
+    comptabilite.synchroniserCotisations(inscription ? [inscription] : [], personnes, saisons, configuration);
+    comptabilite.synchroniserCotisations([inscription], personnes, saisons, configuration);
+
+    const synthese = comptabilite.obtenirSynthese("saison_2026_2027", configuration);
+    const operations = comptabilite.obtenirOperations({ saisonId: "saison_2026_2027" });
+
+    assert.equal(operations.filter(operation => operation.source === "cotisation").reduce((total, operation) => total + operation.montant, 0), 105);
+    assert.equal(operations.filter(operation => operation.source === "aide").reduce((total, operation) => total + operation.montant, 0), 50);
+    assert.equal(operations.filter(operation => operation.source === "licence-adherent").reduce((total, operation) => total + operation.montant, 0), 39);
+    assert.equal(synthese.totalRecettes, 155);
+    assert.equal(synthese.totalDepenses, 39);
+    assert.equal(synthese.resultat, 116);
+    assert.equal(synthese.compteBancaire, 116);
+});
