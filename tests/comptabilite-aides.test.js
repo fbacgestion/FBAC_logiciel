@@ -85,6 +85,7 @@ test("les opérations et paramètres d'une saison historique sont en lecture seu
         saisonId: "saison_2025_2026"
     }), /saison historique est en lecture seule/);
     assert.throws(() => comptabilite.modifierOperation("operation_historique", { libelle: "Modifiée" }), /saison historique est en lecture seule/);
+    assert.throws(() => comptabilite.modifierOperation("operation_historique", { saisonId: "saison_2026_2027" }), /saison historique est en lecture seule/);
     assert.throws(() => comptabilite.supprimerOperation("operation_historique"), /saison historique est en lecture seule/);
     assert.throws(() => comptabilite.enregistrerParametres("saison_2025_2026", { licence: 39 }), /saison historique est en lecture seule/);
     assert.equal(comptabilite.obtenirOperation("operation_historique").libelle, "Ancienne cotisation");

@@ -87,6 +87,7 @@ function obtenirOperations(filtres = {}) {
 function obtenirOperation(id) { return obtenirDonnees().operations.find(operation => operation.id === id) || null; }
 function creerOperation(donnees) {
     const operation = normaliserOperation(donnees || {});
+    if (!operation.saisonId) throw new Error("La saison de l’opération est obligatoire.");
     verifierSaisonModifiable(operation.saisonId);
     if (!operation.libelle) throw new Error("Le libellé de l’opération est obligatoire.");
     if (operation.montant <= 0) throw new Error("Le montant doit être supérieur à 0.");
@@ -102,6 +103,8 @@ function modifierOperation(id, donnees) {
     verifierSaisonModifiable(actuelle.saisonId);
     if (SOURCES_AUTOMATIQUES.has(actuelle.source)) throw new Error("Cette opération est générée automatiquement depuis les inscriptions et ne peut pas être modifiée ici.");
     const modifiee = normaliserOperation({ ...actuelle, ...(donnees || {}), id });
+    if (modifiee.saisonId !== actuelle.saisonId) throw new Error("La saison d’une opération ne peut pas être modifiée.");
+    verifierSaisonModifiable(modifiee.saisonId);
     if (CATEGORIES_AIDES.has(modifiee.categorie)) {
         throw new Error("Les aides des adhérents sont générées automatiquement depuis les inscriptions et ne peuvent pas être saisies manuellement.");
     }
