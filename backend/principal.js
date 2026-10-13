@@ -538,10 +538,13 @@ function enregistrerHandlersIpc() {
 
     ipcMain.handle(
         "obtenir-categories-comptables",
-        () => ({
-            recettes: require("./gestion/comptabilite").CATEGORIES_RECETTES,
-            depenses: require("./gestion/comptabilite").CATEGORIES_DEPENSES
-        })
+        () => {
+            const comptabilite = require("./gestion/comptabilite");
+            return {
+                recettes: comptabilite.CATEGORIES_RECETTES.filter(categorie => !comptabilite.CATEGORIES_AIDES.has(categorie.id)),
+                depenses: comptabilite.CATEGORIES_DEPENSES
+            };
+        }
     );
 
     ipcMain.handle(
