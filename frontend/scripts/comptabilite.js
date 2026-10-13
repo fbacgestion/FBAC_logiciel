@@ -54,7 +54,7 @@ function afficherComptabilite() {
                 <td>${escapeHtmlCompta(operation.categorie)}</td>
                 <td>${escapeHtmlCompta(operation.modePaiement || "—")}</td>
                 <td class="${classe}">${operation.type === "depense" ? "−" : "+"}${euroCompta(operation.montant)}</td>
-                <td>${operation.source === "cotisation" ? '<span class="compta-badge">Auto</span>' : '<button class="btn btn-small button-danger" data-compta-delete="${operation.id}">Suppr.</button>'}</td>
+                <td>${["cotisation", "aide", "licence-adherent", "licence-vip"].includes(operation.source) ? '<span class="compta-badge">Auto</span>' : '<button class="btn btn-small button-danger" data-compta-delete="${operation.id}">Suppr.</button>'}</td>
             </tr>`;
         }).join("");
     }
