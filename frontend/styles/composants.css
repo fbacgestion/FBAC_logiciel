@@ -442,15 +442,15 @@ tr:hover td{
 }
 
 .referral-card-header>strong{
-    flex:none;
-    padding:5px 8px;
-    border:1px solid rgba(227,6,19,.28);
-    border-radius:5px;
-    background:rgba(227,6,19,.08);
-    color:#ff6b73;
-    font-size:11px;
-    font-weight:700;
-    white-space:nowrap;
+    flex: none;
+    padding: 5px 8px;
+    border: 1px solid rgb(62 227 6 / 28%);
+    border-radius: 5px;
+    background: rgb(6 227 45 / 8%);
+    color: #80ff6b;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 .referral-card-content{
