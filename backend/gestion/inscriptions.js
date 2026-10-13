@@ -407,6 +407,15 @@ function initialiserParametresFinanciers() {
     return inscriptions;
 }
 
+function verifierInscriptionSaisonActive(id) {
+    const inscription = obtenirInscription(id);
+    if (!inscription) throw new Error("Inscription introuvable.");
+    if (inscription.season !== obtenirSaisonActivePourEcriture()) {
+        throw new Error("Cette inscription appartient à une saison historique. Les certificats sont en lecture seule.");
+    }
+    return inscription;
+}
+
 function obtenirSaisonActivePourEcriture() {
     const configuration = lireJson("configuration.json") || {};
     if (configuration.saisonActiveId) {
@@ -533,6 +542,7 @@ function genererId() {
 module.exports = {
     obtenirInscriptions,
     obtenirInscription,
+    verifierInscriptionSaisonActive,
     obtenirInscriptionsSaison,
     obtenirInscriptionPersonneSaison,
     creerInscription,

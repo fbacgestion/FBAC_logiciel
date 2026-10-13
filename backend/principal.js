@@ -38,6 +38,7 @@ const {
 const {
     obtenirInscriptions,
     obtenirInscription,
+    verifierInscriptionSaisonActive,
     obtenirInscriptionsSaison,
     obtenirInscriptionPersonneSaison,
     creerInscription,
@@ -638,6 +639,7 @@ function enregistrerHandlersIpc() {
     ipcMain.handle(
         "enregistrer-certificat",
         (_, inscriptionId, fichier) => {
+            verifierInscriptionSaisonActive(inscriptionId);
             return enregistrerCertificat(
                 inscriptionId,
                 fichier
@@ -756,6 +758,7 @@ function enregistrerHandlersIpc() {
     ipcMain.handle(
         "supprimer-certificat",
         (_, inscriptionId) => {
+            verifierInscriptionSaisonActive(inscriptionId);
             return supprimerCertificat(
                 inscriptionId
             );
