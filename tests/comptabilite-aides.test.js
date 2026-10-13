@@ -42,12 +42,10 @@ test("une aide est comptée une seule fois en recette et dans la trésorerie", (
         reductionFamille: 0
     };
 
-    comptabilite.synchroniserCotisations(
-        [inscription],
-        [{ id: "personne_aide", firstName: "Test", lastName: "Aide" }],
-        [{ id: "saison_2026_2027" }],
-        configuration
-    );
+    const personnes = [{ id: "personne_aide", firstName: "Test", lastName: "Aide" }];
+    const saisons = [{ id: "saison_2026_2027" }];
+    comptabilite.synchroniserCotisations([inscription], personnes, saisons, configuration);
+    comptabilite.synchroniserCotisations([inscription], personnes, saisons, configuration);
 
     const operations = comptabilite.obtenirOperations({ saisonId: "saison_2026_2027" });
     const synthese = comptabilite.obtenirSynthese("saison_2026_2027", configuration);
