@@ -146,3 +146,33 @@ test("une licence décochée reste décochée après plusieurs synchronisations"
     synchroniser([entree]);
     assert.equal(operationsLicence().length, 0);
 });
+
+test("une ancienne ventilation à zéro est réparée si la licence est désormais explicitement incluse", () => {
+    reinitialiser();
+    const entree = inscription("ventilation_a_reparer", {
+        licenceFederaleIncluse: true,
+        paiements: [{ id: "paiement_1", date: "2026-10-10", amount: 155, method: "virement" }]
+    });
+    fichiers.ecrireJson("comptabilite.json", {
+        operations: [{
+            id: "cotisation_ventilation_a_reparer_paiement_1",
+            date: "2026-10-10",
+            type: "recette",
+            libelle: "Cotisation — Test",
+            categorie: "cotisations",
+            montant: 155,
+            modePaiement: "virement",
+            saisonId: SAISON,
+            source: "cotisation",
+            inscriptionId: "ventilation_a_reparer",
+            paiementId: "paiement_1",
+            licenceMontant: 0,
+            clubMontant: 155
+        }],
+        parametres: { [SAISON]: { licence: 39, compteBancaire: 1000, caisse: 0 } }
+    });
+    synchroniser([entree]);
+    const operation = comptabilite.obtenirOperations({ saisonId: SAISON }).find(item => item.source === "cotisation");
+    assert.equal(operation.licenceMontant, 39);
+    assert.equal(operation.clubMontant, 116);
+});

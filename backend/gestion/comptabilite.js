@@ -222,7 +222,7 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
                 licenceInclusePourInscription(inscription, saisonId, licence, configuration);
             const partLicence = !licenceIncluse
                 ? 0
-                : ancienne
+                : ancienne && Number(ancienne.licenceMontant) > 0
                     ? Math.min(Math.max(0, Number(ancienne.licenceMontant) || 0), montant)
                     : Math.min(Math.max(0, licence - licenceDejaAffectee), montant);
             const partClub = Math.max(0, montant - partLicence);
