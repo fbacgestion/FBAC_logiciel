@@ -166,7 +166,7 @@ test("8. changement de saison et gel des paramètres", () => {
 
 test("9. comptabilité : création, synthèse et trésorerie", () => {
     comptabilite.initialiser();
-    comptabilite.enregistrerParametres("saison_2026_2027", {
+    comptabilite.enregistrerParametres("saison_2027_2028", {
         licence: 39,
         compteBancaire: 1000,
         caisse: 100
@@ -179,7 +179,7 @@ test("9. comptabilité : création, synthèse et trésorerie", () => {
         categorie: "stages",
         montant: 200,
         modePaiement: "virement",
-        saisonId: "saison_2026_2027"
+        saisonId: "saison_2027_2028"
     });
 
     const depense = comptabilite.creerOperation({
@@ -189,10 +189,10 @@ test("9. comptabilité : création, synthèse et trésorerie", () => {
         categorie: "materiel",
         montant: 50,
         modePaiement: "carte",
-        saisonId: "saison_2026_2027"
+        saisonId: "saison_2027_2028"
     });
 
-    const synthese = comptabilite.obtenirSynthese("saison_2026_2027", {});
+    const synthese = comptabilite.obtenirSynthese("saison_2027_2028", {});
     assert.ok(recette.id);
     assert.ok(depense.id);
     assert.equal(synthese.totalRecettes, 200);
