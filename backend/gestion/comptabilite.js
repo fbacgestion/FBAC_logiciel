@@ -282,13 +282,16 @@ function obtenirSynthese(saisonId, configuration = {}) {
         const mode = String(operation.modePaiement || "").trim().toLowerCase();
         return !modesBanque.has(mode) && !modesCaisse.has(mode);
     });
+    const coutLicencesVip = depenses
+        .filter(operation => operation.source === "licence-vip")
+        .reduce((total, operation) => total + operation.montant, 0);
     return {
         saisonId,
         totalRecettes,
         totalDepenses,
         resultat: totalRecettes - totalDepenses,
-        licenceEncaissee: recettes.reduce((total, operation) => total + operation.licenceMontant, 0),
-        clubEncaisse: recettes.reduce((total, operation) => total + operation.clubMontant, 0),
+        licenceEncaissee: recettes.reduce((total, operation) => total + operation.licenceMontant, 0) + coutLicencesVip,
+        clubEncaisse: recettes.reduce((total, operation) => total + operation.clubMontant, 0) - coutLicencesVip,
         licenceParametee: parametres.licence,
         compteBancaire,
         caisse,
