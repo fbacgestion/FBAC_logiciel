@@ -1,7 +1,10 @@
 let comptabilite = {
     operations: [],
     synthese: null,
-    categories: { recettes: [], depenses: [] }
+    categories: { recettes: [], depenses: [] },
+    pageJournal: 1,
+    taillePageJournal: 25,
+    filtresJournal: { recherche: "", type: "tous", categorie: "toutes", mode: "tous", debut: "", fin: "" }
 };
 
 function euroCompta(montant) {
@@ -43,22 +46,141 @@ function afficherComptabilite() {
     const club = document.getElementById("comptaClub");
     if (licence) licence.textContent = euroCompta(synthese.licenceEncaissee);
     if (club) club.textContent = euroCompta(synthese.clubEncaisse);
+    afficherJournalComptable();
+    afficherGraphiqueCompta(synthese);
+}
+
+function obtenirOperationsJournal() {
+    const filtres = comptabilite.filtresJournal;
+    const terme = filtres.recherche.trim().toLocaleLowerCase("fr-FR");
+    return comptabilite.operations
+        // Les licences prises en charge par le club restent dans les totaux comptables,
+        // mais ne polluent pas le journal avec une ligne négative par adhérent.
+        .filter(operation => !["licence-vip", "licence-adherent"].includes(operation.source))
+        .filter(operation => filtres.type === "tous" || operation.type === filtres.type)
+        .filter(operation => filtres.categorie === "toutes" || operation.categorie === filtres.categorie)
+        .filter(operation => filtres.mode === "tous" || (operation.modePaiement || "non-renseigne") === filtres.mode)
+        .filter(operation => !filtres.debut || String(operation.date || "") >= filtres.debut)
+        .filter(operation => !filtres.fin || String(operation.date || "") <= filtres.fin)
+        .filter(operation => !terme || [
+            operation.libelle, operation.categorie, operation.modePaiement,
+            obtenirNomCategorie(operation.categorie), obtenirOrigineOperation(operation.source)
+        ].some(valeur => String(valeur || "").toLocaleLowerCase("fr-FR").includes(terme)))
+        .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")) || String(b.id || "").localeCompare(String(a.id || "")));
+}
+
+function obtenirNomCategorie(id) {
+    const toutes = [...(comptabilite.categories.recettes || []), ...(comptabilite.categories.depenses || [])];
+    return toutes.find(categorie => categorie.id === id)?.nom || String(id || "Autre");
+}
+
+function obtenirOrigineOperation(source) {
+    const noms = {
+        cotisation: "Paiement adhérent",
+        aide: "Aide reçue",
+        manuelle: "Saisie manuelle",
+        "licence-vip": "Licence VIP",
+        "licence-adherent": "Licence adhérent"
+    };
+    return noms[source] || "Saisie manuelle";
+}
+
+function formaterDateJournal(date) {
+    const valeur = String(date || "");
+    const correspondance = valeur.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return correspondance ? correspondance[3] + "/" + correspondance[2] + "/" + correspondance[1] : valeur || "—";
+}
+
+function afficherJournalComptable() {
     const table = document.getElementById("comptaOperations");
-    if (table) {
-        const operationsVisibles = comptabilite.operations.filter(operation => operation.source !== "licence-vip");
-        table.innerHTML = operationsVisibles.slice(0, 30).map(operation => {
-            const classe = operation.type === "recette" ? "amount-positive" : "amount-negative";
-            return `<tr>
-                <td>${escapeHtmlCompta(operation.date)}</td>
-                <td><strong>${escapeHtmlCompta(operation.libelle)}</strong><small>${escapeHtmlCompta(operation.source === "cotisation" ? "Paiement adhérent" : "Saisie manuelle")}</small></td>
-                <td>${escapeHtmlCompta(operation.categorie)}</td>
-                <td>${escapeHtmlCompta(operation.modePaiement || "—")}</td>
-                <td class="${classe}">${operation.type === "depense" ? "−" : "+"}${euroCompta(operation.montant)}</td>
-                <td>${["cotisation", "aide", "licence-adherent", "licence-vip"].includes(operation.source) ? '<span class="compta-badge">Auto</span>' : '<button class="btn btn-small button-danger" data-compta-delete="${operation.id}">Suppr.</button>'}</td>
-            </tr>`;
+    const compteur = document.getElementById("comptaJournalCompteur");
+    const pagination = document.getElementById("comptaPagination");
+    const filtreCategorie = document.getElementById("comptaFiltreCategorie");
+    const filtreMode = document.getElementById("comptaFiltreMode");
+    if (!table) return;
+
+    const categories = [...new Set(comptabilite.operations
+        .filter(operation => !["licence-vip", "licence-adherent"].includes(operation.source))
+        .map(operation => operation.categorie).filter(Boolean))].sort((a, b) => obtenirNomCategorie(a).localeCompare(obtenirNomCategorie(b), "fr"));
+    if (filtreCategorie) {
+        const valeur = comptabilite.filtresJournal.categorie;
+        filtreCategorie.innerHTML = '<option value="toutes">Toutes les catégories</option>' + categories.map(id =>
+            '<option value="' + escapeHtmlCompta(id) + '">' + escapeHtmlCompta(obtenirNomCategorie(id)) + '</option>'
+        ).join("");
+        filtreCategorie.value = categories.includes(valeur) ? valeur : "toutes";
+        comptabilite.filtresJournal.categorie = filtreCategorie.value;
+    }
+    const modes = [...new Set(comptabilite.operations
+        .filter(operation => !["licence-vip", "licence-adherent"].includes(operation.source))
+        .map(operation => operation.modePaiement || "non-renseigne"))].sort((a, b) => a.localeCompare(b, "fr"));
+    if (filtreMode) {
+        const valeur = comptabilite.filtresJournal.mode;
+        filtreMode.innerHTML = '<option value="tous">Tous les moyens</option>' + modes.map(mode =>
+            '<option value="' + escapeHtmlCompta(mode) + '">' + escapeHtmlCompta(mode === "non-renseigne" ? "Non renseigné" : mode) + '</option>'
+        ).join("");
+        filtreMode.value = modes.includes(valeur) ? valeur : "tous";
+        comptabilite.filtresJournal.mode = filtreMode.value;
+    }
+
+    const operations = obtenirOperationsJournal();
+    const nombrePages = Math.max(1, Math.ceil(operations.length / comptabilite.taillePageJournal));
+    comptabilite.pageJournal = Math.min(comptabilite.pageJournal, nombrePages);
+    const debut = (comptabilite.pageJournal - 1) * comptabilite.taillePageJournal;
+    const visibles = operations.slice(debut, debut + comptabilite.taillePageJournal);
+    const totalRecettesFiltrees = operations.filter(operation => operation.type === "recette").reduce((total, operation) => total + Number(operation.montant || 0), 0);
+    const totalDepensesFiltrees = operations.filter(operation => operation.type === "depense").reduce((total, operation) => total + Number(operation.montant || 0), 0);
+
+    if (compteur) {
+        compteur.innerHTML = '<span><strong>' + operations.length + '</strong> opération' + (operations.length > 1 ? 's' : '') + ' affichée' + (operations.length > 1 ? 's' : '') + '</span>' +
+            '<span class="journal-totaux"><span class="journal-recettes">Recettes ' + escapeHtmlCompta(euroCompta(totalRecettesFiltrees)) + '</span><span class="journal-depenses">Dépenses ' + escapeHtmlCompta(euroCompta(totalDepensesFiltrees)) + '</span></span>';
+    }
+
+    if (!visibles.length) {
+        table.innerHTML = '<tr><td colspan="6"><div class="compta-empty journal-empty"><strong>Aucune opération trouvée</strong><span>Modifie les filtres ou efface la recherche pour retrouver des opérations.</span></div></td></tr>';
+    } else {
+        table.innerHTML = visibles.map(operation => {
+            const automatique = ["cotisation", "aide", "licence-adherent", "licence-vip"].includes(operation.source);
+            const classeMontant = operation.type === "recette" ? "amount-positive" : "amount-negative";
+            const signe = operation.type === "depense" ? "−" : "+";
+            const typeLabel = operation.type === "depense" ? "Dépense" : (operation.source === "aide" ? "Aide reçue" : "Encaissement");
+            const action = automatique
+                ? '<span class="compta-badge">Auto</span>'
+                : (saisonConsulteeEstHistorique() ? '<span class="journal-indisponible">Lecture seule</span>' : '<button class="btn btn-small button-danger" data-compta-delete="' + escapeHtmlCompta(operation.id) + '" aria-label="Supprimer ' + escapeHtmlCompta(operation.libelle) + '" title="Supprimer cette opération">Supprimer</button>');
+            return '<tr>' +
+                '<td class="journal-date">' + escapeHtmlCompta(formaterDateJournal(operation.date)) + '</td>' +
+                '<td class="journal-libelle"><strong>' + escapeHtmlCompta(operation.libelle || "Opération sans libellé") + '</strong><span class="journal-origine">' + escapeHtmlCompta(obtenirOrigineOperation(operation.source)) + '</span></td>' +
+                '<td><span class="journal-categorie">' + escapeHtmlCompta(obtenirNomCategorie(operation.categorie)) + '</span></td>' +
+                '<td class="journal-mode">' + escapeHtmlCompta(operation.modePaiement || "—") + '</td>' +
+                '<td class="journal-montant ' + classeMontant + '"><strong>' + signe + escapeHtmlCompta(euroCompta(operation.montant)) + '</strong><span>' + escapeHtmlCompta(typeLabel) + '</span></td>' +
+                '<td class="journal-action">' + action + '</td>' +
+                '</tr>';
         }).join("");
     }
-    afficherGraphiqueCompta(synthese);
+
+    if (pagination) {
+        pagination.innerHTML = '<span>Page ' + comptabilite.pageJournal + ' / ' + nombrePages + '</span><div class="journal-pagination-actions">' +
+            '<button class="btn btn-small" data-journal-page="' + (comptabilite.pageJournal - 1) + '"' + (comptabilite.pageJournal <= 1 ? ' disabled' : '') + '>← Précédent</button>' +
+            '<button class="btn btn-small" data-journal-page="' + (comptabilite.pageJournal + 1) + '"' + (comptabilite.pageJournal >= nombrePages ? ' disabled' : '') + '>Suivant →</button>' +
+            '</div>';
+    }
+}
+
+function reinitialiserFiltresJournal() {
+    comptabilite.filtresJournal = { recherche: "", type: "tous", categorie: "toutes", mode: "tous", debut: "", fin: "" };
+    comptabilite.pageJournal = 1;
+    const ids = {
+        comptaRechercheJournal: "",
+        comptaFiltreType: "tous",
+        comptaFiltreCategorie: "toutes",
+        comptaFiltreMode: "tous",
+        comptaFiltreDebut: "",
+        comptaFiltreFin: ""
+    };
+    Object.entries(ids).forEach(([id, valeur]) => {
+        const element = document.getElementById(id);
+        if (element) element.value = valeur;
+    });
+    afficherJournalComptable();
 }
 
 function escapeHtmlCompta(value) {
@@ -217,11 +339,35 @@ function initialiserComptabilite() {
         document.addEventListener("click", event => {
             const bouton = event.target.closest("[data-compta-delete]");
             if (bouton) supprimerOperationComptableDepuisInterface(bouton.dataset.comptaDelete);
+            const page = event.target.closest("[data-journal-page]");
+            if (page && !page.disabled) {
+                comptabilite.pageJournal = Math.max(1, Number(page.dataset.journalPage) || 1);
+                afficherJournalComptable();
+            }
             const action = event.target.closest("[data-action]");
             if (action?.dataset.action === "nouvelle-recette") ouvrirOperationComptable("recette");
             if (action?.dataset.action === "nouvelle-depense") ouvrirOperationComptable("depense");
             if (action?.dataset.action === "rafraichir-comptabilite") rafraichirComptabilite();
             if (action?.dataset.action === "generer-rapport-financier") genererRapportFinancierDepuisInterface();
+            if (action?.dataset.action === "reinitialiser-filtres-journal") reinitialiserFiltresJournal();
+        });
+        const champsJournal = [
+            ["comptaRechercheJournal", "recherche"],
+            ["comptaFiltreType", "type"],
+            ["comptaFiltreCategorie", "categorie"],
+            ["comptaFiltreMode", "mode"],
+            ["comptaFiltreDebut", "debut"],
+            ["comptaFiltreFin", "fin"]
+        ];
+        champsJournal.forEach(([id, cle]) => {
+            const champ = document.getElementById(id);
+            if (!champ) return;
+            const evenement = champ.tagName === "INPUT" && champ.type === "search" ? "input" : "change";
+            champ.addEventListener(evenement, () => {
+                comptabilite.filtresJournal[cle] = champ.value;
+                comptabilite.pageJournal = 1;
+                afficherJournalComptable();
+            });
         });
         document.body.dataset.comptaInitialisee = "true";
     }
