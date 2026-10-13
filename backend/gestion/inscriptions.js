@@ -65,6 +65,11 @@ function creerInscription(donnees) {
         );
     }
 
+    const saisonActive = obtenirSaisonActivePourEcriture();
+    if (saisonActive && donnees.season !== saisonActive) {
+        throw new Error("Une inscription ne peut être créée que pour la saison active.");
+    }
+
     const inscriptions = obtenirInscriptions();
 
     const inscriptionExistante =

@@ -249,7 +249,7 @@ test("11. certificat : données de certificat conservées avec l'inscription", (
 
     const inscription = inscriptions.creerInscription({
         personId: personne.id,
-        season: "saison_2026_2027",
+        season: "saison_2027_2028",
         certificate: {
             date: "2026-10-01",
             expiry: "2027-10-01",
@@ -267,16 +267,20 @@ test("11. certificat : données de certificat conservées avec l'inscription", (
 
 test("les certificats des inscriptions historiques sont en lecture seule", () => {
     const personne = personnes.creerPersonne({ firstName: "Test", lastName: "Certificat historique" });
-    const historique = inscriptions.creerInscription({
+    const historique = {
+        id: "inscription_certificat_historique",
         personId: personne.id,
         season: "saison_2026_2027",
         certificate: { fileName: "ancien.pdf" }
-    });
+    };
+    const inscriptionsExistantes = inscriptions.obtenirInscriptions();
+    fichiers.ecrireJson("inscriptions.json", [...inscriptionsExistantes, historique]);
     const active = inscriptions.creerInscription({
         personId: personnes.creerPersonne({ firstName: "Test", lastName: "Certificat actif" }).id,
         season: "saison_2027_2028",
         certificate: { fileName: "actif.pdf" }
     });
+    assert.throws(() => inscriptions.creerInscription({ personId: personne.id, season: "saison_2026_2027" }), /saison active/);
     assert.throws(() => inscriptions.verifierInscriptionSaisonActive(historique.id), /saison historique/);
     assert.equal(inscriptions.verifierInscriptionSaisonActive(active.id).id, active.id);
 });
