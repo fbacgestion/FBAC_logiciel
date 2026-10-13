@@ -154,7 +154,13 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
     for (const inscription of inscriptions || []) {
         const personne = (personnes || []).find(element => element.id === inscription.personId);
         const saisonId = inscription.season || inscription.saisonId || "";
-        const licence = Math.max(0, Number(inscription.parametresFinanciers?.licenceFederale ?? saisonParametres[saisonId]?.licence) || 0);
+        const saisonActiveId = configuration.saisonActiveId || "";
+        const estSaisonActive = saisonId && saisonId === saisonActiveId;
+        const licence = Math.max(0, Number(
+            estSaisonActive
+                ? saisonParametres[saisonId]?.licence
+                : inscription.parametresFinanciers?.licenceFederale ?? saisonParametres[saisonId]?.licence
+        ) || 0);
 
         const licenceIncluse = licenceInclusePourInscription(inscription, saisonId, licence, configuration);
         if (licenceIncluse && licence > 0) {
@@ -220,8 +226,7 @@ function synchroniserCotisations(inscriptions, personnes, saisons, configuration
             const ancienne = data.operations.find(operation => operation.id === id && operation.source === "cotisation");
             const licenceIncluse =
                 licenceInclusePourInscription(inscription, saisonId, licence, configuration);
-            const saisonActiveId = configuration.saisonActiveId || "";
-            const recalculerVentilation = saisonId && saisonId === saisonActiveId;
+            const recalculerVentilation = estSaisonActive;
             const partLicence = !licenceIncluse
                 ? 0
                 : !recalculerVentilation && ancienne && Number(ancienne.licenceMontant) > 0
