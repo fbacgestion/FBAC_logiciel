@@ -173,3 +173,50 @@ test("empêche la suppression d'une aide générée automatiquement", () => {
         /générée automatiquement/
     );
 });
+
+test("les licences FFK sont débitées de la trésorerie par prélèvement bancaire", () => {
+    reinitialiserComptabilite();
+    comptabilite.enregistrerParametres("saison_2026_2027", {
+        licence: 39,
+        compteBancaire: 1000,
+        caisse: 0
+    });
+
+    const inscriptions = [
+        {
+            id: "inscription_normale",
+            personId: "personne_normale",
+            season: "saison_2026_2027",
+            licenceFederaleIncluse: true
+        },
+        {
+            id: "inscription_vip",
+            personId: "personne_vip",
+            season: "saison_2026_2027",
+            licenceFederaleIncluse: true,
+            vip: true
+        }
+    ];
+    comptabilite.synchroniserCotisations(
+        inscriptions,
+        [
+            { id: "personne_normale", firstName: "Adhérent", lastName: "Normal" },
+            { id: "personne_vip", firstName: "Adhérent", lastName: "VIP" }
+        ],
+        [{ id: "saison_2026_2027" }],
+        {}
+    );
+
+    const operations = comptabilite.obtenirOperations({ saisonId: "saison_2026_2027" });
+    const licences = operations.filter(operation =>
+        operation.source === "licence-adherent" || operation.source === "licence-vip"
+    );
+    const synthese = comptabilite.obtenirSynthese("saison_2026_2027", {});
+
+    assert.equal(licences.length, 2);
+    assert.ok(licences.every(operation => operation.modePaiement === "prélèvement"));
+    assert.equal(synthese.totalDepenses, 78);
+    assert.equal(synthese.compteBancaire, 922);
+    assert.equal(synthese.tresorerie, 922);
+    assert.equal(synthese.nombreOperationsNonAffectees, 0);
+});
