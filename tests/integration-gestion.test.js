@@ -126,6 +126,39 @@ test("5. paiement", () => {
     assert.equal(modifiee.paidAmount, 100);
 });
 
+test("5b. refuse un paiement positif sans mode, sans bloquer les anciennes données inchangées", () => {
+    const personne = personnes.creerPersonne({
+        firstName: "Test",
+        lastName: "ModeManquant",
+        birthDate: "1992-01-01"
+    });
+
+    assert.throws(() => inscriptions.creerInscription({
+        personId: personne.id,
+        season: "saison_2026_2027",
+        paidAmount: 50,
+        paymentMethod: ""
+    }), /mode de paiement est obligatoire/);
+
+    const inscription = inscriptions.creerInscription({
+        personId: personne.id,
+        season: "saison_2026_2027",
+        paidAmount: 50,
+        paymentMethod: "cheque"
+    });
+
+    assert.throws(() => inscriptions.modifierInscription(inscription.id, {
+        paiements: [{
+            id: "paiement_sans_mode",
+            date: "2026-10-19",
+            amount: 25,
+            method: ""
+        }]
+    }), /mode de paiement est obligatoire/);
+
+    assert.equal(inscriptions.obtenirInscription(inscription.id).paidAmount, 50);
+});
+
 test("6. archivage", () => {
     const personne = personnes.obtenirPersonnes()[0];
     const archivee = personnes.supprimerPersonne(personne.id);
