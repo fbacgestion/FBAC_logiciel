@@ -435,6 +435,12 @@ async function enregistrerPaiement(
             "paymentMethod"
         ) || "";
 
+    if (!mode.trim()) {
+        notificationErreur("Choisissez le mode de paiement avant d'enregistrer le règlement.");
+        document.getElementById("paymentMethod")?.focus();
+        return;
+    }
+
     obtenirPaiementsInscription(
         inscription
     ).push({
