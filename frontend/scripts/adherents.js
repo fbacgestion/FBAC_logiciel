@@ -1302,6 +1302,12 @@ async function enregistrerAdherentDepuisFormulaire(
             ) || 0
         );
 
+    if (montantPaye > 0 && !paiement.trim()) {
+        notificationErreur("Choisissez le mode de paiement pour le montant déjà encaissé.");
+        document.getElementById("memberPaymentMethod")?.focus();
+        return;
+    }
+
     const aides = {
         atoutNormandie: {
             enabled:

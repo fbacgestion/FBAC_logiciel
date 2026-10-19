@@ -155,6 +155,8 @@ function creerInscription(donnees) {
             )
     };
 
+    validerModesPaiement(inscription.paiements);
+
     inscriptions.push(inscription);
 
     ecrireJson(
@@ -305,6 +307,15 @@ function modifierInscription(
         calculerTotalPaiements(
             nouvelleInscription.paiements
         );
+
+    validerModesPaiement(
+        nouvelleInscription.paiements,
+        normaliserPaiements(
+            inscriptionActuelle.paiements,
+            inscriptionActuelle.paidAmount,
+            inscriptionActuelle.paymentMethod
+        )
+    );
 
     inscriptions[index] =
         nouvelleInscription;
@@ -505,6 +516,29 @@ function calculerTotalPaiements(paiements) {
                 total + (Number(paiement.amount) || 0),
             0
         );
+}
+
+function validerModesPaiement(paiements, paiementsExistants = []) {
+    const anciens = Array.isArray(paiementsExistants) ? paiementsExistants : [];
+
+    for (let index = 0; index < (Array.isArray(paiements) ? paiements.length : 0); index += 1) {
+        const paiement = paiements[index];
+        if (!paiement || !(Number(paiement.amount) > 0) || String(paiement.method || "").trim()) {
+            continue;
+        }
+
+        const ancien = anciens.find(element => element.id && element.id === paiement.id)
+            || (anciens[index] && Number(anciens[index].amount) === Number(paiement.amount)
+                ? anciens[index]
+                : null);
+
+        if (ancien && !String(ancien.method || "").trim()
+            && Number(ancien.amount) === Number(paiement.amount)) {
+            continue;
+        }
+
+        throw new Error("Le mode de paiement est obligatoire pour tout nouveau paiement supérieur à 0 €.");
+    }
 }
 
 function normaliserCertificat(

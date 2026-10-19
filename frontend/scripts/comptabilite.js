@@ -281,6 +281,17 @@ async function enregistrerOperationComptable(event) {
         saisonId: saisonComptableActive(),
         note: document.getElementById("comptaNote").value.trim()
     };
+    const mode = String(donnees.modePaiement || "").trim().toLocaleLowerCase("fr-FR");
+    const modesBanque = ["cheque", "chèque", "virement", "carte", "cb", "prélèvement", "prelevement"];
+    const modesCaisse = ["espèces", "especes"];
+    if (![...modesBanque, ...modesCaisse].includes(mode)) {
+        const continuer = window.confirm(
+            "Attention : ce mode de paiement ne sera pas intégré à la trésorerie calculée. " +
+            "Choisissez Chèque, Virement, Carte, Prélèvement ou Espèces si cette opération a été encaissée ou payée par l'un de ces moyens.\n\n" +
+            "Voulez-vous tout de même enregistrer l'opération ?"
+        );
+        if (!continuer) return;
+    }
     try {
         await window.fbac.creerOperationComptable(donnees);
         document.getElementById("comptaOperationModal").classList.remove("active", "open");
